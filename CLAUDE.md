@@ -71,23 +71,38 @@ starting any work on this repo.
   `type:feat`, `type:docs`
 - **Milestones**: `v0.2 - Stack modernization` through `v1.0 - IDD-aware stack`
 
-## Workflow: the `/goal` command
+## Workflow: native `/goal` + IDD sub-agents
 
-This repo ships a `/goal` slash command (`.claude/commands/goal.md`) that
-orchestrates the integration plan. Usage:
+This repo uses Claude Code's **native** `/goal` command (Claude Code
+v2.1.139+) with three project-specific sub-agents under `.claude/agents/`.
+Native `/goal` sets a completion condition and keeps Claude working across
+turns until a small fast model confirms it's met. The sub-agents are the
+building blocks Claude uses inside that loop.
+
+### Sub-agents (invoked via the Task tool)
+
+- **prometeo** — reads INTEGRATION-PLAN.md and decomposes a phase, milestone,
+  or issue into an ordered, dependency-aware execution plan. Does not write
+  code.
+- **forja** — implements a single issue: writes code, runs `npx` commands,
+  makes atomic commits on a feature branch. Does not validate or open PRs.
+- **centinela** — validates forja's work (build, type-check, tests,
+  forbidden-import scan) and returns APPROVED or REJECTED.
+
+### Example `/goal` conditions
 
 ```text
-/goal Fase 0             → execute every issue in Phase 0
-/goal v0.3               → execute every issue in milestone v0.3
-/goal #5                 → execute a specific issue
-/goal "add dark mode"    → interpret free-form, match against INTEGRATION-PLAN.md
+/goal Open PRs that close every Phase 0 issue from INTEGRATION-PLAN.md. Use
+      prometeo to plan, forja per issue, centinela to gate each PR.
+
+/goal Land issue #5 from INTEGRATION-PLAN.md: PR open, centinela APPROVED,
+      working tree clean. Stop after 10 turns.
+
+/goal Every Phase 1 issue from INTEGRATION-PLAN.md has an open or merged PR.
 ```
 
-The `/goal` command delegates to three sub-agents in `.claude/agents/`:
-
-- **prometeo** — reads the goal, plans the work, identifies dependencies
-- **forja** — executes the plan (writes code, runs commands, commits)
-- **centinela** — validates (build, tests, a11y, approves PR)
+Run `/goal` with no arguments to check status; `/goal clear` to cancel. See
+<https://code.claude.com/docs/en/goal> for the full reference.
 
 ## Critical warnings — read before touching code
 
