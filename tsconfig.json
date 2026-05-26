@@ -4,10 +4,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    "skipLibCheck": true,
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", ".astro/**/*"]
+  "include": ["src/**/*"]
 }
