@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HelloReact from '../components/islands/HelloReact';
 ---
 
 <BaseLayout title="Hello World — issue-driven-web-template" lang="en">
@@ -63,6 +64,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="text-xs text-gray-600 pt-2">
         Or click the <span class="text-emerald-400">chat bubble</span> in the bottom-right corner to report an issue with full diagnostics.
       </p>
+
+      <HelloReact client:load />
     </div>
   </main>
 </BaseLayout>
