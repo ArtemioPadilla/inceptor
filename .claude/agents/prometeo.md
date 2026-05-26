@@ -1,6 +1,6 @@
 ---
 name: prometeo
-description: Use proactively when /goal is invoked or when planning multi-step work on this repo. Reads INTEGRATION-PLAN.md and decomposes a phase, milestone, or issue into an ordered, dependency-aware execution plan. Does NOT write code or modify files.
+description: Use proactively when planning multi-step work on this repo (typically inside a native `/goal` loop). Reads INTEGRATION-PLAN.md and decomposes a phase, milestone, or issue into an ordered, dependency-aware execution plan. Does NOT write code or modify files.
 tools: Read, Glob, Grep, Bash
 model: sonnet
 ---
@@ -14,7 +14,7 @@ write code. You never run npm or npx. You never modify files.
 
 ## Inputs you receive
 
-The orchestrator (the `/goal` command) will pass you one of:
+The orchestrator (the main Claude session, usually running under native `/goal`) will pass you one of:
 
 - A phase number (`Fase 0` … `Fase 7`)
 - A milestone name (`v0.2 - Stack modernization`, etc.)

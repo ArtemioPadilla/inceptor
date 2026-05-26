@@ -4,7 +4,9 @@ This is the canonical, machine-parsable source of truth for the integration of
 the recommended UI stack (Recipe C: shadcn/ui + Base UI + Tailwind v4 + TanStack
 + Tremor Raw + Motion + @vite-pwa/astro) into this template.
 
-**Read this file before invoking `/goal`. Sub-agents read this file too.**
+**Read this file before starting any integration work (e.g. before setting a
+native `/goal` condition). The `prometeo`, `forja`, and `centinela` sub-agents
+read this file too.**
 
 ## Format
 
@@ -588,7 +590,7 @@ component locations). Add stack-specific guidance for Claude triage workflow.
 
 **Acceptance criteria**
 - [ ] `CLAUDE.md` lists exact installed versions
-- [ ] Documents the `/goal` command and sub-agents
+- [ ] Documents the IDD workflow (native `/goal` + prometeo/forja/centinela sub-agents)
 - [ ] Includes the "compound-component gotcha" with example fix
 
 ### Issue 026 — docs: new issue templates
