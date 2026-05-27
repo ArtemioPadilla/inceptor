@@ -417,7 +417,113 @@ locations above are picked up automatically.
 
 ---
 
-## 8. Forbidden imports
+## 8. Data tables
+
+`src/components/ui/data-table.tsx` exports a generic `<DataTable<TData, TValue>>`
+component that composes **TanStack Table v8** (sorting, filtering, column
+visibility, column resizing) on top of **TanStack Virtual** (row virtualization)
+and the shadcn `<Table>` primitives.
+
+### Props surface
+
+```tsx
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];   // TanStack column definitions
+  data: TData[];                          // Row data
+  initialColumnVisibility?: VisibilityState; // Column id → visible
+  initialGlobalFilter?: string;           // Pre-fill the filter input
+  height?: string | number;              // Scroll container height (default '500px')
+  estimateRowSize?: number;              // px per row for virtualizer (default 40)
+}
+```
+
+### Generic column type-safety
+
+Pass your data type as the first generic parameter and the accessor's value type
+as the second:
+
+```tsx
+import { type ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@/components/ui/data-table';
+
+interface Issue {
+  id: number;
+  title: string;
+  state: 'open' | 'closed';
+  createdAt: string;
+}
+
+const columns: ColumnDef<Issue, string>[] = [
+  { accessorKey: 'id',        header: 'ID',      size: 60  },
+  { accessorKey: 'title',     header: 'Title',   size: 300 },
+  { accessorKey: 'state',     header: 'State',   size: 100 },
+  { accessorKey: 'createdAt', header: 'Created', size: 140 },
+];
+
+export default function IssuesTable({ data }: { data: Issue[] }) {
+  return <DataTable columns={columns} data={data} height="600px" />;
+}
+```
+
+TypeScript will enforce that `accessorKey` is a key of `Issue` and that
+cell value accessors return the correct type.
+
+### Virtualization defaults and tuning
+
+TanStack Virtual renders only the rows visible in the scroll container (plus
+10 rows of overscan on each side). The rest are replaced by invisible spacer
+`<tr>` elements that maintain the correct scroll height.
+
+| Prop | Default | When to change |
+|---|---|---|
+| `height` | `'500px'` | Match the viewport area you have available |
+| `estimateRowSize` | `40` | Set to your actual row height — reduces layout jitter on first scroll |
+
+For 50,000+ rows, set `estimateRowSize` to a value close to the real rendered
+height. The virtualizer will self-correct via `measureElement`, but a good
+initial estimate prevents scroll position jumps.
+
+### Island wrapping requirement
+
+`DataTable` is a stateful compound component — it owns sort, filter, and
+visibility state internally. When using it in an Astro page, wrap it in a
+single React file under `src/components/islands/` and hydrate that file
+as one island. Do **not** spread the filter input and the table across
+separate `client:*` usages.
+
+```tsx
+// src/components/islands/IssuesDataTable.tsx
+import { DataTable } from '@/components/ui/data-table';
+import { columns } from './columns';
+import type { Issue } from '@/lib/types';
+
+// This entire composition is one island — one React root, one hydration boundary.
+export default function IssuesDataTable({ data }: { data: Issue[] }) {
+  return <DataTable columns={columns} data={data} />;
+}
+```
+
+```astro
+---
+// src/pages/issues.astro
+import IssuesDataTable from '../components/islands/IssuesDataTable';
+---
+<IssuesDataTable data={issues} client:visible />
+```
+
+### Features at a glance
+
+| Feature | How it works |
+|---|---|
+| **Sort** | Click any column header. Cycles: none → asc → desc. Sort direction shown with caret icon. |
+| **Global filter** | Text input above the table. Filters all columns simultaneously via `getFilteredRowModel`. |
+| **Column visibility** | "Columns" dropdown in the top-right. Uses `DropdownMenuCheckboxItem`. |
+| **Column resizing** | Drag the handle at the right edge of any header. `enableColumnResizing: true` + `columnResizeMode: 'onChange'`. |
+| **Row virtualization** | `useVirtualizer` renders only in-viewport rows + 10 overscan rows. Handles millions of rows without DOM overhead. |
+
+---
+
+## 9. Forbidden imports
 
 These are hard rules. The CI forbidden-import scan (when added) and code review
 will reject any PR that violates them.

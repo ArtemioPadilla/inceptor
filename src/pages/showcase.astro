@@ -8,6 +8,7 @@ import ShowcaseTabs from '../components/islands/ShowcaseTabs';
 import ShowcaseToast from '../components/islands/ShowcaseToast';
 import ThemeIndicator from '../components/islands/ThemeIndicator';
 import QueryDemo from '../components/islands/QueryDemo';
+import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
 
 // /showcase — living documentation for every installed shadcn/ui component.
 // Each section renders the component in both light and dark side-by-side.
@@ -138,6 +139,27 @@ import QueryDemo from '../components/islands/QueryDemo';
         </div>
       </div>
     </section>
+    <!-- DataTable (TanStack Table + Virtual) -->
+    <section aria-labelledby="section-datatable">
+      <h2 id="section-datatable" class="text-xl font-semibold mb-4">Data table</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Generic <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">&lt;DataTable&gt;</code>
+        powered by TanStack Table v8 + TanStack Virtual. Supports sort, global filter,
+        column visibility toggle, column resizing, and row virtualization.
+        Consume it inside a single React island file (compound-component rule applies).
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseDataTable client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseDataTable client:visible />
+        </div>
+      </div>
+    </section>
+
     <!-- TanStack Query (persisted) -->
     <section aria-labelledby="section-query">
       <h2 id="section-query" class="text-xl font-semibold mb-4">TanStack Query (persisted)</h2>

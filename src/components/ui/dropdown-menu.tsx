@@ -63,15 +63,21 @@ const DropdownMenuSubContent = React.forwardRef<
 ));
 DropdownMenuSubContent.displayName = 'DropdownMenuSubContent';
 
-// DropdownMenuContent wraps the positioner + popup for the top-level menu
+// DropdownMenuContent wraps the positioner + popup for the top-level menu.
+// `align` and `side` are forwarded to Menu.Positioner so callers can control
+// placement (e.g. data-table's column-visibility dropdown uses align="end").
+type DropdownMenuContentProps = React.ComponentPropsWithoutRef<typeof Menu.Popup> & {
+  sideOffset?: number;
+  align?: 'start' | 'center' | 'end';
+  side?: 'top' | 'right' | 'bottom' | 'left' | 'inline-end' | 'inline-start';
+};
+
 const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof Menu.Popup>,
-  React.ComponentPropsWithoutRef<typeof Menu.Popup> & {
-    sideOffset?: number;
-  }
->(({ className, sideOffset = 4, ...props }, ref) => (
+  DropdownMenuContentProps
+>(({ className, sideOffset = 4, align, side, ...props }, ref) => (
   <Menu.Portal>
-    <Menu.Positioner sideOffset={sideOffset}>
+    <Menu.Positioner sideOffset={sideOffset} align={align} side={side}>
       <Menu.Popup
         ref={ref}
         className={cn(
