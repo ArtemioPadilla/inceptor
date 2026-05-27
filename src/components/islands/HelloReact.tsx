@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { noop as _noop } from '@/lib/utils';
+import { cn as _cn } from '@/lib/utils';
 
 export default function HelloReact() {
   const [count, setCount] = useState(0);
