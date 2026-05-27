@@ -1,3 +1,18 @@
+/**
+ * Form — compound-component shadcn pattern.
+ *
+ * Uses two intra-island React Contexts (FormFieldContext, FormItemContext)
+ * to pass field name / item id down to FormControl, FormLabel,
+ * FormDescription, FormMessage. These Contexts NEVER cross an Astro island
+ * boundary — the entire <Form>...</Form> composition lives in one file and
+ * is hydrated as a single island (per CLAUDE.md "compound-component gotcha").
+ *
+ * CLAUDE.md's prohibition on React.createContext is specifically about
+ * sharing state ACROSS islands. Intra-island Context is the documented
+ * pattern for compound components. See:
+ *   https://ui.shadcn.com/docs/components/form (Radix original)
+ *   CLAUDE.md → "shadcn/ui + Astro: the compound-component gotcha"
+ */
 import * as React from 'react';
 import { Field } from '@base-ui-components/react/field';
 import {
@@ -27,6 +42,7 @@ type FormFieldContextValue<
   name: TName;
 };
 
+// intra-island only — see file header
 const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue,
 );
@@ -89,20 +105,24 @@ const FormLabel = React.forwardRef<
 });
 FormLabel.displayName = 'FormLabel';
 
-// FormControl wraps Base UI's Field.Control for a11y binding
+// FormControl uses React.cloneElement (the original shadcn pattern) to inject
+// a11y props into the consumer-provided child element. We avoid Base UI's
+// Field.Control here because it renders a self-closing <input> and cannot
+// accept React children — which crashes at SSR when a custom <Input> is passed.
 const FormControl = React.forwardRef<
-  React.ComponentRef<typeof Field.Control>,
-  React.ComponentPropsWithoutRef<typeof Field.Control>
->(({ ...props }, ref) => {
+  HTMLElement,
+  React.HTMLAttributes<HTMLElement> & { children: React.ReactElement }
+>(({ children, ...props }, ref) => {
   const { error } = useFormField();
 
-  return (
-    <Field.Control
-      ref={ref}
-      aria-invalid={!!error}
-      {...props}
-    />
-  );
+  const childProps = {
+    ref,
+    'aria-invalid': !!error,
+    ...props,
+    ...(children.props as Record<string, unknown>),
+  };
+
+  return React.cloneElement(children, childProps);
 });
 FormControl.displayName = 'FormControl';
 

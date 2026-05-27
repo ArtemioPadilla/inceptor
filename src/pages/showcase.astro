@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ShowcaseDialog from '../components/islands/ShowcaseDialog';
+import ShowcaseDropdown from '../components/islands/ShowcaseDropdown';
+import ShowcaseForm from '../components/islands/ShowcaseForm';
+import ShowcaseSimples from '../components/islands/ShowcaseSimples';
+import ShowcaseTabs from '../components/islands/ShowcaseTabs';
+import ShowcaseToast from '../components/islands/ShowcaseToast';
+
+// /showcase — living documentation for every installed shadcn/ui component.
+// Each section renders the component in both light and dark side-by-side.
+//
+// Compound components (Dialog, DropdownMenu, Tabs, Toast, Form) are wrapped in
+// their own island files under src/components/islands/ per the compound-component
+// gotcha documented in CLAUDE.md. All islands use client:visible — these are
+// below-the-fold demos that don't need eager hydration.
+//
+// The dark column applies the `.dark` class directly on a wrapper div so the
+// dark tokens kick in independently of the page-level theme. This lets visitors
+// preview both themes regardless of their current OS/toggle preference.
+---
+
+<BaseLayout title="Component showcase" description="Visual showcase of all installed shadcn/ui components in light and dark mode">
+  <main class="mx-auto max-w-7xl px-4 py-12 space-y-12">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight">Component showcase</h1>
+      <p class="mt-2 text-muted-foreground">
+        Each component rendered in both light and dark. Compound components are
+        hydrated as single React islands per
+        <a
+          href="https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/CLAUDE.md"
+          class="underline underline-offset-4 hover:text-foreground"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          CLAUDE.md's compound-component gotcha
+        </a>.
+      </p>
+    </header>
+
+    <!-- Primitives: Button, Input, Label, Card, Table, Badge -->
+    <section aria-labelledby="section-primitives">
+      <h2 id="section-primitives" class="text-xl font-semibold mb-4">Primitives</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseSimples client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseSimples client:visible />
+        </div>
+      </div>
+    </section>
+
+    <!-- Dialog -->
+    <section aria-labelledby="section-dialog">
+      <h2 id="section-dialog" class="text-xl font-semibold mb-4">Dialog</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseDialog client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseDialog client:visible />
+        </div>
+      </div>
+    </section>
+
+    <!-- DropdownMenu -->
+    <section aria-labelledby="section-dropdown">
+      <h2 id="section-dropdown" class="text-xl font-semibold mb-4">Dropdown menu</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseDropdown client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseDropdown client:visible />
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <section aria-labelledby="section-tabs">
+      <h2 id="section-tabs" class="text-xl font-semibold mb-4">Tabs</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseTabs client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseTabs client:visible />
+        </div>
+      </div>
+    </section>
+
+    <!-- Toast -->
+    <section aria-labelledby="section-toast">
+      <h2 id="section-toast" class="text-xl font-semibold mb-4">Toast</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseToast client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseToast client:visible />
+        </div>
+      </div>
+    </section>
+
+    <!-- Form -->
+    <section aria-labelledby="section-form">
+      <h2 id="section-form" class="text-xl font-semibold mb-4">Form</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseForm client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseForm client:visible />
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
