@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import source from './showcase.astro?raw';
+import source from '../pages/showcase.astro?raw';
 
 // These tests verify that the /showcase page wiring is correct by inspecting
 // the raw source. They guard against accidental removal of island imports or
