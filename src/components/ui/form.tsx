@@ -1,0 +1,155 @@
+import * as React from 'react';
+import { Field } from '@base-ui-components/react/field';
+import {
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+  FormProvider,
+  useFormContext,
+  Controller,
+} from 'react-hook-form';
+
+import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+
+// Form built around react-hook-form's FormProvider + Controller, with Base UI's
+// Field primitive providing accessibility structure (label → control → error linking).
+// Mirrors the shadcn/ui API so consumers don't need to relearn.
+
+// Form is FormProvider re-exported with the same name for shadcn parity.
+const Form = FormProvider;
+
+// Context for passing the field name down to FormItem children
+type FormFieldContextValue<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> = {
+  name: TName;
+};
+
+const FormFieldContext = React.createContext<FormFieldContextValue>(
+  {} as FormFieldContextValue,
+);
+
+// FormField wraps react-hook-form's Controller and provides the field name via context
+function FormField<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({ ...props }: ControllerProps<TFieldValues, TName>) {
+  return (
+    <FormFieldContext.Provider value={{ name: props.name }}>
+      <Controller {...props} />
+    </FormFieldContext.Provider>
+  );
+}
+
+function useFormField() {
+  const fieldContext = React.useContext(FormFieldContext);
+  const { getFieldState, formState } = useFormContext();
+
+  const fieldState = getFieldState(fieldContext.name, formState);
+
+  if (!fieldContext) {
+    throw new Error('useFormField must be used within <FormField>');
+  }
+
+  return {
+    name: fieldContext.name,
+    ...fieldState,
+  };
+}
+
+// FormItem wraps Base UI's Field.Root — provides accessibility wiring
+const FormItem = React.forwardRef<
+  React.ComponentRef<typeof Field.Root>,
+  React.ComponentPropsWithoutRef<typeof Field.Root>
+>(({ className, ...props }, ref) => (
+  <Field.Root
+    ref={ref}
+    className={cn('space-y-2', className)}
+    {...props}
+  />
+));
+FormItem.displayName = 'FormItem';
+
+// FormLabel uses our native Label + marks invalid fields
+const FormLabel = React.forwardRef<
+  React.ComponentRef<typeof Label>,
+  React.ComponentPropsWithoutRef<typeof Label>
+>(({ className, ...props }, ref) => {
+  const { error } = useFormField();
+
+  return (
+    <Label
+      ref={ref}
+      className={cn(error && 'text-destructive', className)}
+      {...props}
+    />
+  );
+});
+FormLabel.displayName = 'FormLabel';
+
+// FormControl wraps Base UI's Field.Control for a11y binding
+const FormControl = React.forwardRef<
+  React.ComponentRef<typeof Field.Control>,
+  React.ComponentPropsWithoutRef<typeof Field.Control>
+>(({ ...props }, ref) => {
+  const { error } = useFormField();
+
+  return (
+    <Field.Control
+      ref={ref}
+      aria-invalid={!!error}
+      {...props}
+    />
+  );
+});
+FormControl.displayName = 'FormControl';
+
+// FormDescription uses Base UI's Field.Description for a11y
+const FormDescription = React.forwardRef<
+  React.ComponentRef<typeof Field.Description>,
+  React.ComponentPropsWithoutRef<typeof Field.Description>
+>(({ className, ...props }, ref) => (
+  <Field.Description
+    ref={ref}
+    className={cn('text-sm text-muted-foreground', className)}
+    {...props}
+  />
+));
+FormDescription.displayName = 'FormDescription';
+
+// FormMessage shows the validation error message from react-hook-form
+const FormMessage = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  const { error } = useFormField();
+  const body = error ? String(error?.message ?? '') : children;
+
+  if (!body) {
+    return null;
+  }
+
+  return (
+    <p
+      ref={ref}
+      className={cn('text-sm font-medium text-destructive', className)}
+      {...props}
+    >
+      {body}
+    </p>
+  );
+});
+FormMessage.displayName = 'FormMessage';
+
+export {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+};
