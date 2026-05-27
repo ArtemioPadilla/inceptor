@@ -7,6 +7,7 @@ import ShowcaseSimples from '../components/islands/ShowcaseSimples';
 import ShowcaseTabs from '../components/islands/ShowcaseTabs';
 import ShowcaseToast from '../components/islands/ShowcaseToast';
 import ThemeIndicator from '../components/islands/ThemeIndicator';
+import QueryDemo from '../components/islands/QueryDemo';
 
 // /showcase — living documentation for every installed shadcn/ui component.
 // Each section renders the component in both light and dark side-by-side.
@@ -136,6 +137,15 @@ import ThemeIndicator from '../components/islands/ThemeIndicator';
           <ShowcaseForm client:visible />
         </div>
       </div>
+    </section>
+    <!-- TanStack Query (persisted) -->
+    <section aria-labelledby="section-query">
+      <h2 id="section-query" class="text-xl font-semibold mb-4">TanStack Query (persisted)</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Repo stats fetched via TanStack Query and persisted to IndexedDB. Reload to
+        see cached data render before the network round-trip completes.
+      </p>
+      <QueryDemo client:visible />
     </section>
   </main>
 </BaseLayout>
