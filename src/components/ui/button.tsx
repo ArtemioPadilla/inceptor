@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 // Minimal Slot implementation: merges props onto a single React child element,
-// replacing Radix's @radix-ui/react-slot to keep this component Radix-free.
+// replacing the Radix Slot to keep this component Radix-free.
 function Slot({
   children,
   ...slotProps

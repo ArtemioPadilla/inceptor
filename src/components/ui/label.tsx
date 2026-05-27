@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-// Hand-written label using a native <label> element to avoid @radix-ui/react-label.
+// Hand-written label using a native <label> element to avoid the Radix UI label package.
 // Matches shadcn's public API and styling conventions.
 const Label = React.forwardRef<
   HTMLLabelElement,
