@@ -13,14 +13,16 @@ import {
 // Wraps the DropdownMenu compound component in a single island.
 // Lucide icons are imported here rather than lazily — the island itself
 // is already loaded lazily via client:visible on the showcase page.
+//
+// Base UI uses a `render` prop instead of Radix's `asChild` pattern.
+// render={<Button variant="outline" />} lets Base UI merge open/close
+// behavior onto the Button element without the Radix Slot pattern.
 export default function ShowcaseDropdown() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          <Settings2Icon className="mr-2 h-4 w-4" />
-          Actions
-        </Button>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        <Settings2Icon className="mr-2 h-4 w-4" />
+        Actions
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>Item actions</DropdownMenuLabel>
