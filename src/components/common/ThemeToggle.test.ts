@@ -1,17 +1,7 @@
 import { describe, expect, it } from 'vitest';
-
-// ThemeToggle.astro renders an inline <script> that depends on DOM globals.
-// We don't fully render it; we just verify the file exists and the script
-// contains the expected behaviour hooks via source inspection.
-import fs from 'node:fs';
-import path from 'node:path';
+import source from './ThemeToggle.astro?raw';
 
 describe('ThemeToggle.astro', () => {
-  const source = fs.readFileSync(
-    path.resolve(__dirname, 'ThemeToggle.astro'),
-    'utf8',
-  );
-
   it('declares the toggle button with correct id', () => {
     expect(source).toMatch(/id=["']theme-toggle["']/);
   });
