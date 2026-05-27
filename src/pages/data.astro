@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import IssuesList from '../components/islands/IssuesList';
+---
+
+<BaseLayout title="Data demo — issue-driven-web-template" description="GitHub Issues fetcher with persisted IndexedDB cache">
+  <main class="mx-auto max-w-3xl px-4 py-12 space-y-6">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight">Data island demo</h1>
+      <p class="mt-2 text-muted-foreground">
+        Live open issues for this template's GitHub repo. Cached to IndexedDB
+        on first load — refresh to see the cache render before the network
+        round-trip completes.
+      </p>
+    </header>
+
+    <IssuesList client:visible />
+  </main>
+</BaseLayout>
