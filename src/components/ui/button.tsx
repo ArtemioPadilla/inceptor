@@ -12,8 +12,9 @@ function Slot({
   if (React.isValidElement(children)) {
     return React.cloneElement(children, {
       ...slotProps,
-      // Child props win for event handlers; className is merged
-      ...children.props,
+      // Child props win for event handlers; className is merged.
+      // Cast required: children.props is typed as {} which TS won't spread directly (TS2698).
+      ...(children.props as Record<string, unknown>),
       className: cn(
         (slotProps as { className?: string }).className,
         (children.props as { className?: string }).className,

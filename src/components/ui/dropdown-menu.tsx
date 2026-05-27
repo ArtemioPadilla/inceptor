@@ -7,20 +7,17 @@ import { cn } from '@/lib/utils';
 // Dropdown menu built on Base UI's Menu primitive instead of the Radix UI dropdown-menu package.
 // Exposes a shadcn-compatible API.
 
+// Direct Base UI re-exports — no .displayName assignments.
+// Base UI types don't carry that property (TS2339); DevTools already shows the component name.
 const DropdownMenu = Menu.Root;
-DropdownMenu.displayName = 'DropdownMenu';
 
 const DropdownMenuTrigger = Menu.Trigger;
-DropdownMenuTrigger.displayName = 'DropdownMenuTrigger';
 
 const DropdownMenuGroup = Menu.Group;
-DropdownMenuGroup.displayName = 'DropdownMenuGroup';
 
 const DropdownMenuPortal = Menu.Portal;
-DropdownMenuPortal.displayName = 'DropdownMenuPortal';
 
 const DropdownMenuSub = Menu.SubmenuRoot;
-DropdownMenuSub.displayName = 'DropdownMenuSub';
 
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ComponentRef<typeof Menu.SubmenuTrigger>,
@@ -189,7 +186,6 @@ const DropdownMenuSeparator = React.forwardRef<
 DropdownMenuSeparator.displayName = 'DropdownMenuSeparator';
 
 const DropdownMenuRadioGroup = Menu.RadioGroup;
-DropdownMenuRadioGroup.displayName = 'DropdownMenuRadioGroup';
 
 function DropdownMenuShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (

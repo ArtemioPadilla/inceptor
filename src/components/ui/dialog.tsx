@@ -6,19 +6,17 @@ import { cn } from '@/lib/utils';
 // Dialog built on Base UI primitives instead of the Radix UI dialog package.
 // Exposes a shadcn-compatible API so consumers don't need to learn a new surface.
 
+// Base UI re-exports — no .displayName assignment; Base UI types don't carry that
+// property and TS2339 fires. DevTools already shows the Base UI component name.
 const Dialog = BaseDialog.Root;
-Dialog.displayName = 'Dialog';
 
 const DialogTrigger = BaseDialog.Trigger;
-DialogTrigger.displayName = 'DialogTrigger';
 
 const DialogClose = BaseDialog.Close;
-DialogClose.displayName = 'DialogClose';
 
 // Portal wrapper — Base UI's Portal is used internally by Popup; we expose it
 // as a passthrough component for API parity with shadcn.
 const DialogPortal = BaseDialog.Portal;
-DialogPortal.displayName = 'DialogPortal';
 
 // Backdrop (overlay) — maps to shadcn's DialogOverlay
 const DialogOverlay = React.forwardRef<

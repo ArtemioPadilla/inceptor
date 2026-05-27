@@ -44,7 +44,8 @@ function ToastList() {
             <BaseToast.Root
               toast={toast}
               className={cn(
-                toastVariants({ variant: typedToast.variant }),
+                // Base UI stores custom data under .data, not at the top level (TS2339).
+                toastVariants({ variant: typedToast.data?.variant }),
                 'data-[ending-style]:opacity-0 data-[ending-style]:translate-x-full',
                 'data-[starting-style]:opacity-0 data-[starting-style]:translate-x-full',
                 'transition-[opacity,transform]',
