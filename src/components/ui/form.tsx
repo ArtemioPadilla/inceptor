@@ -89,20 +89,24 @@ const FormLabel = React.forwardRef<
 });
 FormLabel.displayName = 'FormLabel';
 
-// FormControl wraps Base UI's Field.Control for a11y binding
+// FormControl uses React.cloneElement (the original shadcn pattern) to inject
+// a11y props into the consumer-provided child element. We avoid Base UI's
+// Field.Control here because it renders a self-closing <input> and cannot
+// accept React children — which crashes at SSR when a custom <Input> is passed.
 const FormControl = React.forwardRef<
-  React.ComponentRef<typeof Field.Control>,
-  React.ComponentPropsWithoutRef<typeof Field.Control>
->(({ ...props }, ref) => {
+  HTMLElement,
+  React.HTMLAttributes<HTMLElement> & { children: React.ReactElement }
+>(({ children, ...props }, ref) => {
   const { error } = useFormField();
 
-  return (
-    <Field.Control
-      ref={ref}
-      aria-invalid={!!error}
-      {...props}
-    />
-  );
+  const childProps = {
+    ref,
+    'aria-invalid': !!error,
+    ...props,
+    ...(children.props as Record<string, unknown>),
+  };
+
+  return React.cloneElement(children, childProps);
 });
 FormControl.displayName = 'FormControl';
 
