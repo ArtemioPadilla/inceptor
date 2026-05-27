@@ -2,6 +2,12 @@
 
 > A web starter template built around **Issue-Driven Development (IDD)** — ship a Hello World, then let structured GitHub issues guide every feature forward.
 
+## Documentation
+
+- [Component contribution guide](docs/COMPONENTS.md) — adding components, hydration, theming, dark mode
+- [Integration plan](INTEGRATION-PLAN.md) — phased roadmap and per-issue specs
+- [Claude Code context](CLAUDE.md) — repo conventions and stack details
+
 ## What's included
 
 - **Hello World** — minimal Astro + Tailwind page, deployable in minutes
