@@ -12,6 +12,6 @@ describe('card', () => {
     expect(source).toMatch(/from ['"]@\/lib\/utils['"]/);
   });
   it('does not import from radix-ui', () => {
-    expect(source).not.toMatch(/from ['"]@radix-ui/);
+    expect(source).not.toMatch(/from .{1,2}@radix/);
   });
 });

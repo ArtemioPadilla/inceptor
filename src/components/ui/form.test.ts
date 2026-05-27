@@ -27,6 +27,6 @@ describe('form', () => {
     expect(source).toMatch(/from ['"]react-hook-form['"]/);
   });
   it('does not import from radix-ui', () => {
-    expect(source).not.toMatch(/from ['"]@radix-ui/);
+    expect(source).not.toMatch(/from .{1,2}@radix/);
   });
 });

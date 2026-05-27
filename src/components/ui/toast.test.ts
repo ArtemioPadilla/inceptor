@@ -15,6 +15,6 @@ describe('toast', () => {
     expect(source).toMatch(/from ['"]@base-ui-components\/react\/toast['"]/);
   });
   it('does not import from radix-ui', () => {
-    expect(source).not.toMatch(/from ['"]@radix-ui/);
+    expect(source).not.toMatch(/from .{1,2}@radix/);
   });
 });
