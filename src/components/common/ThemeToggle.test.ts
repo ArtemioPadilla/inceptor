@@ -11,11 +11,17 @@ describe('ThemeToggle.astro', () => {
     expect(source).toMatch(/aria-label=["']Toggle dark mode["']/);
   });
 
-  it('persists user choice to localStorage', () => {
-    expect(source).toMatch(/localStorage\.setItem\(['"]theme['"]/);
+  // Since #19 (Nano Stores migration), localStorage and classList side-effects
+  // live in src/stores/theme.ts, not here. These two tests verify the new
+  // architecture: the toggle delegates to the store rather than manipulating
+  // the DOM directly.
+
+  it('delegates toggle action to the Nano Store (toggleTheme import)', () => {
+    expect(source).toMatch(/toggleTheme/);
+    expect(source).toMatch(/from ['"]@\/stores\/theme['"]/);
   });
 
-  it('toggles the dark class on documentElement', () => {
-    expect(source).toMatch(/document\.documentElement\.classList\.toggle\(['"]dark['"]\)/);
+  it('subscribes to $theme for aria-pressed sync', () => {
+    expect(source).toMatch(/\$theme\.subscribe/);
   });
 });
