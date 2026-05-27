@@ -14,8 +14,12 @@ describe('createQueryClient', () => {
   it('returns a QueryClient with sensible offline defaults', () => {
     const client = createQueryClient();
     const defaults = client.getDefaultOptions();
-    expect(defaults.queries?.staleTime).toBeGreaterThan(0);
-    expect(defaults.queries?.gcTime).toBeGreaterThan(defaults.queries?.staleTime ?? 0);
+    const staleTime = defaults.queries?.staleTime;
+    expect(typeof staleTime).toBe('number');
+    expect(staleTime as number).toBeGreaterThan(0);
+    const gcTime = defaults.queries?.gcTime;
+    expect(typeof gcTime).toBe('number');
+    expect(gcTime as number).toBeGreaterThan(staleTime as number);
     expect(defaults.queries?.refetchOnWindowFocus).toBe(false);
   });
 
