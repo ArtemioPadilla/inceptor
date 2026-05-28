@@ -9,6 +9,16 @@ export default defineConfig({
   // Set this to your production URL for sitemap absolute URLs + Open Graph.
   // Replace when deploying — see ROADMAP Epic 6 (production readiness).
   site: 'https://issue-driven-web-template.example',
+  // i18n routing — English at root (no prefix), Spanish under /es/.
+  // `prefixDefaultLocale: false` keeps existing English URLs unchanged.
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+    routing: {
+      prefixDefaultLocale: false,
+      redirectToDefaultLocale: false,
+    },
+  },
   // 301 redirects from the old top-level demo routes to their new /demos/*
   // locations. Old URLs survive; visual baselines re-anchor automatically.
   redirects: {
@@ -29,7 +39,15 @@ export default defineConfig({
     AstroPWA({
       registerType: 'autoUpdate',
       strategies: 'generateSW',
-      includeAssets: ['favicon.svg', 'icons/pwa-512.svg'],
+      includeAssets: [
+        'favicon.svg',
+        'favicon.ico',
+        'apple-touch-icon.png',
+        'icons/pwa-192.png',
+        'icons/pwa-512.png',
+        'icons/pwa-maskable-512.png',
+        'icons/logo-source.svg',
+      ],
       manifest: {
         name: 'issue-driven-web-template',
         short_name: 'IDD Template',
@@ -41,13 +59,15 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         icons: [
+          { src: '/icons/pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icons/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           {
-            src: '/icons/pwa-512.svg',
+            src: '/icons/pwa-maskable-512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
-            // "any maskable" tells browsers this icon is safe to mask
-            purpose: 'any maskable',
+            type: 'image/png',
+            purpose: 'maskable',
           },
+          { src: '/icons/logo-source.svg', sizes: 'any', type: 'image/svg+xml' },
         ],
       },
       workbox: {
