@@ -146,7 +146,11 @@ export function useDataTableUrlState(
     return () => window.removeEventListener('popstate', onPop);
   }, [enabled, key]);
 
-  const timer = React.useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  // ReturnType<typeof setTimeout> satisfies both the browser (number) and Node
+  // (NodeJS.Timeout) overloads. Using the global setTimeout (no window. prefix)
+  // lets TypeScript pick the correct overload for whichever @types are in scope,
+  // which matters now that @types/node is installed.
+  const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const write = React.useCallback(
     (next: Partial<DataTableUrlState>) => {
@@ -159,8 +163,8 @@ export function useDataTableUrlState(
       if (!enabled) return;
 
       // Debounce: avoid flooding history on rapid keystrokes in the filter input.
-      if (timer.current !== null) window.clearTimeout(timer.current);
-      timer.current = window.setTimeout(() => {
+      if (timer.current !== null) clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
         const params = serializeToUrlParams(stateRef.current, key);
         const qs = params.toString();
         const url = window.location.pathname + (qs ? '?' + qs : '');
