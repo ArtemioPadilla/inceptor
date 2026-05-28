@@ -16,6 +16,9 @@
     "test:visual:update": "playwright test --update-snapshots",
     "a11y": "playwright test tests/visual/a11y.spec.ts",
     "ux:check": "vitest run src/tests/ux-contrast.test.ts src/tests/ux-motion.test.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lighthouse": "npm run build && lhci autorun",
     "monday": "bash scripts/monday.sh",
     "ship": "bash scripts/ship.sh",
     "doctor": "bash scripts/doctor.sh",
@@ -52,7 +55,9 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@astrojs/sitemap": "^3.7.3",
     "@axe-core/playwright": "^4.11.3",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -65,6 +70,8 @@
     "jsdom": "^29.1.1",
     "npm-run-all": "^4.1.5",
     "pa11y": "^9.1.1",
+    "prettier": "^3.8.3",
+    "prettier-plugin-astro": "^0.14.1",
     "sharp": "^0.34.5",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"

@@ -3,8 +3,12 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import AstroPWA from '@vite-pwa/astro';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
+  // Set this to your production URL for sitemap absolute URLs + Open Graph.
+  // Replace when deploying — see ROADMAP Epic 6 (production readiness).
+  site: 'https://issue-driven-web-template.example',
   // 301 redirects from the old top-level demo routes to their new /demos/*
   // locations. Old URLs survive; visual baselines re-anchor automatically.
   redirects: {
@@ -16,6 +20,11 @@ export default defineConfig({
   integrations: [
     // MDX for the /docs/* content collection — lets pages embed React components
     mdx(),
+    sitemap({
+      // Don't bloat the sitemap with test artifacts or generated content
+      filter: (page) =>
+        !page.includes('/_') && !page.includes('/404') && !page.endsWith('.json'),
+    }),
     react(),
     AstroPWA({
       registerType: 'autoUpdate',
