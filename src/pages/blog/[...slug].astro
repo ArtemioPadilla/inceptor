@@ -49,7 +49,7 @@ const { Content } = await render(entry);
         )}
         {entry.data.tags.length > 0 && (
           <span class="flex gap-1.5">
-            {entry.data.tags.map((tag) => (
+            {entry.data.tags.map((tag: string) => (
               <span class="rounded bg-muted px-1.5 py-0.5 font-mono">{tag}</span>
             ))}
           </span>

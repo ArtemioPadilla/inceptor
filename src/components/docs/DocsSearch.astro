@@ -55,13 +55,13 @@ const enabled = flags.docsSearch;
       }
     }
 
-    const debounce = (fn: (...args: unknown[]) => void, ms: number) => {
+    function debounce<F extends (...args: never[]) => unknown>(fn: F, ms: number) {
       let t: ReturnType<typeof setTimeout> | null = null;
-      return (...args: unknown[]) => {
+      return ((...args: Parameters<F>) => {
         if (t) clearTimeout(t);
         t = setTimeout(() => fn(...args), ms);
-      };
-    };
+      }) as F;
+    }
 
     async function runSearch(q: string) {
       const lib = await ensureLoaded();
@@ -92,10 +92,12 @@ const enabled = flags.docsSearch;
     }
 
     const debounced = debounce(
-      (e: Event) => runSearch((e.target as HTMLInputElement).value),
+      ((e: Event) => {
+        void runSearch((e.target as HTMLInputElement).value);
+      }) as (e: Event) => void,
       150,
     );
-    input.addEventListener('input', debounced as EventListener);
+    input.addEventListener('input', debounced);
 
     // ⌘K / Ctrl+K to focus
     window.addEventListener('keydown', (e: KeyboardEvent) => {

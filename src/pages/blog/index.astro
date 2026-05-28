@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import { flags } from '../../lib/flags';
+
+type BlogEntry = CollectionEntry<'blog'>;
 
 // Early redirect when the blog is disabled via feature flag.
 if (!flags.blog) {
@@ -9,8 +11,8 @@ if (!flags.blog) {
 }
 
 const posts = (await getCollection('blog'))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  .filter((p: BlogEntry) => !p.data.draft)
+  .sort((a: BlogEntry, b: BlogEntry) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout title="Blog" description="Posts from this scaffold.">
@@ -30,7 +32,7 @@ const posts = (await getCollection('blog'))
       </p>
     ) : (
       <ul class="space-y-6">
-        {posts.map((post) => (
+        {posts.map((post: BlogEntry) => (
           <li class="rounded-lg border border-border bg-card p-5">
             <a
               href={`/blog/${post.id}/`}
@@ -46,7 +48,7 @@ const posts = (await getCollection('blog'))
                 </time>
                 {post.data.tags.length > 0 && (
                   <span class="flex gap-1.5">
-                    {post.data.tags.map((tag) => (
+                    {post.data.tags.map((tag: string) => (
                       <span class="rounded bg-muted px-1.5 py-0.5 font-mono">{tag}</span>
                     ))}
                   </span>
