@@ -10,6 +10,7 @@ import ShowcaseToast from '../components/islands/ShowcaseToast';
 import ThemeIndicator from '../components/islands/ThemeIndicator';
 import QueryDemo from '../components/islands/QueryDemo';
 import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
+import ShowcaseCharts from '../components/islands/ShowcaseCharts';
 
 // /showcase — living documentation for every installed shadcn/ui component.
 // Each section renders the component in both light and dark side-by-side.
@@ -192,6 +193,31 @@ import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
         <div class="dark rounded-lg border border-border bg-background p-6">
           <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
           <ShowcaseKpis client:visible />
+        </div>
+      </div>
+    </section>
+    <!-- Charts (Recharts wrappers themed to shadcn CSS vars) -->
+    <section aria-labelledby="section-charts">
+      <h2 id="section-charts" class="text-xl font-semibold mb-4">Charts</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Recharts wrappers that read colors from
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">--chart-1</code>
+        …
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">--chart-5</code>
+        CSS vars — dark mode flips automatically. Components:
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">LineChart</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">BarChart</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">AreaChart</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">DonutChart</code>.
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseCharts client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseCharts client:visible />
         </div>
       </div>
     </section>
