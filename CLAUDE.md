@@ -196,6 +196,13 @@ click. See `docs/COMPONENTS.md` for opt-in usage.
 
 ## References
 
+- **Principles (how we work + ethics)**: `docs/PRINCIPLES.md` — Shape Up
+  cadence, TDD, Spec-DD, persuasive-design ethics summary, UX quality bar,
+  governance baseline, non-negotiables
+- **Ethics framework**: `docs/ETHICS.md` — Fogg's Functional Triad, the 8-item
+  ethics checklist, Stakeholder Analysis for `risk:high` PRs
+- **Decisions log**: `docs/decisions/` — every irreversible architectural
+  decision is an ADR
 - Full plan: `INTEGRATION-PLAN.md`
 - Setup: `SETUP.md`
 - Roadmap: `ROADMAP.md`

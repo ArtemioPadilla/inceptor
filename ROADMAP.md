@@ -138,6 +138,96 @@ from the original template ROADMAP.
 
 ---
 
+## Epic 10 — Methodology layer (Shape Up + TDD + Spec-DD)
+
+Bake the principles documented in [`docs/PRINCIPLES.md`](./docs/PRINCIPLES.md)
+into the tooling. The framework decisions are recorded in `docs/decisions/`;
+the foundational docs landed with the methodology-layer PR. Remaining work:
+
+- [ ] Install `@testing-library/react` + `@testing-library/jest-dom` —
+      needed for behavior tests (currently we have only `?raw` source-text
+      assertions)
+- [ ] Write 3-4 example behavior tests demonstrating the red→green pattern;
+      include at least one that would have caught the Form/Field.Control SSR
+      bug surfaced in PR #17
+- [ ] Add `npm run tdd` watch script (`vitest --watch` with focused output)
+- [ ] Create `src/schemas/` directory; extract the `ShowcaseForm` Zod schema
+      as the first inhabitant
+- [ ] Document the Shape Up cycle cadence in `CONTRIBUTING.md` (Monday ritual,
+      Friday hill-chart update, cooldown discipline)
+- [ ] Add `docs/lessons.md` (initially empty) — populated by centinela on the
+      double-reject trigger
+- [ ] *(later, with backend archetype)* install `@hono/zod-openapi`, derive
+      OpenAPI from shared schemas
+
+## Epic 11 — Governance baseline
+
+Standard files every personal scaffold should ship with. Cheap to land.
+
+- [ ] `LICENSE` — pick MIT (default for personal scaffold; switch per project)
+- [ ] `SECURITY.md` — vulnerability disclosure policy with contact email and
+      no-penalty pledge
+- [ ] `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1 verbatim
+- [ ] `.github/dependabot.yml` — weekly npm + Actions dependency updates
+- [ ] `.github/PULL_REQUEST_TEMPLATE.md` — includes the 8-item ethics checklist
+      (required items #1, #2, #6, #8) plus a doc/test-only opt-out toggle
+- [ ] `.github/CODEOWNERS` *(optional)* — useful if the scaffold becomes
+      shared
+- [ ] Branch protection on `main`: require PR, status checks, linear history
+
+## Epic 12 — UX / ethics quality bar
+
+The 7 measurable criteria from [`docs/PRINCIPLES.md`](./docs/PRINCIPLES.md) §5
+become mechanical gates. Each tool stands up independently.
+
+- [ ] `npm run a11y` — axe-core via Playwright on `/`, `/showcase`, `/dashboard`
+      (light + dark) — 0 serious / 0 critical
+- [ ] `npm run lighthouse` — `@lhci/cli` on `/` and `/dashboard`, mobile preset,
+      Perf ≥ 90 / A11y ≥ 95 / BP ≥ 95
+- [ ] `npm run contrast` — build-time check on `:root` / `.dark` CSS var pairs
+      against WCAG AA 4.5:1
+- [ ] `npm run motion-check` — lint that every `motion/react` `animate=` is
+      inside `<LazyMotion>` with `useReducedMotion()` branch (or uses
+      `tailwindcss-motion` which respects the OS pref by default)
+- [ ] `npm run keyboard-nav` — Playwright tab-walk through `/showcase` asserting
+      visible `:focus-visible` ring on every interactive element
+- [ ] `npm run ux:check` — composite of all the above
+- [ ] CI integration: gate on `ux:check` (or split Lighthouse to nightly if PR
+      runtime becomes painful)
+- [ ] Privacy toast on first page load — *"Diagnostics are captured locally and
+      only sent if you open an issue"* — closes the surveillance gap in the
+      HydrationCanary capture (ethics checklist item #6)
+
+## Epic 13 — Sub-agent contract upgrades
+
+After Epics 10–12 land (the docs and tooling need to exist first), the
+sub-agents enforce the framework. Order matters; do this last.
+
+- [ ] **prometeo** — emit `## Behavior contracts` section per `type:feat`/`fix`
+      issue (TDD seeds); classify each `type:feat` by Functional Triad corner
+      (tool / medium / social actor); add governance pre-check step reading
+      `.claude/checklists/governance.md`
+- [ ] **forja** — add to Forbidden actions: *"Never commit production code in a
+      branch without a prior `test(...)` commit that initially failed"*; require
+      any cross-boundary type to start as a Zod schema in `src/schemas/`; any
+      irreversible architectural decision triggers an ADR commit in
+      `docs/decisions/`
+- [ ] **centinela** — add step 3.5 "Ethics & UX gate" running `npm run ux:check`
+      + greppable presence-check of the 8-item checklist in the PR body; add
+      step 4.5 "Red→green verification" checking `git log` ordering and
+      re-running the red commit's test; introduce `ETHICS_OR_UX_FAIL` failure
+      classification distinct from `BUILD_FAIL` so the orchestrator routes
+      back to forja with the right prompt
+- [ ] *(stretch)* Create `.claude/checklists/ethics.md` and
+      `.claude/checklists/governance.md` — machine-readable versions of the
+      checklists in `docs/ETHICS.md` so sub-agents reference them without
+      duplicating the text
+- [ ] *(stretch)* Spawn a new `etico` sub-agent for `risk:high` issues —
+      performs the Stakeholder Analysis 7-step (see `docs/ETHICS.md`) and
+      writes the resulting ADR
+
+---
+
 ## Status legend
 
 - `[ ]` — open / not started
