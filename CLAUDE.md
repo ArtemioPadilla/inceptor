@@ -8,40 +8,50 @@ FeedbackFAB lets real users file issues with diagnostics pre-filled.
 
 ## Active integration
 
-Currently executing **`INTEGRATION-PLAN.md`**: migrating from the bare
-Astro 4 + Tailwind 3 starter to a full UI stack (shadcn/ui on Base UI primitives
-+ TanStack + Tremor Raw + Motion + vite-pwa). Read `INTEGRATION-PLAN.md` before
-starting any work on this repo.
+Integration complete; `INTEGRATION-PLAN.md` is the historical record of every
+phase (0–7) that brought this repo from a bare Astro 4 + Tailwind 3 starter to
+the full UI stack now in place.
 
-## Stack (target)
+## Stack (installed)
 
-- **Astro 5+** — islands architecture, ship zero JS by default
-- **Tailwind CSS v4** via `@tailwindcss/vite` (NOT `@astrojs/tailwind` —
-  deprecated for v4)
-- **React 19** via `@astrojs/react` — only for interactive islands
-- **shadcn/ui** with **Base UI** primitives (not Radix; see warnings below)
-- **TanStack Table v8 + TanStack Virtual** — data grids
-- **TanStack Query** + `@tanstack/query-persist-client-core` + `idb-keyval` —
-  offline cache
-- **Tremor Raw** (copy-paste, NOT `@tremor/react`) — KPI cards and dashboards
-- **Recharts** — charts, themed to shadcn CSS vars
-- **Motion** (`npm i motion`, post-Framer-Motion-merge) with the `LazyMotion`
-  pattern; import only from `motion/react`
-- **`tailwindcss-motion`** — utility-class animations, zero JS runtime
-- **`@vite-pwa/astro`** — PWA + offline service worker
-- **Nano Stores** — cross-island state (NOT React Context)
+| Package | Version | Role |
+|---|---|---|
+| `astro` | `^5.18.1` | islands architecture, ship zero JS by default |
+| `@astrojs/react` | `^5.0.5` | React 19 integration |
+| `react` / `react-dom` | `^19.2.6` | only for interactive islands |
+| `tailwindcss` | `^4.3.0` | via `@tailwindcss/vite` (NOT `@astrojs/tailwind`) |
+| `@tailwindcss/vite` | `^4.3.0` | Vite plugin for Tailwind v4 |
+| `tailwindcss-motion` | `^1.1.1` | CSS-only motion utilities (`@plugin` directive) |
+| `@base-ui-components/react` | `^1.0.0-rc.0` | shadcn primitives (NOT Radix) |
+| `class-variance-authority` | `^0.7.1` | variant API for shadcn |
+| `clsx` + `tailwind-merge` | `^2.1.1` / `^3.6.0` | `cn()` helper in `src/lib/utils.ts` |
+| `lucide-react` | `^1.16.0` | icons |
+| `react-hook-form` + `zod` + `@hookform/resolvers` | `^7.76.1` / `^3.25.76` / `^5.4.0` | `<Form>` |
+| `@tanstack/react-table` + `@tanstack/react-virtual` | `^8.21.3` / `^3.13.26` | `<DataTable>` |
+| `@tanstack/react-query` + `@tanstack/query-persist-client-core` | `^5.100.14` | per-island Query + persistence |
+| `idb-keyval` | `^6.2.4` | IndexedDB persister backend |
+| `nanostores` + `@nanostores/react` | `^1.3.0` / `^1.1.0` | cross-island state |
+| `recharts` | `^3.8.1` | charts (lazy chunk) |
+| `motion` | `^12.40.0` | React animations (LazyMotion + domAnimation) |
+| `@vite-pwa/astro` (devDep) + `workbox-window` | `^1.2.0` / `^7.4.1` | PWA + SW + offline cache |
+| `vitest` | `^2.0.0` | tests |
+| `typescript` | `^5.6.0` | strict mode |
+
+> `@radix-ui/*`, `@tremor/react`, `framer-motion`, and `@astrojs/tailwind` are intentionally absent (see warnings below).
 
 ## File organization
 
 - `src/components/ui/` — shadcn primitives (owned, copy-pasted)
+- `src/components/ui/charts/` — Recharts wrappers themed to shadcn CSS vars
 - `src/components/islands/` — React islands (hydrated via `client:*` directives)
-- `src/components/common/` — Astro components shared across pages (FeedbackFAB
-  lives here)
+- `src/components/common/` — Astro components shared across pages (FeedbackFAB lives here)
 - `src/layouts/` — Astro layouts
 - `src/lib/` — utilities (`cn()`, `queryClient`, etc.)
-- `src/stores/` — Nano Stores for shared state
+- `src/stores/` — Nano Stores for cross-island state
 - `src/styles/global.css` — Tailwind v4 import + CSS vars + dark-mode tokens
 - `src/pages/` — Astro pages (routes)
+- `src/tests/` — Vitest tests for pages, configs, and docs
+- `src/types/` — shared TypeScript types
 
 ## Path aliases
 
@@ -73,32 +83,32 @@ starting any work on this repo.
 
 ## Workflow: native `/goal` + IDD sub-agents
 
-This repo uses Claude Code's **native** `/goal` command (Claude Code
-v2.1.139+) with three project-specific sub-agents under `.claude/agents/`.
-Native `/goal` sets a completion condition and keeps Claude working across
-turns until a small fast model confirms it's met. The sub-agents are the
-building blocks Claude uses inside that loop.
+This repo uses Claude Code's **native** `/goal` command (Claude Code v2.1.139+)
+with three project-specific sub-agents under `.claude/agents/`. Native `/goal`
+sets a completion condition and keeps Claude working across turns until a small
+fast model confirms it's met. The sub-agents are the building blocks Claude uses
+inside that loop.
 
 ### Sub-agents (invoked via the Task tool)
 
-- **prometeo** — reads INTEGRATION-PLAN.md and decomposes a phase, milestone,
-  or issue into an ordered, dependency-aware execution plan. Does not write
-  code.
-- **forja** — implements a single issue: writes code, runs `npx` commands,
-  makes atomic commits on a feature branch. Does not validate or open PRs.
+- **prometeo** — reads `INTEGRATION-PLAN.md` and decomposes a phase, milestone,
+  or issue into an ordered, dependency-aware execution plan. Does not write code.
+- **forja** — implements a single issue: writes code, runs `npx` commands, makes
+  atomic commits on a feature branch. Does not validate or open PRs.
 - **centinela** — validates forja's work (build, type-check, tests,
   forbidden-import scan) and returns APPROVED or REJECTED.
 
 ### Example `/goal` conditions
 
 ```text
+/goal Ship every Phase 1 issue from INTEGRATION-PLAN.md: PRs open, centinela
+      APPROVED, working tree clean. Stop after 30 turns.
+
+/goal Land issue #N from INTEGRATION-PLAN.md. End state: PR open against main,
+      centinela APPROVED in this transcript, branch named per the plan.
+
 /goal Open PRs that close every Phase 0 issue from INTEGRATION-PLAN.md. Use
       prometeo to plan, forja per issue, centinela to gate each PR.
-
-/goal Land issue #5 from INTEGRATION-PLAN.md: PR open, centinela APPROVED,
-      working tree clean. Stop after 10 turns.
-
-/goal Every Phase 1 issue from INTEGRATION-PLAN.md has an open or merged PR.
 ```
 
 Run `/goal` with no arguments to check status; `/goal clear` to cancel. See
@@ -123,11 +133,59 @@ Run `/goal` with no arguments to check status; `/goal clear` to cancel. See
 
 ## shadcn/ui + Astro: the compound-component gotcha
 
-Components that compose multiple parts and share state (`Accordion`, `Tabs`,
-controlled `Dialog`, etc.) **cannot span multiple islands**. Wrap the entire
-composition in one React file under `src/components/islands/` (e.g.
-`SettingsTabs.tsx`) and hydrate it as a single island. This is a documented
-constraint of Astro's partial hydration model — do not fight it.
+Components that compose multiple parts and share state — `Dialog`, `Tabs`,
+controlled `DropdownMenu`, `Toast` — **cannot span multiple islands**. Astro
+hydrates each `client:*` boundary as its own React root, so a `<Dialog>` wrapper
+in one island won't see a `<DialogContent>` in a separate island.
+
+### Wrong
+
+```astro
+---
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+---
+<DialogTrigger client:load>Open</DialogTrigger>
+<DialogContent client:load>...</DialogContent>
+```
+
+Each `client:*` creates a separate React root; trigger and content cannot share state.
+
+### Right
+
+Wrap the whole composition in **one** React file under `src/components/islands/`:
+
+`src/components/islands/MyDialogIsland.tsx`:
+
+```tsx
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+
+export default function MyDialogIsland() {
+  return (
+    <Dialog>
+      <DialogTrigger>Open</DialogTrigger>
+      <DialogContent>...</DialogContent>
+    </Dialog>
+  );
+}
+```
+
+Then hydrate as a single island in the page:
+
+```astro
+<MyDialogIsland client:visible />
+```
+
+This is what `src/components/islands/ShowcaseDialog.tsx`, `ShowcaseTabs.tsx`,
+`ShowcaseDropdown.tsx`, `ShowcaseToast.tsx`, and `ShowcaseForm.tsx` all do today.
+
+## IDD reporting (Phase 7)
+
+React islands are wrapped in `<ErrorBoundary>` (from
+`src/components/islands/ErrorBoundary.tsx`) which captures runtime errors and
+builds a pre-filled GitHub issue with stack, component path, URL, and user agent.
+The `HydrationCanary` island listens for `window 'error'` events and stores
+hydration-mismatch URLs in `sessionStorage`; the `FeedbackFAB` reads that key on
+click. See `docs/COMPONENTS.md` for opt-in usage.
 
 ## Quality bar
 
@@ -141,6 +199,7 @@ constraint of Astro's partial hydration model — do not fight it.
 - Full plan: `INTEGRATION-PLAN.md`
 - Setup: `SETUP.md`
 - Roadmap: `ROADMAP.md`
+- Component guide: `docs/COMPONENTS.md`
 - Astro docs: <https://docs.astro.build>
 - shadcn/ui + Astro: <https://ui.shadcn.com/docs/installation/astro>
 - Tailwind v4 + Astro: <https://tailwindcss.com/docs/installation/framework-guides/astro>
