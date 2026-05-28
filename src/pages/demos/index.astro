@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const demos = [
+  {
+    href: '/demos/dashboard/',
+    name: 'Dashboard',
+    summary:
+      'KPIs + charts + DataTable composed on a single page, fetching live GitHub data via TanStack Query.',
+  },
+  {
+    href: '/demos/data/',
+    name: 'Data island',
+    summary:
+      'GitHub issues fetcher with loading, error, and empty states. Cache persisted to IndexedDB.',
+  },
+  {
+    href: '/demos/data/large/',
+    name: '50,000-row table',
+    summary:
+      'DataTable scaled to 50k deterministic rows via TanStack Virtual. Sort, filter, URL state sync.',
+  },
+];
+---
+
+<BaseLayout title="Demos" description="Composed real-feeling pages stitching primitives into believable products.">
+  <main class="mx-auto max-w-6xl px-4 py-12">
+    <header class="mb-10">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground" style="view-transition-name: page-title">
+        Demos
+      </h1>
+      <p class="mt-2 text-muted-foreground">
+        Composed real-feeling pages. Looking for individual primitives?
+        Visit <a href="/gallery/" class="text-primary hover:underline">/gallery</a>.
+      </p>
+    </header>
+
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        demos.map((demo) => (
+          <li>
+            <a
+              href={demo.href}
+              class="group block rounded-lg border border-border bg-card p-5 transition-colors hover:bg-accent/40"
+            >
+              <h2 class="text-base font-semibold text-foreground group-hover:underline">
+                {demo.name}
+              </h2>
+              <p class="mt-2 text-sm text-muted-foreground">{demo.summary}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</BaseLayout>

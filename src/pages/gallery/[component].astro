@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { galleryManifest, type GalleryEntry } from '../../content/gallery';
+
+// Import every gallery island statically so Astro can wire hydration.
+// (Dynamic lookups via a registry don't work for `client:*` directives.)
+import ShowcaseSimples from '../../components/islands/ShowcaseSimples';
+import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
+import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
+import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
+import ShowcaseToast from '../../components/islands/ShowcaseToast';
+import ShowcaseForm from '../../components/islands/ShowcaseForm';
+import ShowcaseDataTable from '../../components/islands/ShowcaseDataTable';
+import ShowcaseKpis from '../../components/islands/ShowcaseKpis';
+import ShowcaseCharts from '../../components/islands/ShowcaseCharts';
+import MotionDemo from '../../components/islands/MotionDemo';
+import ShowcasePWA from '../../components/islands/ShowcasePWA';
+import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundary';
+
+export async function getStaticPaths() {
+  return galleryManifest.map((entry) => ({
+    params: { component: entry.slug },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: GalleryEntry;
+}
+
+const { entry } = Astro.props;
+const repoBlob = `https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/${entry.source}`;
+---
+
+<BaseLayout title={`${entry.name} — Gallery`} description={entry.summary}>
+  <main class="mx-auto max-w-6xl px-4 py-12">
+    <nav class="mb-6 text-sm">
+      <a href="/gallery/" class="text-muted-foreground hover:text-foreground">← Gallery</a>
+    </nav>
+
+    <header class="mb-8 border-b border-border pb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1
+            class="text-3xl font-bold tracking-tight text-foreground"
+            style="view-transition-name: page-title"
+          >
+            {entry.name}
+          </h1>
+          <p class="mt-2 text-muted-foreground">{entry.summary}</p>
+        </div>
+        <span
+          class:list={[
+            'shrink-0 rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide',
+            entry.status === 'stable' &&
+              'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
+            entry.status === 'beta' &&
+              'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30',
+            entry.status === 'experimental' &&
+              'bg-orange-500/15 text-orange-300 border border-orange-500/30',
+          ]}
+        >
+          {entry.status}
+        </span>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+        <span>
+          Source:
+          <a href={repoBlob} target="_blank" rel="noopener noreferrer"
+             class="font-mono text-foreground hover:underline">
+            {entry.source}
+          </a>
+        </span>
+        {entry.install && (
+          <span>
+            Install:
+            <code class="ml-1 rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground border border-border">
+              {entry.install}
+            </code>
+          </span>
+        )}
+      </div>
+    </header>
+
+    <section class="space-y-6">
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Rendered example — light + dark
+      </h2>
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="mb-4 text-xs uppercase tracking-wide text-muted-foreground">Light</p>
+          {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
+          {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
+          {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
+          {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
+          {entry.island === 'ShowcaseToast' && <ShowcaseToast client:visible />}
+          {entry.island === 'ShowcaseForm' && <ShowcaseForm client:visible />}
+          {entry.island === 'ShowcaseDataTable' && <ShowcaseDataTable client:visible />}
+          {entry.island === 'ShowcaseKpis' && <ShowcaseKpis client:visible />}
+          {entry.island === 'ShowcaseCharts' && <ShowcaseCharts client:visible />}
+          {entry.island === 'MotionDemo' && <MotionDemo client:visible />}
+          {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
+          {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="mb-4 text-xs uppercase tracking-wide text-muted-foreground">Dark</p>
+          {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
+          {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
+          {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
+          {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
+          {entry.island === 'ShowcaseToast' && <ShowcaseToast client:visible />}
+          {entry.island === 'ShowcaseForm' && <ShowcaseForm client:visible />}
+          {entry.island === 'ShowcaseDataTable' && <ShowcaseDataTable client:visible />}
+          {entry.island === 'ShowcaseKpis' && <ShowcaseKpis client:visible />}
+          {entry.island === 'ShowcaseCharts' && <ShowcaseCharts client:visible />}
+          {entry.island === 'MotionDemo' && <MotionDemo client:visible />}
+          {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
+          {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12 rounded-lg border border-border bg-card p-6">
+      <h2 class="mb-2 text-sm font-semibold text-foreground">Recipes &amp; props</h2>
+      <p class="text-sm text-muted-foreground">
+        Per-component recipes, prop tables, and variant matrices land in a follow-up
+        (see <a href="/docs/history/roadmap/" class="text-primary hover:underline">ROADMAP Epic 16</a>).
+        For now: open the source link above, or read the
+        <a href="/docs/building/adding-a-component/" class="text-primary hover:underline">
+          contribution guide
+        </a>.
+      </p>
+    </section>
+  </main>
+</BaseLayout>
