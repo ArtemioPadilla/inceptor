@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Native cross-document View Transitions — Baseline Newly Available Oct 2025.
+ * No-op in older browsers; supporting browsers (Chromium 126+, Safari 18.2+,
+ * Firefox 144+) get cross-page fade-through. Page-level transitions can be
+ * customized further via ::view-transition-old/new pseudo-elements. */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
