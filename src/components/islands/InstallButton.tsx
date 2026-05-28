@@ -27,7 +27,7 @@ export default function InstallButton() {
           $installPrompt.set(null);
         }
       }}
-      className="fixed bottom-4 left-4 z-50 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-lg hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="fixed bottom-4 left-4 z-50 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-lg hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-preset-slide-right-md motion-duration-300"
       aria-label="Install app"
     >
       <span aria-hidden="true">&#11015;</span>
