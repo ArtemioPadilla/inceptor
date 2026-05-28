@@ -1,0 +1,37 @@
+import { describe, expect, it } from 'vitest';
+import source from './ErrorBoundary.tsx?raw';
+
+describe('ErrorBoundary', () => {
+  it('uses static getDerivedStateFromError', () => {
+    expect(source).toMatch(/static getDerivedStateFromError/);
+  });
+
+  it('uses componentDidCatch with ErrorInfo', () => {
+    expect(source).toMatch(/componentDidCatch/);
+    expect(source).toMatch(/ErrorInfo/);
+  });
+
+  it('builds an issue URL via buildIssueUrl', () => {
+    expect(source).toMatch(/buildIssueUrl/);
+  });
+
+  it('renders an alert role fallback by default', () => {
+    expect(source).toMatch(/role=["']alert["']/);
+  });
+
+  it('imports from @/lib/report-issue (not a third-party tracker)', () => {
+    expect(source).toMatch(/from ['"]@\/lib\/report-issue['"]/);
+  });
+
+  it('exports a default class component extending React.Component', () => {
+    expect(source).toMatch(/export default class ErrorBoundary extends React\.Component/);
+  });
+
+  it('accepts an optional name prop for the component path', () => {
+    expect(source).toMatch(/name\?/);
+  });
+
+  it('does not import from framer-motion', () => {
+    expect(source).not.toMatch(/from ['"]framer-motion['"]/);
+  });
+});
