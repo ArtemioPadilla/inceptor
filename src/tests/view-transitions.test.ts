@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import css from '../styles/global.css?raw';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+// ?raw import of CSS files returns '' under Vitest's node environment because
+// the Tailwind Vite plugin chain is not present in the test runner.
+// Reading from disk with readFileSync bypasses that limitation.
+const css = readFileSync(
+  fileURLToPath(new URL('../styles/global.css', import.meta.url)),
+  'utf-8',
+);
+
 import baseLayout from '../layouts/BaseLayout.astro?raw';
 import index from '../pages/index.astro?raw';
 import showcase from '../pages/showcase.astro?raw';
