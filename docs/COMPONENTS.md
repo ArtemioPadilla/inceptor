@@ -523,7 +523,57 @@ import IssuesDataTable from '../components/islands/IssuesDataTable';
 
 ---
 
-## 9. Forbidden imports
+## 9. Animation (LazyMotion)
+
+This repo uses the `motion` package (the December 2024 merge of Framer Motion
+and Motion One). **Never import from `framer-motion`** — see CLAUDE.md rule #6.
+
+### The LazyMotion pattern
+
+Wrap interactive islands that need physics-based or sequenced animation in a
+`<LazyMotion features={domAnimation}>` boundary. `domAnimation` is a ~15 kb
+gzip feature bundle covering the most common use cases: enter/exit transitions,
+`AnimatePresence`, layout animations, and spring physics.
+
+```tsx
+// src/components/islands/MyIsland.tsx
+import { LazyMotion, domAnimation, m, AnimatePresence } from 'motion/react';
+
+export default function MyIsland() {
+  return (
+    <LazyMotion features={domAnimation} strict>
+      {/* Use m.* — NOT motion.* — inside LazyMotion */}
+      <m.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        Content
+      </m.div>
+    </LazyMotion>
+  );
+}
+```
+
+### Key rules
+
+| Rule | Why |
+|---|---|
+| Use `m.*` not `motion.*` inside `<LazyMotion>` | `motion.*` loads the full feature set eagerly, negating the lazy-bundle split. The `strict` prop on `<LazyMotion>` throws at dev-time if you accidentally use `motion.*`. |
+| Import only from `motion/react` | `framer-motion` is the pre-merge package and is no longer maintained. |
+| Only inside React islands | Marketing/blog `.astro` surfaces must stay zero-JS. Motion has no Astro-native renderer; keep it inside `src/components/islands/`. |
+| Hydrate with `client:visible`, not `client:load` | Motion islands are typically below the fold. Defer hydration until scroll. |
+
+### When NOT to use LazyMotion
+
+For simple CSS-class-based animations (fade-in on scroll, hover scale, etc.)
+prefer `tailwindcss-motion` utilities — zero JS runtime. Reserve `motion/react`
+for interactions that genuinely require JavaScript: spring physics,
+`AnimatePresence` exit animations, or gesture tracking (`useDragControls`, etc.).
+
+---
+
+## 10. Forbidden imports
 
 These are hard rules. The CI forbidden-import scan (when added) and code review
 will reject any PR that violates them.
@@ -531,7 +581,7 @@ will reject any PR that violates them.
 | Import | Why forbidden | Correct alternative |
 |---|---|---|
 | `@radix-ui/*` | We are on Base UI. Mixing Radix and Base UI in a single component breaks accessibility and state management. Never @radix-ui imports anywhere in `src/`. | `@base-ui-components/react/<primitive>` |
-| `framer-motion` | Framer Motion merged with Motion One into the `motion` package in December 2024. The old package is no longer maintained. | `motion/react` (when Motion lands in Phase 6) |
+| `framer-motion` | Framer Motion merged with Motion One into the `motion` package in December 2024. The old package is no longer maintained. | `motion/react` — see Section 9 for the LazyMotion pattern. |
 | `@tremor/react` | Tremor Raw is copy-paste only — you own the source in `src/components/ui/`. The `@tremor/react` npm package is a bundled distribution you cannot customize or tree-shake properly. | Copy-paste from [raw.tremor.so](https://raw.tremor.so) into `src/components/ui/` |
 | `@astrojs/tailwind` | This integration is deprecated for Tailwind v4. It does not exist. | `@tailwindcss/vite` registered as a Vite plugin in `astro.config.mjs` |
 | `React.createContext` for **cross-island** state | Astro's partial hydration creates a separate React root per island. Context does not cross island boundaries. | Nano Stores (`nanostores` + `@nanostores/react`) — arriving in Phase 2. |

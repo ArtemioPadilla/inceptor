@@ -12,6 +12,7 @@ import QueryDemo from '../components/islands/QueryDemo';
 import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
 import ShowcaseCharts from '../components/islands/ShowcaseCharts';
 import ShowcasePWA from '../components/islands/ShowcasePWA';
+import MotionDemo from '../components/islands/MotionDemo';
 
 // /showcase — living documentation for every installed shadcn/ui component.
 // Each section renders the component in both light and dark side-by-side.
@@ -222,6 +223,31 @@ import ShowcasePWA from '../components/islands/ShowcasePWA';
         </div>
       </div>
     </section>
+    <!-- Motion (lazy) — LazyMotion + domAnimation demo -->
+    <section aria-labelledby="section-motion">
+      <h2 id="section-motion" class="text-xl font-semibold mb-4">Motion (lazy)</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">LazyMotion</code> +
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">domAnimation</code>
+        defers the Motion runtime (~15 kb gzip) until this island hydrates. Use
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">m.*</code> not
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">motion.*</code>
+        inside the wrapper — the latter loads the full feature set eagerly and defeats
+        the purpose. See <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">docs/COMPONENTS.md</code>
+        § Animation (LazyMotion) for the full pattern guide.
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <MotionDemo client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <MotionDemo client:visible />
+        </div>
+      </div>
+    </section>
+
     <!-- PWA install + update prompts -->
     <section aria-labelledby="section-pwa">
       <h2 id="section-pwa" class="text-xl font-semibold mb-4">PWA prompts</h2>
