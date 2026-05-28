@@ -228,6 +228,179 @@ sub-agents enforce the framework. Order matters; do this last.
 
 ---
 
+## Review findings — multi-agent enhancements (2026-05-28)
+
+Five subagents (engineering pragmatism, DX, brand, methodology rigor,
+ethics + UX) independently reviewed the methodology + ethics + governance
+layer that landed in PR #58. These enhancements should be folded into
+Epics 10–13 **before implementation begins** — they close real gaps in
+the framework as currently documented.
+
+Each item names the source agent(s) and the doc/epic it modifies.
+
+### F1. Tier the ethics checklist by surface area
+
+*Source: DX subagent.* Modifies: `docs/ETHICS.md`, Epic 12, Epic 13.
+
+Eight questions on a typo PR will erode the rule. Define three tiers:
+
+- **Tier-0** (`docs/**`, `*.md`, `*.mdx`, `tests/**`, typo PRs) — auto-skip via path glob
+- **Tier-1** (UI tweaks — color, copy, layout that doesn't change behavior) — 3 questions only: intent (#1), vulnerable-group (#7), predictable-misuse (#8)
+- **Tier-2** (new persuasive surface — new affordance, new flow, new telemetry) — all 8 questions
+
+`centinela` picks the tier from the PR diff. Required-set in `docs/ETHICS.md` updates accordingly.
+
+### F2. Replace TDD git-log topology with a `Tdd-Red:` commit trailer
+
+*Source: Pragmatism + Methodology subagents.* Modifies: `docs/PRINCIPLES.md` §2, Epic 13.
+
+The PRINCIPLES.md §2 spec ("test commit precedes feat commit on the branch") breaks on:
+
+- Squash-merges (destroy commit ordering)
+- Rebases (linearize history, reorder commits)
+- Legitimate test+fix-in-one regression commits
+
+Replace with a commit-trailer convention: the green commit carries `Tdd-Red: <sha>` pointing back to the originating red commit. Survives rebase + squash. Single-commit legit shortcut: `Tdd-Red-Verified: inline` (declares the test was written and verified red in the same working tree before the fix). `centinela` greps for the trailer.
+
+### F3. Promote item #7 (vulnerable groups) to required in the ethics checklist
+
+*Source: Ethics + UX subagent.* Modifies: `docs/ETHICS.md`, `docs/PRINCIPLES.md` §4, Epic 11 (PR template).
+
+Current required set (#1, #2, #6, #8) catches intent, deception, surveillance, and foreseeable misuse — but misses the most common real-harm vector: flows that quietly exclude screen-reader users, anxious users, non-native readers, or motor-impaired users. Promote #7 to required. Allow `N/A — non-user-visible change` as the only opt-out, justified in one line.
+
+### F4. Define `risk:high` mechanically, not by self-label
+
+*Source: Ethics + UX subagent.* Modifies: `docs/PRINCIPLES.md` §4, `docs/ETHICS.md` §Stakeholder Analysis, Epic 13.
+
+Self-labelling will be under-applied. Encode hard triggers in `prometeo`'s plan output that auto-apply `risk:high`:
+
+- New network request to a non-same-origin endpoint
+- New `localStorage` / `IndexedDB` / cookie write of user input
+- Routes under `/learn`, `/kids`, `/payments`, `/auth`
+- Any change to `src/lib/diagnostics.*` or telemetry surfaces
+
+If any trigger fires, `risk:high` is auto-applied and `centinela` blocks merge until the Stakeholder Analysis ADR exists in `docs/decisions/`.
+
+### F5. Consolidate the documentation surface
+
+*Source: DX subagent.* Modifies: all top-level markdown files, README.md.
+
+Today: 8 markdown files (`README`, `CLAUDE`, `PRINCIPLES`, `ETHICS`, `COMPONENTS`, `CONTRIBUTING`, `ROADMAP`, `INTEGRATION-PLAN`, `SETUP`). Forbidden-imports list lives in three of them. They will drift.
+
+**Decision deferred** to the docs-strategy subagent in Epic 14 (see below). Two paths:
+
+- (a) Consolidate to ~4 files keyed by reader-question (`START-HERE`, `STACK`, `HOW-WE-WORK`, `BUILDING`)
+- (b) Keep current structure + add `docs/INDEX.md` keyed by "where do I find X?"
+
+### F6. Cooldown needs structural enforcement, not honor system
+
+*Source: Methodology + DX subagents.* Modifies: `docs/PRINCIPLES.md` §1 (cadence), Epic 13.
+
+A 2-day "no new features" rule held by self-discipline alone will be skipped. Pick one:
+
+- **Hard**: `/goal` refuses to start a new phase if `< 2 working days` have elapsed since the last phase's last merged PR on `main`, unless invoked as `/goal --skip-cooldown <reason>` — the friction of typing the reason IS the cooldown.
+- **Tagged**: between phases, `main` is tagged `cooldown/<phase>-end`. `prometeo` refuses to plan `type:feat` issues until the tag is `cooldown-cleared`. Only `type:chore` and `type:docs` pass the gate.
+
+Recommendation: the tagged option — mechanical, no orchestrator state.
+
+## Epic 14 — Daily DX surface
+
+*Source: DX architect subagent.* The Monday ritual promises 15 minutes but
+the dev opens `ROADMAP.md` (now 350+ lines), greps GitHub, then types a
+free-form `/goal` string from memory. Ship a small, opinionated command
+surface so the daily flow is mechanical.
+
+- [ ] `npm run monday` — Monday-morning dashboard: open PRs, in-progress branches, last week's `centinela` rejections, top-3 oldest open issues, numbered menu the dev replies `1/2/3` to
+- [ ] `npm run ship` — runs `check` + `git push -u origin HEAD` + `gh pr create --fill --web` in one step
+- [ ] `npm run check` consolidates: `build` + `check:astro` (renamed) + `type-check` + `test` + (when Epic 12 lands) `ux:check`
+- [ ] `npm run doctor` — preflight: node version, gh auth, `ANTHROPIC_API_KEY`, clean tree, branch-naming compliance, with actionable fixes
+- [ ] `npm run docs` — opens `docs/INDEX.md` (orientation map, lands with Epic 15)
+- [ ] `scripts/parallel-worktrees.sh` — spawn forja in `git worktree add .claude/worktrees/issue-<N>` for parallel-safe issues from prometeo's plan; reconcile at end
+- [ ] `scripts/new-issue.sh` — interactive wrapper around `gh issue create --template`, infers labels from branch
+- [ ] `.claude/commands/monday.md`, `ship.md`, `doctor.md` — slash-command mirrors
+- [ ] **TDD tiers** — add `tdd-tier:strict|smoke|exempt` issue labels with rubric in `docs/PRINCIPLES.md` §2.1 (also implements F1's structural cousin for testing — see Review findings)
+- [ ] **chore-train lane** — long-lived `chore/<week>` branch where `centinela-light` auto-approves dep bumps + copy edits + ADR additions, squash-merged Fridays. Docs in `CONTRIBUTING.md` §"When NOT to use IDD"
+- [ ] **Centinela verdict tokens** — REJECTED output appends `verdict_token: RETRY_FORJA|NEEDS_HUMAN|BLOCKED_UPSTREAM` + `failure_class: BUILD|TYPE|TEST|FORBIDDEN_IMPORT|ETHICS|REPORTING_MISMATCH` as a trailing fenced JSON block. ADR `docs/decisions/0003-centinela-verdict-tokens.md`
+- [ ] **prometeo `parallel_safe: bool`** per issue in plan frontmatter so `/goal` can fan out
+
+## Epic 15 — Docs site (Astro Starlight at `/docs/*`)
+
+*Source: Documentation strategist subagent.* Resolves F5 (consolidate the
+doc surface).
+
+- [ ] Install `@astrojs/starlight`; mount at `/docs/*` route prefix in `astro.config.mjs`
+- [ ] Configure Pagefind search (Starlight default — no Algolia until corpus > 200 pages)
+- [ ] Information architecture — 7 sections (see ADR for full tree):
+  - **Start here** (quick start, what you get, 60-second IDD tour)
+  - **Stack** (Astro, React, Tailwind v4, shadcn/Base UI, TanStack, Tremor, Recharts, Motion, PWA, forbidden imports — single canonical list)
+  - **How we work** (IDD, Shape Up, TDD, Spec-DD, /goal, sub-agents)
+  - **Ethics & UX** (Fogg framework, 8-item checklist with tiers, UX quality bar, Stakeholder Analysis)
+  - **Building** (adding a component, hydration, compound-component gotcha, theming, testing, visual regression)
+  - **Reference** (live components gallery — embeds `src/components/ui/*`; commands cheatsheet; env vars; file structure)
+  - **Decisions** (auto-generated index of `docs/decisions/`)
+- [ ] **Single-source forbidden-imports JSON** at `.claude/checklists/forbidden-imports.json` — MDX page renders as a table, `centinela` greps the same file (closes F5's drift problem permanently)
+- [ ] `scripts/sync-stack-versions.mjs` — reads `package.json`, regenerates `src/content/docs/_generated/stack-versions.mdx` in `prebuild`
+- [ ] Live components: `/docs/reference/components/<name>` MDX imports the actual `src/components/ui/<name>` and renders inline (one React island per component, `client:visible`)
+- [ ] `npm run docs:check` — broken-link checker (lychee) + Pagefind dry-run
+- [ ] Wire `npm run a11y` + `lighthouse` (Epic 12) to crawl `/docs/*` — same quality bar as the app
+- [ ] **Repo markdown reorganization** — implements F5:
+  - **Keep at root** (slim): `README.md` (pitch + quick-start + link to `/docs`, ~50 lines), `CLAUDE.md` (~150 lines — Claude reads from disk at runtime, cannot move), `CONTRIBUTING.md` (~30 lines — pointer to docs site), `ROADMAP.md` (active operational doc)
+  - **Move**: `INTEGRATION-PLAN.md` → `docs/history/integration-plan.md`
+  - **Delete**: `SETUP.md` (content moves to `/docs/start-here/`); leave a 1-line stub redirecting
+  - **Single source of truth**: docs source `.md` files in `docs/`, MDX-imported into the Starlight site
+- [ ] ADR `docs/decisions/0004-starlight-for-docs.md` recording the choice
+- [ ] *(stretch)* TypeDoc on `src/lib/*` exports embedded as reference page
+- [ ] *(stretch)* Per-page "Was this page helpful?" → FeedbackFAB integration
+
+## Epic 16 — Gallery + Demo + Marketing surface
+
+*Source: Demo + gallery designer subagent.* The current `/showcase` mixes
+component-reference with marketing dump. Split into three distinct surfaces.
+
+- [ ] **Vocabulary + scope**:
+  - **Gallery** (`/gallery`, `/gallery/<component>`) — every primitive in isolation, source-of-truth for visual regression
+  - **Demos** (`/demos/<name>`) — composed real-feeling pages (dashboard, data, large-table, PWA, forms…)
+  - **Marketing** (`/`) — 8-second pitch + paths into Gallery, Demos, Docs
+- [ ] **Built-in, not Storybook** — Astro pages + visual regression infra we already have. Avoid 150 MB devDeps + parallel routing model
+- [ ] `src/content/gallery/index.ts` — manifest of every component with metadata (name, slug, status badge, install command, source path, demo island)
+- [ ] `src/components/gallery/GalleryPage.astro` — per-component layout shell (header, hero, variant matrix, snippet + source side-by-side, props table, recipes, "used in" footer)
+- [ ] `src/components/gallery/CodeSnippet.tsx` — Shiki-highlighted source via `?raw` import + `navigator.clipboard.writeText` copy button (simultaneously fixes the `document.execCommand('copy')` deprecation in FeedbackFAB — Epic 5)
+- [ ] `src/components/gallery/VariantGrid.tsx` — cva-aware variant matrix (auto-render `variant × size × state` where possible)
+- [ ] `src/components/gallery/PropsTable.astro` — declarative props table from colocated `<name>.gallery.ts` files
+- [ ] **Migrate** every existing `Showcase*` island → `/gallery/<component>` page; retain light+dark side-by-side
+- [ ] `/gallery/index.astro` — thumbnail grid linking each component page
+- [ ] **Move routes**: `/dashboard` → `/demos/dashboard`, `/data` → `/demos/data`, `/data/large` → `/demos/data/large` (with 301 redirects)
+- [ ] `/demos/index.astro` — composed-demo index
+- [ ] **Rewrite `/`** — real launchpad: hero + "What's inside" thumbnail grid (auto-from Playwright baselines) + "See it composed" demo links + "Docs + workflow" links. Bundles Epic 4 brand assets (OG image, favicon.ico, real PWA icons)
+- [ ] **Restructure Playwright baselines** per-component — `tests/__screenshots__/gallery-<component>-<theme>.png`. Replaces the giant `/showcase` baseline. **Unblocks Epic 1** — per-component baselines are mechanical to refresh in Docker
+- [ ] `tests/visual/gallery.spec.ts` — iterates manifest, auto-enrolls new components
+- [ ] *(stretch)* `<Playground>` React island for live prop editing on Button first
+- [ ] *(stretch)* `/gallery.json` build-time endpoint emitting the manifest for external embedding
+
+### Per-archetype demo strategy (when archetypes land)
+
+- **backend** — `/demos/api` with self-hosted Swagger UI from OpenAPI derived from `src/schemas/`
+- **decentralized** — `/demos/wallet` with wallet-connect, opt-in gated
+- **onion** — `/demos/onion-safe` asserts at build time (Playwright network spy) that the gallery loads with **zero external requests**
+
+---
+
+### F7. Functional Triad must change implementation, not just label it
+
+*Source: Methodology + Ethics subagents.* Modifies: `docs/ETHICS.md` §Functional Triad, Epic 13.
+
+Current spec: `prometeo` classifies each `type:feat` by triad corner. Pure labelling — doesn't change downstream behavior. Wire each corner to the optional checklist items it auto-promotes to required:
+
+| Triad corner | Auto-promote these optional items to required |
+|---|---|
+| **Tool** (extends capability) | #3 (asymmetric persistence) |
+| **Medium** (presents experience) | #5 (emotional reciprocity), #7 (already required after F3 — included for emphasis) |
+| **Social actor** (takes persona / makes claims) | #4 (borrowed credibility), #5 (emotional reciprocity) |
+
+`prometeo`'s plan output declares the required-set for the issue. `centinela` enforces against the declared set, not just the global required-set.
+
+---
+
 ## Status legend
 
 - `[ ]` — open / not started
