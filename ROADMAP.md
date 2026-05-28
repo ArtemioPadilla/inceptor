@@ -1,5 +1,34 @@
 # Roadmap
 
+## Implementation status (2026-05-28, end of marathon)
+
+The Methodology + Ethics + Governance + Daily DX + Docs site + Gallery + Demos
++ Marketing + Spec-DD + Behavior tests + UX mechanical gates + Lighthouse-CI
++ Sitemap + Favicon + Prettier + Sub-agent contract upgrades + Feature flags
++ Blog + Pagefind search marathon shipped across 10 PRs (#57–#65 + #66) in
+one session. Test suite went from 295 to 327. Page count went from 5 to 51.
+
+**Phases shipped (8/8):**
+
+- ✅ Phase A — PRs #59 (F1-F7 docs) + #60 (LICENSE + DX surface)
+- ✅ Phase B — PR #61 (custom /docs/* route, 36 pages, sidebar nav)
+- ✅ Phase C — PR #62 (/gallery, /demos, launchpad, 49 → 51 pages)
+- ✅ Phase D — PR #63 (TDD + Spec-DD + UX checks + sub-agent contracts)
+- ✅ Phase E — PR #64 (Lighthouse-CI config)
+- ✅ Phase F — PR #64 (sitemap, favicon.ico, robots.txt, execCommand removed)
+- ✅ Phase G — PR #64 (.editorconfig, Prettier)
+- ✅ Phase H — PR #65 (feature flags, blog, Pagefind search)
+
+**Genuinely deferred** (require external action, documented in epics below):
+
+- Real PWA artwork — needs designer
+- GitHub API token + production deployment target — needs user secrets
+- SECURITY.md / CODE_OF_CONDUCT.md / dependabot.yml — content-filter blocked this session; can be added manually
+- Refresh visual regression baselines in Linux Docker — user runs docker per CONTRIBUTING.md
+- i18n with actual translated content — config + flag in place; routes await content
+- Newsletter / contact form — need external services
+- Sentry-style error monitoring — opt-in external service
+
 ## Where we are (2026-05-28)
 
 The Astro 5 + React 19 + shadcn/Base UI + TanStack + Tremor Raw + Motion +

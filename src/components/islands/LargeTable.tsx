@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { generateRows, type FakeRow } from '@/lib/fake-rows';
+import ErrorBoundary from './ErrorBoundary';
 
 const ROW_COUNT = 50_000;
 
@@ -20,7 +21,7 @@ const columns: ColumnDef<FakeRow>[] = [
   { accessorKey: 'joined', header: 'Joined', size: 130 },
 ];
 
-export default function LargeTable() {
+function LargeTableInner() {
   // useMemo so the dataset isn't regenerated on every parent render. With
   // 50,000 rows this is the difference between a smooth hydration and an
   // initial-render stutter.
@@ -42,5 +43,13 @@ export default function LargeTable() {
         syncToUrl={{ key: 'large' }}
       />
     </div>
+  );
+}
+
+export default function LargeTable() {
+  return (
+    <ErrorBoundary name="LargeTable">
+      <LargeTableInner />
+    </ErrorBoundary>
   );
 }

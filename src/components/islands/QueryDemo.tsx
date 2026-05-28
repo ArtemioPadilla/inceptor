@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import QueryProvider from './QueryProvider';
+import ErrorBoundary from './ErrorBoundary';
 
 interface RepoInfo {
   description: string | null;
@@ -41,11 +42,22 @@ function RepoStatsInner() {
  * Self-contained demo island: wraps its own QueryProvider so the demo can be
  * dropped onto any page without a parent provider. The query is opted-in to
  * IndexedDB persistence via meta.persist.
+ *
+ * Wrapped in ErrorBoundary so a flaky GitHub API call or render error
+ * surfaces as a pre-filled GitHub issue rather than blanking the section.
  */
-export default function QueryDemo() {
+function QueryDemoInner() {
   return (
     <QueryProvider>
       <RepoStatsInner />
     </QueryProvider>
+  );
+}
+
+export default function QueryDemo() {
+  return (
+    <ErrorBoundary name="QueryDemo">
+      <QueryDemoInner />
+    </ErrorBoundary>
   );
 }
