@@ -1,0 +1,21 @@
+# GitHub CODEOWNERS — auto-request reviews when files change.
+#
+# Each line is `pattern @owner @owner …`. The last matching pattern wins, so
+# put more-specific rules at the bottom. See
+# https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+#
+# This file ships with one default rule pointing at the template author. When
+# you fork the scaffold, replace @ArtemioPadilla with your own GitHub
+# handle(s) or team(s). The commented examples below show how to add finer
+# ownership for specific areas — uncomment and adapt as the team grows.
+
+# Default owner of everything not matched by a more specific rule.
+*                                       @ArtemioPadilla
+
+# Examples of finer-grained ownership (uncomment + adapt):
+# /src/components/ui/                   @design-team
+# /src/lib/diagnostics.*                @security-team
+# /docs/                                @docs-team
+# /.github/workflows/                   @platform-team
+# CLAUDE.md                             @ArtemioPadilla   # AI guardrails
+# /src/schemas/                         @backend-team     # Spec-DD source
