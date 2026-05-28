@@ -1,0 +1,46 @@
+---
+import { docsSidebar } from '../../content/docs-sidebar';
+
+interface Props {
+  /** Slug of the currently-rendered page (without leading slash) */
+  current: string;
+}
+
+const { current } = Astro.props;
+
+function isCurrent(slug: string): boolean {
+  return current === slug;
+}
+---
+
+<nav class="docs-sidebar" aria-label="Documentation">
+  <ol class="space-y-6 text-sm">
+    {
+      docsSidebar.map((group) => (
+        <li>
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {group.label}
+          </p>
+          <ul class="space-y-1">
+            {group.items.map((item) => (
+              <li>
+                <a
+                  href={`/docs/${item.slug}/`.replace(/\/+$/, '/')}
+                  class:list={[
+                    'block rounded-md px-2 py-1 transition-colors',
+                    isCurrent(item.slug)
+                      ? 'bg-accent text-accent-foreground font-medium'
+                      : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground',
+                  ]}
+                  aria-current={isCurrent(item.slug) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ol>
+</nav>

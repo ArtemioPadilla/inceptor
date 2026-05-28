@@ -1,6 +1,29 @@
-// Astro 5 requires a content config file to be present and export `collections`.
-// No content collections are defined yet; this satisfies the generated types
-// in .astro/content.d.ts without defining any collections.
-import { defineCollection } from 'astro:content';
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
-export const collections = {} satisfies Record<string, ReturnType<typeof defineCollection>>;
+const docs = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    // `splash` reserved for the /docs landing; default content pages omit it
+    template: z.enum(['splash']).optional(),
+    // For the landing page hero
+    hero: z
+      .object({
+        tagline: z.string().optional(),
+        actions: z
+          .array(
+            z.object({
+              text: z.string(),
+              link: z.string(),
+              variant: z.enum(['primary', 'secondary']).default('primary'),
+            }),
+          )
+          .optional(),
+      })
+      .optional(),
+  }),
+});
+
+export const collections = { docs };

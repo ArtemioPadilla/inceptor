@@ -2,9 +2,12 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import AstroPWA from '@vite-pwa/astro';
+import mdx from '@astrojs/mdx';
 
 export default defineConfig({
   integrations: [
+    // MDX for the /docs/* content collection — lets pages embed React components
+    mdx(),
     react(),
     AstroPWA({
       registerType: 'autoUpdate',
