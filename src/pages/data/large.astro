@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LargeTable from '../../components/islands/LargeTable';
+---
+
+<BaseLayout title="50k-row demo" description="DataTable scaled to 50,000 rows">
+  <main class="mx-auto max-w-6xl px-4 py-12 space-y-4">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight">50,000-row table</h1>
+      <p class="mt-2 text-muted-foreground">
+        Performance test for the DataTable component. The row data is generated
+        deterministically (mulberry32, seed = 42) so the same dataset renders on
+        every load.
+      </p>
+    </header>
+
+    <LargeTable client:visible />
+  </main>
+</BaseLayout>
