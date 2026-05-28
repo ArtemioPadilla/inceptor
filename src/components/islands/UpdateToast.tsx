@@ -21,7 +21,7 @@ export default function UpdateToast() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed top-4 right-4 z-50 max-w-sm rounded-lg border border-border bg-card text-card-foreground px-4 py-3 shadow-lg"
+      className="fixed top-4 right-4 z-50 max-w-sm rounded-lg border border-border bg-card text-card-foreground px-4 py-3 shadow-lg motion-preset-slide-down-md motion-duration-300"
     >
       <p className="text-sm font-medium">Update available</p>
       <p className="mt-1 text-xs text-muted-foreground">A new version is ready.</p>
