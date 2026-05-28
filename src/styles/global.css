@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* CSS-only animation utilities — zero JS runtime cost. Activates on element
+ * mount via CSS keyframes. See https://rombo.co/tailwind/ for the full API. */
+@plugin "tailwindcss-motion";
 
 /* Native cross-document View Transitions — Baseline Newly Available Oct 2025.
  * No-op in older browsers; supporting browsers (Chromium 126+, Safari 18.2+,
