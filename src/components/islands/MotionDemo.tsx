@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { LazyMotion, domAnimation, m, AnimatePresence } from 'motion/react';
+import ErrorBoundary from './ErrorBoundary';
 
 /**
  * Demonstration of the LazyMotion + domAnimation pattern.
@@ -16,6 +17,7 @@ import { LazyMotion, domAnimation, m, AnimatePresence } from 'motion/react';
 export default function MotionDemo() {
   const [open, setOpen] = React.useState(false);
   return (
+    <ErrorBoundary name="MotionDemo">
     <LazyMotion features={domAnimation} strict>
       <div className="flex flex-col items-start gap-3">
         <button
@@ -45,5 +47,6 @@ export default function MotionDemo() {
         </AnimatePresence>
       </div>
     </LazyMotion>
+    </ErrorBoundary>
   );
 }

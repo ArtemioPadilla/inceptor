@@ -425,8 +425,15 @@ const tr = {
       });
     }
 
-    // Open modal
+    // Open modal — but if HydrationCanary stored a pending report URL from a
+    // React hydration mismatch, surface that directly instead of the generic form.
     btn.addEventListener('click', function () {
+      var pending = sessionStorage.getItem('feedbackfab.pending-report');
+      if (pending) {
+        sessionStorage.removeItem('feedbackfab.pending-report');
+        window.open(pending, '_blank', 'noopener,noreferrer');
+        return;
+      }
       populateDiagnostics();
       modal.showModal();
     });

@@ -13,6 +13,7 @@ import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
 import ShowcaseCharts from '../components/islands/ShowcaseCharts';
 import ShowcasePWA from '../components/islands/ShowcasePWA';
 import MotionDemo from '../components/islands/MotionDemo';
+import ShowcaseErrorBoundary from '../components/islands/ShowcaseErrorBoundary';
 
 // /showcase — living documentation for every installed shadcn/ui component.
 // Each section renders the component in both light and dark side-by-side.
@@ -244,6 +245,34 @@ import MotionDemo from '../components/islands/MotionDemo';
         <div class="dark rounded-lg border border-border bg-background p-6">
           <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
           <MotionDemo client:visible />
+        </div>
+      </div>
+    </section>
+
+    <!-- ErrorBoundary (IDD — auto-reports React errors to GitHub) -->
+    <section aria-labelledby="section-error-boundary">
+      <h2 id="section-error-boundary" class="text-xl font-semibold mb-4">ErrorBoundary</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Class-based React error boundary that catches rendering errors inside its
+        subtree and shows a fallback with a pre-filled
+        <a
+          href="https://github.com/ArtemioPadilla/issue-driven-web-template/issues/new"
+          class="underline underline-offset-4 hover:text-foreground"
+          target="_blank"
+          rel="noopener noreferrer"
+        >GitHub issue link</a>. Click "Throw error" to see the boundary in action.
+        Used in <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">IssuesList</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">DashboardIsland</code>,
+        and <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">MotionDemo</code>.
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseErrorBoundary client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseErrorBoundary client:visible />
         </div>
       </div>
     </section>

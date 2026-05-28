@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import QueryProvider from './QueryProvider';
+import ErrorBoundary from './ErrorBoundary';
 
 interface GitHubIssue {
   id: number;
@@ -144,7 +145,9 @@ function IssuesEmpty() {
 export default function IssuesList() {
   return (
     <QueryProvider idbKey="tanstack-query-cache-issues">
-      <IssuesListInner />
+      <ErrorBoundary name="IssuesList">
+        <IssuesListInner />
+      </ErrorBoundary>
     </QueryProvider>
   );
 }

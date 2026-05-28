@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import QueryProvider from './QueryProvider';
+import ErrorBoundary from './ErrorBoundary';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { Metric } from '@/components/ui/metric';
 import { Callout } from '@/components/ui/callout';
@@ -196,7 +197,9 @@ function DashboardInner() {
 export default function DashboardIsland() {
   return (
     <QueryProvider idbKey="tanstack-query-cache-dashboard">
-      <DashboardInner />
+      <ErrorBoundary name="Dashboard">
+        <DashboardInner />
+      </ErrorBoundary>
     </QueryProvider>
   );
 }
