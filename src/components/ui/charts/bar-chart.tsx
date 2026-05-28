@@ -33,8 +33,12 @@ export function BarChart<T extends Record<string, unknown>>({
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+          {/* Recharts' generic dataKey narrows to TypedDataKey<T, any> which our
+              public `keyof T & string` doesn't structurally satisfy. The runtime
+              contract is already enforced at the wrapper boundary; cast here to
+              silence the internal Recharts type without weakening the surface API. */}
           <XAxis
-            dataKey={index}
+            dataKey={index as never}
             stroke="var(--muted-foreground)"
             tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
           />
@@ -53,7 +57,7 @@ export function BarChart<T extends Record<string, unknown>>({
             cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
           />
           {series.map((key, i) => (
-            <Bar key={key} dataKey={key} fill={chartColor(i)} radius={[4, 4, 0, 0]} />
+            <Bar key={key} dataKey={key as never} fill={chartColor(i)} radius={[4, 4, 0, 0]} />
           ))}
         </RechartsBarChart>
       </ResponsiveContainer>

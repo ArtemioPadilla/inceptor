@@ -33,8 +33,12 @@ export function LineChart<T extends Record<string, unknown>>({
       <ResponsiveContainer width="100%" height="100%">
         <RechartsLineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+          {/* Recharts' generic dataKey narrows to TypedDataKey<T, any> which our
+              public `keyof T & string` doesn't structurally satisfy. The runtime
+              contract is already enforced at the wrapper boundary; cast here to
+              silence the internal Recharts type without weakening the surface API. */}
           <XAxis
-            dataKey={index}
+            dataKey={index as never}
             stroke="var(--muted-foreground)"
             tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
           />
@@ -56,7 +60,7 @@ export function LineChart<T extends Record<string, unknown>>({
             <Line
               key={key}
               type="monotone"
-              dataKey={key}
+              dataKey={key as never}
               stroke={chartColor(i)}
               strokeWidth={2}
               dot={false}

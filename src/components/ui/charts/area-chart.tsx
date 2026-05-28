@@ -42,8 +42,12 @@ export function AreaChart<T extends Record<string, unknown>>({
             ))}
           </defs>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+          {/* Recharts' generic dataKey narrows to TypedDataKey<T, any> which our
+              public `keyof T & string` doesn't structurally satisfy. The runtime
+              contract is already enforced at the wrapper boundary; cast here to
+              silence the internal Recharts type without weakening the surface API. */}
           <XAxis
-            dataKey={index}
+            dataKey={index as never}
             stroke="var(--muted-foreground)"
             tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
           />
@@ -65,7 +69,7 @@ export function AreaChart<T extends Record<string, unknown>>({
             <Area
               key={key}
               type="monotone"
-              dataKey={key}
+              dataKey={key as never}
               stroke={chartColor(i)}
               strokeWidth={2}
               fill={`url(#gradient-${key})`}
