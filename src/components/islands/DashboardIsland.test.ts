@@ -28,4 +28,9 @@ describe('DashboardIsland', () => {
   it('handles error state via Callout', () => {
     expect(source).toMatch(/<Callout/);
   });
+
+  it('exposes a Retry action via useQueryClient', () => {
+    expect(source).toMatch(/useQueryClient/);
+    expect(source).toMatch(/Retry/);
+  });
 });
