@@ -4,6 +4,9 @@
 
 ## Documentation
 
+- [Principles](docs/PRINCIPLES.md) — how we work (Shape Up + TDD + Spec-DD), ethics, UX bar, governance, non-negotiables
+- [Ethics](docs/ETHICS.md) — persuasive-tech framework + 8-item checklist (Fogg-grounded)
+- [Decisions log](docs/decisions/) — ADRs for irreversible architectural choices
 - [Component contribution guide](docs/COMPONENTS.md) — adding components, hydration, theming, dark mode
 - [Integration plan](INTEGRATION-PLAN.md) — historical record of the 27-issue rollout
 - [Roadmap](ROADMAP.md) — post-integration follow-ups grouped into epics
