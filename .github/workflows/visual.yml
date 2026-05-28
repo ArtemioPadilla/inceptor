@@ -1,0 +1,57 @@
+name: Visual regression
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build Astro (required before preview server)
+        run: npm run build
+
+      # Advisory until baselines are regenerated in a matching Ubuntu env.
+      # Initial baselines were captured on macOS; system font metrics differ
+      # by ~20-50 px in total page height on Ubuntu CI runners, which produces
+      # pixel diffs that aren't actual regressions. The fix is to refresh the
+      # baselines from a Linux Playwright Docker image (or download the
+      # `playwright-snapshots` artifact below and commit it). Once baselines
+      # are platform-stable, remove `continue-on-error` to make this a gate.
+      # See CONTRIBUTING.md for the refresh workflow.
+      - name: Run Playwright visual tests
+        id: pw
+        continue-on-error: true
+        run: npx playwright test
+
+      - name: Upload Playwright report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload current snapshots so they can be promoted to baselines
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-snapshots
+          path: test-results/**/*-actual.png
+          if-no-files-found: ignore
+          retention-days: 14
