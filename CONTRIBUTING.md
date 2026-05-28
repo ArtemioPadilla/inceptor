@@ -58,8 +58,18 @@ npm run test:visual    # equivalent to: playwright test
 
 ### Refresh baselines in CI's environment (Linux)
 
-The Playwright project ships a Docker image matching the CI runner. From a host
-with Docker running:
+The Playwright project ships a Docker image matching the CI runner. The
+one-shot:
+
+```bash
+npm run refresh-baselines
+```
+
+That's a wrapper around `scripts/refresh-baselines.sh` which pulls the
+Docker image, runs `npm ci && npm run build && npx playwright test --update-snapshots`
+under the container, and prints next-step guidance.
+
+Manual equivalent (in case Docker isn't available on PATH):
 
 ```bash
 docker run --rm \

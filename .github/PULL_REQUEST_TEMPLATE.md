@@ -20,8 +20,11 @@ Closes #
 
 ## Ethics & UX checklist
 
-<!-- Required items for the tier (see docs/ETHICS.md). N/A is fine for
-non-required items with a one-line reason. -->
+<!--
+Required items for the tier (see docs/ETHICS.md and the canonical source at
+.claude/checklists/ethics.json). N/A is fine for non-required items with a
+one-line reason.
+-->
 
 **1. Intent declared** *(required at every non-zero tier)*
 > What behavior change does this PR push the user toward, and whose benefit?

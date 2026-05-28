@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import ErrorBoundary from './ErrorBoundary';
 
 // Wraps the Dialog compound component in a single island to satisfy the
 // Astro compound-component constraint: all stateful composition must live
@@ -19,6 +20,7 @@ import {
 // behavior (aria, open/close handlers) onto the Button element.
 export default function ShowcaseDialog() {
   return (
+    <ErrorBoundary name="ShowcaseDialog">
     <Dialog>
       <DialogTrigger render={<Button variant="outline" />}>
         Open dialog
@@ -40,5 +42,6 @@ export default function ShowcaseDialog() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </ErrorBoundary>
   );
 }

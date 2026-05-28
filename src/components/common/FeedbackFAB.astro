@@ -20,7 +20,13 @@ interface Props {
 
 const { lang = 'es' } = Astro.props;
 
-const repoSlug = 'ArtemioPadilla/issue-driven-web-template';
+// Where the feedback issues get filed. To use this scaffold for your own
+// project, set PUBLIC_REPO_SLUG in .env (or your deploy host's env settings)
+// to `<owner>/<repo>` — e.g. `acme/storefront`. Falls back to the template
+// repo only as a sanity default during development.
+const repoSlug =
+  (import.meta.env.PUBLIC_REPO_SLUG as string | undefined) ??
+  'ArtemioPadilla/issue-driven-web-template';
 const buildSha = import.meta.env.PUBLIC_BUILD_SHA || 'dev';
 const appVersion = import.meta.env.PUBLIC_VERSION || 'dev';
 

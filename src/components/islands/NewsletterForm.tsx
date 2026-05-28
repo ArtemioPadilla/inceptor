@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { NewsletterSchema, type NewsletterValues } from '@/schemas/contact';
+import ErrorBoundary from './ErrorBoundary';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -18,6 +19,14 @@ type Status = 'idle' | 'submitting' | 'success' | 'error';
  * client-side and prints to console. No external requests made.
  */
 export default function NewsletterForm() {
+  return (
+    <ErrorBoundary name="NewsletterForm">
+      <NewsletterFormInner />
+    </ErrorBoundary>
+  );
+}
+
+function NewsletterFormInner() {
   const [status, setStatus] = useState<Status>('idle');
   const form = useForm<NewsletterValues>({
     resolver: zodResolver(NewsletterSchema),

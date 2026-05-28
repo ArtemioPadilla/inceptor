@@ -6,6 +6,7 @@ import { KpiCard } from '@/components/ui/kpi-card';
 import { Metric } from '@/components/ui/metric';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Tracker, type TrackerBlock } from '@/components/ui/tracker';
+import ErrorBoundary from './ErrorBoundary';
 
 // Sample uptime data for the Tracker — 30 days, mostly green with a few
 // outages and a degraded period.
@@ -29,6 +30,7 @@ const UPTIME_DATA: TrackerBlock[] = [
 // Wrapped in one island so the whole composition hydrates as a unit.
 export default function ShowcaseKpis() {
   return (
+    <ErrorBoundary name="ShowcaseKpis">
     <div className="space-y-6">
       {/* KpiCard + Metric row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -136,5 +138,6 @@ export default function ShowcaseKpis() {
         <Divider />
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

@@ -52,10 +52,12 @@ const {
     <script>
       import { initPwaRegister } from '@/lib/pwa-register';
       import { initSentry } from '@/lib/sentry';
+      import { initAnalytics } from '@/lib/analytics';
       initPwaRegister();
-      // Skeleton init — no-op unless PUBLIC_FLAG_SENTRY=true and PUBLIC_SENTRY_DSN
-      // are set. See src/lib/sentry.ts.
+      // Skeleton init — no-op unless the corresponding PUBLIC_FLAG_* env vars
+      // are set. See src/lib/sentry.ts and src/lib/analytics.ts.
       void initSentry();
+      initAnalytics();
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

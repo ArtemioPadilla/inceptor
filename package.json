@@ -20,6 +20,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lighthouse": "npm run build && lhci autorun",
+    "perf": "npm run build && lhci collect && lhci assert",
+    "refresh-baselines": "bash scripts/refresh-baselines.sh",
     "monday": "bash scripts/monday.sh",
     "ship": "bash scripts/ship.sh",
     "doctor": "bash scripts/doctor.sh",

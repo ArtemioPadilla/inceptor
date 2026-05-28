@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
+import ErrorBoundary from './ErrorBoundary';
 
 // Sample data for the showcase — illustrates generic column type-safety.
 // TData = Person, TValue inferred from the accessorKey.
@@ -57,6 +58,7 @@ const columns: ColumnDef<Person, string>[] = [
 // and sort state internally — it cannot span multiple islands).
 export default function ShowcaseDataTable() {
   return (
+    <ErrorBoundary name="ShowcaseDataTable">
     <div className="space-y-2">
       <p className="text-sm text-muted-foreground">
         Sort columns, filter rows, toggle visibility, and resize column widths. Virtualization
@@ -69,5 +71,6 @@ export default function ShowcaseDataTable() {
         estimateRowSize={48}
       />
     </div>
+    </ErrorBoundary>
   );
 }

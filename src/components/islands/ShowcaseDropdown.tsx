@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ErrorBoundary from './ErrorBoundary';
 
 // Wraps the DropdownMenu compound component in a single island.
 // Lucide icons are imported here rather than lazily — the island itself
@@ -19,6 +20,7 @@ import {
 // behavior onto the Button element without the Radix Slot pattern.
 export default function ShowcaseDropdown() {
   return (
+    <ErrorBoundary name="ShowcaseDropdown">
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" />}>
         <Settings2Icon className="mr-2 h-4 w-4" />
@@ -42,5 +44,6 @@ export default function ShowcaseDropdown() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </ErrorBoundary>
   );
 }

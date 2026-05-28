@@ -6,12 +6,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ErrorBoundary from './ErrorBoundary';
 
 // Wraps the Tabs compound component in a single island — Tabs' selected-tab
 // state is shared across TabsList and TabsContent, so the whole composition
 // must live in one React tree (CLAUDE.md compound-component gotcha).
 export default function ShowcaseTabs() {
   return (
+    <ErrorBoundary name="ShowcaseTabs">
     <Tabs defaultValue="overview" className="w-full max-w-md">
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -61,5 +63,6 @@ export default function ShowcaseTabs() {
         </Card>
       </TabsContent>
     </Tabs>
+    </ErrorBoundary>
   );
 }

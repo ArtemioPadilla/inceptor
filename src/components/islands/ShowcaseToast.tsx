@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Toaster, toast } from '@/components/ui/toast';
+import ErrorBoundary from './ErrorBoundary';
 
 // Wraps Toaster + toast trigger in one island. The Toaster provides the
 // Base UI Toast.Provider, so the imperative `toast()` call must originate
@@ -21,6 +22,7 @@ export default function ShowcaseToast() {
   }
 
   return (
+    <ErrorBoundary name="ShowcaseToast">
     <div className="flex flex-wrap gap-2">
       <Toaster />
       <Button variant="outline" onClick={fireDefault}>
@@ -30,5 +32,6 @@ export default function ShowcaseToast() {
         Fire error toast
       </Button>
     </div>
+    </ErrorBoundary>
   );
 }
