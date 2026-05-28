@@ -12,9 +12,10 @@ const css = readFileSync(
 
 import baseLayout from '../layouts/BaseLayout.astro?raw';
 import index from '../pages/index.astro?raw';
-import showcase from '../pages/showcase.astro?raw';
-import data from '../pages/data.astro?raw';
-import dashboard from '../pages/dashboard.astro?raw';
+import gallery from '../pages/gallery/index.astro?raw';
+import demos from '../pages/demos/index.astro?raw';
+import data from '../pages/demos/data.astro?raw';
+import dashboard from '../pages/demos/dashboard.astro?raw';
 
 describe('@view-transition setup', () => {
   it('declares @view-transition { navigation: auto; }', () => {
@@ -31,7 +32,7 @@ describe('@view-transition setup', () => {
   });
 
   it('uses a consistent page-title transition-name on each route', () => {
-    [index, showcase, data, dashboard].forEach((src) => {
+    [index, gallery, demos, data, dashboard].forEach((src) => {
       expect(src).toMatch(/view-transition-name:\s*page-title/);
     });
   });

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('dashboard page screenshot', async ({ page }) => {
-  await page.goto('/dashboard');
+  await page.goto('/demos/dashboard');
   await page.waitForLoadState('networkidle');
 
   // Mock GitHub API responses before reloading so TanStack Query sees

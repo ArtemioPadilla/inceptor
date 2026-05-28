@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import source from '../pages/data.astro?raw';
+import source from '../pages/demos/data.astro?raw';
 
 describe('data.astro', () => {
   it('uses BaseLayout', () => {
-    expect(source).toMatch(/from\s+['"]\.\.\/layouts\/BaseLayout\.astro['"]/);
+    expect(source).toMatch(/from\s+['"]\.\.\/\.\.\/layouts\/BaseLayout\.astro['"]/);
   });
 
   it('imports and renders IssuesList', () => {

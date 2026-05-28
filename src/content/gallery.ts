@@ -1,0 +1,189 @@
+/**
+ * Single source of truth for the /gallery/* route.
+ *
+ * Each entry describes one component or group on the gallery. The dynamic
+ * route at /gallery/[component] consumes this manifest. Visual regression
+ * baselines key off the `slug`, so every entry here automatically gets a
+ * snapshot at tests/__screenshots__/chromium-{light,dark}/gallery-<slug>.png.
+ */
+
+export interface GalleryEntry {
+  /** URL slug — appears as /gallery/<slug>. */
+  slug: string;
+  /** Display name. */
+  name: string;
+  /** One-line summary shown on the index page. */
+  summary: string;
+  /**
+   * Path to the source file (used to display "Edit on GitHub" link).
+   * Relative to the repo root.
+   */
+  source: string;
+  /** Status tag shown as a small badge. */
+  status: 'stable' | 'beta' | 'experimental';
+  /**
+   * Category bucket on the index page.
+   */
+  category: 'primitives' | 'compound' | 'data' | 'charts' | 'motion' | 'pwa' | 'idd';
+  /**
+   * Optional install command for shadcn-style components.
+   * If omitted, the gallery omits the install section.
+   */
+  install?: string;
+  /**
+   * The Showcase* island that renders the rendered example.
+   * Must be one of the keys in src/components/gallery/islands.ts.
+   */
+  island?: string;
+}
+
+export const galleryManifest: GalleryEntry[] = [
+  // Primitives — single-element components from src/components/ui/
+  {
+    slug: 'primitives',
+    name: 'Primitives',
+    summary:
+      'Button, Input, Label, Card, Table, Badge — every primitive in one place, every variant on screen.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'primitives',
+    install: 'npx shadcn@latest add button input label card table badge --yes',
+    island: 'ShowcaseSimples',
+  },
+  // Compound components — shared internal state, single-island only
+  {
+    slug: 'dialog',
+    name: 'Dialog',
+    summary: 'Modal dialog on Base UI primitive — accessible, dismissible by ESC + backdrop.',
+    source: 'src/components/ui/dialog.tsx',
+    status: 'stable',
+    category: 'compound',
+    island: 'ShowcaseDialog',
+  },
+  {
+    slug: 'dropdown-menu',
+    name: 'Dropdown menu',
+    summary: 'Anchored menu on Base UI Menu primitive with align/side props.',
+    source: 'src/components/ui/dropdown-menu.tsx',
+    status: 'stable',
+    category: 'compound',
+    island: 'ShowcaseDropdown',
+  },
+  {
+    slug: 'tabs',
+    name: 'Tabs',
+    summary: 'Tabbed panels on Base UI Tabs primitive.',
+    source: 'src/components/ui/tabs.tsx',
+    status: 'stable',
+    category: 'compound',
+    island: 'ShowcaseTabs',
+  },
+  {
+    slug: 'toast',
+    name: 'Toast',
+    summary: 'Transient notification using Base UI Toast primitive + createToastManager.',
+    source: 'src/components/ui/toast.tsx',
+    status: 'stable',
+    category: 'compound',
+    island: 'ShowcaseToast',
+  },
+  {
+    slug: 'form',
+    name: 'Form',
+    summary:
+      'Compound form on Base UI Field + react-hook-form + Zod. Single island because compound state.',
+    source: 'src/components/ui/form.tsx',
+    status: 'stable',
+    category: 'compound',
+    island: 'ShowcaseForm',
+  },
+  // Data — TanStack Table / Virtual
+  {
+    slug: 'data-table',
+    name: 'DataTable',
+    summary:
+      'Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility, resizing, virtualization, URL state sync.',
+    source: 'src/components/ui/data-table.tsx',
+    status: 'stable',
+    category: 'data',
+    island: 'ShowcaseDataTable',
+  },
+  // Charts — Recharts + KPIs
+  {
+    slug: 'kpis',
+    name: 'KPI primitives',
+    summary:
+      'Tremor-Raw-style: KpiCard, Metric, ProgressBar, Tracker, Callout, Divider. CSS-var-themed, dark-mode-flip.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'charts',
+    island: 'ShowcaseKpis',
+  },
+  {
+    slug: 'charts',
+    name: 'Charts',
+    summary:
+      'Themed Recharts wrappers (Line, Bar, Area, Donut). Colors come from --chart-1..5 CSS vars.',
+    source: 'src/components/ui/charts/',
+    status: 'stable',
+    category: 'charts',
+    island: 'ShowcaseCharts',
+  },
+  // Motion
+  {
+    slug: 'motion',
+    name: 'Motion (lazy)',
+    summary:
+      'LazyMotion + domAnimation pattern with strict mode. Motion code is in a separate lazy chunk.',
+    source: 'src/components/islands/MotionDemo.tsx',
+    status: 'stable',
+    category: 'motion',
+    island: 'MotionDemo',
+  },
+  // PWA
+  {
+    slug: 'pwa',
+    name: 'PWA prompts',
+    summary:
+      'InstallButton + UpdateToast — driven by virtual:pwa-register events through Nano Stores.',
+    source: 'src/components/islands/',
+    status: 'stable',
+    category: 'pwa',
+    island: 'ShowcasePWA',
+  },
+  // IDD
+  {
+    slug: 'error-boundary',
+    name: 'ErrorBoundary',
+    summary:
+      'Throw an error inside an island — get a pre-filled GitHub issue with stack trace, component path, URL, and UA.',
+    source: 'src/components/islands/ErrorBoundary.tsx',
+    status: 'stable',
+    category: 'idd',
+    island: 'ShowcaseErrorBoundary',
+  },
+];
+
+export function getByCategory(category: GalleryEntry['category']): GalleryEntry[] {
+  return galleryManifest.filter((e) => e.category === category);
+}
+
+export const categoryLabels: Record<GalleryEntry['category'], string> = {
+  primitives: 'Primitives',
+  compound: 'Compound components',
+  data: 'Data',
+  charts: 'KPIs & charts',
+  motion: 'Motion',
+  pwa: 'PWA',
+  idd: 'IDD reporting',
+};
+
+export const categoryOrder: GalleryEntry['category'][] = [
+  'primitives',
+  'compound',
+  'data',
+  'charts',
+  'motion',
+  'pwa',
+  'idd',
+];

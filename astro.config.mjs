@@ -5,6 +5,14 @@ import AstroPWA from '@vite-pwa/astro';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
+  // 301 redirects from the old top-level demo routes to their new /demos/*
+  // locations. Old URLs survive; visual baselines re-anchor automatically.
+  redirects: {
+    '/dashboard': '/demos/dashboard',
+    '/data': '/demos/data',
+    '/data/large': '/demos/data/large',
+    '/showcase': '/gallery',
+  },
   integrations: [
     // MDX for the /docs/* content collection — lets pages embed React components
     mdx(),

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test('showcase page screenshot', async ({ page }) => {
-  await page.goto('/showcase');
+test('gallery page screenshot', async ({ page }) => {
+  await page.goto('/gallery');
 
   // Scroll to bottom so all client:visible islands enter the viewport and
   // hydrate before we capture. Without this, sections below the fold may
@@ -22,7 +22,7 @@ test('showcase page screenshot', async ({ page }) => {
     `,
   });
 
-  await expect(page).toHaveScreenshot('showcase.png', {
+  await expect(page).toHaveScreenshot('gallery.png', {
     fullPage: true,
     maxDiffPixelRatio: 0.02,
   });

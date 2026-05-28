@@ -1,87 +1,139 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../content/gallery';
 ---
 
-<BaseLayout title="Hello World — issue-driven-web-template" lang="en">
-  <main class="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-    <!-- Hero -->
-    <div class="max-w-2xl space-y-6">
+<BaseLayout title="issue-driven-web-template" lang="en">
+  <main class="mx-auto max-w-6xl px-4 py-12">
+
+    <section class="mb-16 text-center">
       <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400">
         <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
         Issue-Driven Development
       </div>
 
-      <h1 class="text-5xl font-bold tracking-tight text-white sm:text-6xl" style="view-transition-name: page-title">
-        Hello, World 👋
+      <h1
+        class="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
+        style="view-transition-name: page-title"
+      >
+        A scaffold that ships everything you need.
       </h1>
 
-      <p class="text-lg text-gray-400 leading-relaxed">
-        Your project starts here. This page is the seed — everything else grows
-        from GitHub Issues, structured workflows, and AI-assisted development.
+      <p class="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
+        Astro 5 · React 19 · Tailwind v4 · shadcn/Base UI · TanStack · Tremor Raw · Motion · PWA.
+        Plus Shape Up cadence, TDD with commit trailers, Zod-driven Spec-DD, and an 8-item
+        ethics checklist baked into the workflow.
       </p>
 
-      <!-- Steps -->
-      <div class="grid grid-cols-1 gap-4 text-left sm:grid-cols-3 mt-8">
-        <div class="rounded-xl border border-gray-800 bg-gray-900 p-4 space-y-2">
-          <div class="text-2xl">📋</div>
-          <h3 class="font-semibold text-white text-sm">1. Open an Issue</h3>
-          <p class="text-xs text-gray-500">Every feature starts as a GitHub Issue. Use the button below or the templates in <code class="text-emerald-400">.github/ISSUE_TEMPLATE</code>.</p>
-        </div>
-        <div class="rounded-xl border border-gray-800 bg-gray-900 p-4 space-y-2">
-          <div class="text-2xl">🤖</div>
-          <h3 class="font-semibold text-white text-sm">2. Claude Triages</h3>
-          <p class="text-xs text-gray-500">GitHub Actions runs Claude on every new issue — adds labels, writes an implementation plan, and opens a PR when possible.</p>
-        </div>
-        <div class="rounded-xl border border-gray-800 bg-gray-900 p-4 space-y-2">
-          <div class="text-2xl">🚀</div>
-          <h3 class="font-semibold text-white text-sm">3. Review & Ship</h3>
-          <p class="text-xs text-gray-500">You review the PR, merge, and CI/CD deploys automatically. Repeat until the app is what you envisioned.</p>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <div class="flex flex-wrap gap-3 justify-center pt-4">
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="/docs/start-here/quick-start/"
+          class="inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-400"
+        >
+          Quick start →
+        </a>
+        <a
+          href="/gallery/"
+          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
+        >
+          Component gallery
+        </a>
+        <a
+          href="/demos/"
+          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
+        >
+          Demos
+        </a>
+        <a
+          href="/docs/"
+          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
+        >
+          Docs
+        </a>
         <a
           href="https://github.com/ArtemioPadilla/issue-driven-web-template"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
+          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
         >
-          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-          View on GitHub
-        </a>
-        <a
-          href="https://github.com/ArtemioPadilla/issue-driven-web-template/issues/new/choose"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2.5 text-sm font-semibold text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
-        >
-          Open first issue →
-        </a>
-        <a
-          href="/data"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2.5 text-sm font-semibold text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
-        >
-          Data demo →
-        </a>
-        <a
-          href="/dashboard"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2.5 text-sm font-semibold text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
-        >
-          Dashboard →
-        </a>
-        <a
-          href="/docs/"
-          class="inline-flex items-center gap-2 rounded-lg border border-emerald-700 bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:border-emerald-500 hover:text-emerald-200 transition-colors"
-        >
-          Read the docs →
+          GitHub ↗
         </a>
       </div>
+    </section>
 
-      <p class="text-xs text-gray-600 pt-2">
-        Or click the <span class="text-emerald-400">chat bubble</span> in the bottom-right corner to report an issue with full diagnostics.
-      </p>
+    <!-- What's inside grid -->
+    <section class="mb-16">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-foreground">What's inside</h2>
+        <a href="/gallery/" class="text-sm text-primary hover:underline">Browse all {galleryManifest.length} →</a>
+      </div>
+      <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          categoryOrder.slice(0, 6).map((cat) => {
+            const entries = getByCategory(cat);
+            if (entries.length === 0) return null;
+            const first = entries[0];
+            return (
+              <li>
+                <a
+                  href={`/gallery/${first.slug}/`}
+                  class="group block h-full rounded-lg border border-border bg-card p-5 transition-colors hover:bg-accent/40"
+                >
+                  <p class="text-xs uppercase tracking-wider text-muted-foreground">
+                    {categoryLabels[cat]}
+                  </p>
+                  <h3 class="mt-1 text-base font-semibold text-foreground group-hover:underline">
+                    {first.name}
+                  </h3>
+                  <p class="mt-2 text-sm text-muted-foreground">{first.summary}</p>
+                  {entries.length > 1 && (
+                    <p class="mt-3 text-xs text-muted-foreground">
+                      + {entries.length - 1} more in {categoryLabels[cat].toLowerCase()}
+                    </p>
+                  )}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </section>
 
-    </div>
+    <!-- IDD pitch -->
+    <section class="mb-16 rounded-xl border border-border bg-card p-8 text-card-foreground">
+      <h2 class="text-2xl font-bold">How development happens here</h2>
+      <ol class="mt-4 space-y-3 text-sm text-muted-foreground">
+        <li class="flex gap-3">
+          <span class="font-mono text-primary">1.</span>
+          <span><strong class="text-foreground">File the issue</strong> — use a template or run <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">npm run new-issue</code>.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="font-mono text-primary">2.</span>
+          <span><strong class="text-foreground">Invoke <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">/goal</code></strong> — prometeo plans, forja implements with a red→green test first, centinela validates.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="font-mono text-primary">3.</span>
+          <span><strong class="text-foreground">PR opens</strong> with the issue reference, sub-agent reports, ethics checklist. CI re-validates.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="font-mono text-primary">4.</span>
+          <span><strong class="text-foreground">Merge.</strong> Issue closes automatically. Visual regression snapshots both `/gallery` and `/demos`.</span>
+        </li>
+      </ol>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/docs/start-here/idd-tour/" class="text-sm font-semibold text-primary hover:underline">
+          Read the 60-second tour →
+        </a>
+        <a href="/docs/how-we-work/idd/" class="text-sm text-muted-foreground hover:text-foreground">
+          Full workflow doc
+        </a>
+      </div>
+    </section>
+
+    <!-- FAB hint -->
+    <p class="text-center text-xs text-muted-foreground">
+      Click the <span class="text-emerald-400">chat bubble</span> in the bottom-right to file a bug with full diagnostics pre-filled.
+    </p>
+
   </main>
 </BaseLayout>
