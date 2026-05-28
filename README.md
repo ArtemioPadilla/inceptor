@@ -5,7 +5,9 @@
 ## Documentation
 
 - [Component contribution guide](docs/COMPONENTS.md) — adding components, hydration, theming, dark mode
-- [Integration plan](INTEGRATION-PLAN.md) — phased roadmap and per-issue specs
+- [Integration plan](INTEGRATION-PLAN.md) — historical record of the 27-issue rollout
+- [Roadmap](ROADMAP.md) — post-integration follow-ups grouped into epics
+- [Contributing](CONTRIBUTING.md) — workflow, tests, visual regression
 - [Claude Code context](CLAUDE.md) — repo conventions and stack details
 
 ## What's included
