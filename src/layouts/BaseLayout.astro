@@ -3,6 +3,7 @@ import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import ThemeToggle from '../components/common/ThemeToggle.astro';
 import OfflineBanner from '../components/islands/OfflineBanner';
+import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
 import UpdateToast from '../components/islands/UpdateToast';
 
@@ -70,6 +71,13 @@ const {
       blocking first paint. position: fixed means it doesn't affect layout.
     -->
     <OfflineBanner client:idle />
+    <!--
+      HydrationCanary: listens for React hydration-mismatch error signatures
+      and writes a pre-filled GitHub issue URL to sessionStorage so the FAB
+      can surface it. Renders nothing; mounted with client:idle to avoid
+      blocking first paint.
+    -->
+    <HydrationCanary client:idle />
     <!--
       InstallButton: appears when `beforeinstallprompt` fires (Chromium only).
       Stays invisible on Safari/Firefox — no extra conditional needed.
