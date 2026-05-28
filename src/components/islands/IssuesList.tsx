@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import QueryProvider from './QueryProvider';
 
 interface GitHubIssue {
@@ -19,8 +19,11 @@ interface GitHubIssue {
 const REPO = 'ArtemioPadilla/issue-driven-web-template';
 
 function IssuesListInner() {
+  const queryClient = useQueryClient();
+  const queryKey = ['issues', REPO, 'open'] as const;
+
   const { data, isLoading, error } = useQuery<GitHubIssue[]>({
-    queryKey: ['issues', REPO, 'open'],
+    queryKey,
     queryFn: async () => {
       const res = await fetch(
         `https://api.github.com/repos/${REPO}/issues?state=open&per_page=30`,
@@ -37,7 +40,12 @@ function IssuesListInner() {
   });
 
   if (isLoading) return <IssuesSkeleton />;
-  if (error) return <IssuesError message={(error as Error).message} />;
+  if (error) return (
+    <IssuesError
+      message={(error as Error).message}
+      onRetry={() => queryClient.invalidateQueries({ queryKey })}
+    />
+  );
   if (!data || data.length === 0) return <IssuesEmpty />;
 
   return (
@@ -99,14 +107,21 @@ function IssuesSkeleton() {
   );
 }
 
-function IssuesError({ message }: { message: string }) {
+function IssuesError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <p
+    <div
       className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
       role="alert"
     >
-      Could not load issues: {message}
-    </p>
+      <p>Could not load issues: {message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-2 inline-flex items-center rounded-md border border-destructive/40 bg-destructive/20 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+      >
+        Retry
+      </button>
+    </div>
   );
 }
 

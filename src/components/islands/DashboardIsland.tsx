@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import QueryProvider from './QueryProvider';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { Metric } from '@/components/ui/metric';
@@ -42,13 +42,22 @@ function useGitHubIssues(state: 'open' | 'closed') {
 }
 
 function DashboardInner() {
+  const queryClient = useQueryClient();
   const { data: openItems, isLoading: openLoading, error: openError } = useGitHubIssues('open');
   const { data: closedItems, isLoading: closedLoading } = useGitHubIssues('closed');
 
   if (openError) {
     return (
       <Callout variant="error" title="Could not load issues">
-        {(openError as Error).message}
+        <p>{(openError as Error).message}</p>
+        {/* Invalidating with a partial key refreshes both open + closed queries. */}
+        <button
+          type="button"
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['issues', REPO] })}
+          className="mt-3 inline-flex items-center rounded-md border border-destructive/40 bg-destructive/20 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+        >
+          Retry
+        </button>
       </Callout>
     );
   }
