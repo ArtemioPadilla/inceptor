@@ -41,4 +41,9 @@ describe('IssuesList', () => {
   it('does not import from @radix-ui', () => {
     expect(source).not.toMatch(/from ['"]@radix-ui/);
   });
+
+  it('exposes a Retry action via useQueryClient', () => {
+    expect(source).toMatch(/useQueryClient/);
+    expect(source).toMatch(/Retry/);
+  });
 });
