@@ -1,0 +1,110 @@
+---
+import { flags } from '../../lib/flags';
+
+// The search box only renders when the feature flag is on AND we're in a
+// production-like build. In dev the Pagefind bundle doesn't exist yet —
+// it's a postbuild artifact.
+const enabled = flags.docsSearch;
+---
+
+{
+  enabled && (
+    <div class="docs-search mb-6">
+      <input
+        id="docs-search-input"
+        type="search"
+        placeholder="Search docs… (⌘K)"
+        autocomplete="off"
+        class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        aria-label="Search documentation"
+      />
+      <div id="docs-search-results" class="mt-2"></div>
+    </div>
+  )
+}
+
+<script>
+  // Defer-load the Pagefind bundle on first focus so initial page load isn't
+  // affected. The bundle is ~50 kB gzipped and pulls indexed JSON shards
+  // on-demand from /_pagefind/.
+  const input = document.getElementById('docs-search-input') as HTMLInputElement | null;
+  const results = document.getElementById('docs-search-results');
+  if (input && results) {
+    let pf: any = null;
+
+    async function ensureLoaded() {
+      if (pf) return pf;
+      try {
+        // Bypass Vite's static analysis by computing the URL at runtime.
+        // The Pagefind bundle is created as a postbuild step (see package.json
+        // build script) and lives at /_pagefind/pagefind.js. In dev it doesn't
+        // exist; we gracefully degrade.
+        const url = ['/', '_pagefind', '/pagefind.js'].join('');
+        // Use a Function constructor to evaluate the dynamic import so the
+        // bundler never sees the literal string.
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
+        const dyn = new Function('u', 'return import(u)');
+        const mod = await dyn(url);
+        pf = mod;
+        await pf.init?.();
+        return pf;
+      } catch {
+        results!.innerHTML =
+          '<p class="text-xs text-muted-foreground">Search is only available in the production build.</p>';
+        return null;
+      }
+    }
+
+    function debounce<F extends (...args: never[]) => unknown>(fn: F, ms: number) {
+      let t: ReturnType<typeof setTimeout> | null = null;
+      return ((...args: Parameters<F>) => {
+        if (t) clearTimeout(t);
+        t = setTimeout(() => fn(...args), ms);
+      }) as F;
+    }
+
+    async function runSearch(q: string) {
+      const lib = await ensureLoaded();
+      if (!lib) return;
+      if (!q || q.length < 2) {
+        results!.innerHTML = '';
+        return;
+      }
+      const search = await lib.search(q);
+      if (!search || !search.results || search.results.length === 0) {
+        results!.innerHTML =
+          '<p class="text-xs text-muted-foreground">No matches.</p>';
+        return;
+      }
+      const items = await Promise.all(
+        search.results.slice(0, 8).map(async (r: { data: () => Promise<any> }) => {
+          const data = await r.data();
+          return `
+            <li class="border-b border-border last:border-0 py-2">
+              <a class="block hover:bg-accent/40 rounded px-2 py-1" href="${data.url}">
+                <p class="text-sm font-medium text-foreground">${data.meta?.title ?? data.url}</p>
+                <p class="text-xs text-muted-foreground">${data.excerpt}</p>
+              </a>
+            </li>`;
+        }),
+      );
+      results!.innerHTML = `<ul class="rounded-lg border border-border bg-card divide-y divide-border">${items.join('')}</ul>`;
+    }
+
+    const debounced = debounce(
+      ((e: Event) => {
+        void runSearch((e.target as HTMLInputElement).value);
+      }) as (e: Event) => void,
+      150,
+    );
+    input.addEventListener('input', debounced);
+
+    // ⌘K / Ctrl+K to focus
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+  }
+</script>

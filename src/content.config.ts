@@ -26,4 +26,18 @@ const docs = defineCollection({
   }),
 });
 
-export const collections = { docs };
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+    /** Author handle (kept generic so the scaffold doesn't presume a single author). */
+    author: z.string().default('artemiopadilla'),
+  }),
+});
+
+export const collections = { docs, blog };
