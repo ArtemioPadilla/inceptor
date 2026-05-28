@@ -66,8 +66,8 @@ describe('activateUpdate', () => {
 
   it('calls the most-recently-registered activator', async () => {
     const log: number[] = [];
-    setUpdateActivator(async () => log.push(1));
-    setUpdateActivator(async () => log.push(2));
+    setUpdateActivator(async () => { log.push(1); });
+    setUpdateActivator(async () => { log.push(2); });
     await activateUpdate();
     expect(log).toEqual([2]);
   });

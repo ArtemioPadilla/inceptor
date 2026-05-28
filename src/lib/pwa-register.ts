@@ -31,16 +31,9 @@ export function initPwaRegister(): void {
   });
 }
 
-// Type declaration for the virtual module provided by @vite-pwa/astro.
-// This module doesn't ship its own .d.ts, so we inline the minimal shape
-// that this file depends on.
-declare module 'virtual:pwa-register' {
-  export interface RegisterSWOptions {
-    immediate?: boolean;
-    onNeedRefresh?: () => void;
-    onOfflineReady?: () => void;
-    onRegistered?: (sw: ServiceWorkerRegistration | undefined) => void;
-    onRegisterError?: (error: unknown) => void;
-  }
-  export function registerSW(opts?: RegisterSWOptions): (reloadPage?: boolean) => Promise<void>;
-}
+// Type declaration for 'virtual:pwa-register' lives in src/types/vite-pwa.d.ts.
+// A file that imports from a module cannot also host a `declare module` block
+// for that same module — TypeScript treats inline augmentations in files with
+// imports as module augmentation rather than ambient declarations, which causes
+// TS2307 / TS2664. The dedicated ambient file has no imports and is picked up
+// automatically by TypeScript via tsconfig.json's include glob.
