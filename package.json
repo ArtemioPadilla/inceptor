@@ -6,11 +6,19 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
+    "check:astro": "astro check",
+    "check": "npm-run-all --parallel check:astro type-check test --serial build",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "tdd": "vitest --watch",
     "test:visual": "playwright test",
-    "test:visual:update": "playwright test --update-snapshots"
+    "test:visual:update": "playwright test --update-snapshots",
+    "monday": "bash scripts/monday.sh",
+    "ship": "bash scripts/ship.sh",
+    "doctor": "bash scripts/doctor.sh",
+    "docs": "node -e \"console.log('Open docs/INDEX.md or run: open docs/INDEX.md')\"",
+    "new-issue": "bash scripts/new-issue.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
@@ -46,6 +54,7 @@
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@vite-pwa/astro": "^1.2.0",
+    "npm-run-all": "^4.1.5",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"
   }
