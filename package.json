@@ -33,11 +33,13 @@
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
+    "workbox-window": "^7.4.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
+    "@vite-pwa/astro": "^1.2.0",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"
   }
