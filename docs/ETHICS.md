@@ -72,15 +72,55 @@ maps to:
 
 ---
 
+## Checklist tiers
+
+The 8-item checklist applies in **three tiers** by PR surface area. `centinela`
+picks the tier from the PR diff using path globs:
+
+| Tier | Triggers when the diff touches… | Required items |
+|---|---|---|
+| **Tier-0** (skip) | Only `docs/**`, `*.md`, `*.mdx`, `tests/**`, or typo-shaped changes | (none — gate skipped) |
+| **Tier-1** (UI tweak) | `src/components/**`, `src/pages/**`, or `.github/ISSUE_TEMPLATE/**` *without* introducing new affordances, new telemetry, or new behavior | **#1, #7, #8** |
+| **Tier-2** (new persuasive surface) | Same paths *with* new affordances, new flows, new telemetry, new network calls, new persistent state | **#1, #2, #6, #7, #8** (+ items promoted by Functional Triad — see below) |
+
+Items not in the required set may be answered "N/A" with a one-line
+justification.
+
+### Functional Triad → required-item promotion
+
+`prometeo` classifies every `type:feat` issue by Functional Triad corner
+(`tool` / `medium` / `social-actor`) and *that classification promotes
+optional checklist items to required* for the issue:
+
+| Triad corner | Optional items auto-promoted to required |
+|---|---|
+| **Tool** (extends capability) | #3 (asymmetric persistence) |
+| **Medium** (presents experience) | #5 (emotional reciprocity) |
+| **Social actor** (takes persona / makes claims) | #4 (borrowed credibility), #5 (emotional reciprocity) |
+
+`prometeo`'s plan output declares the resulting required-set for the issue;
+`centinela` enforces against the declared set, not the global default.
+
+### `risk:high` triggers mechanical Stakeholder Analysis
+
+The `risk:high` label is **auto-applied by `prometeo`**, never self-labelled,
+when the proposed changes match any of:
+
+- New network request to a non-same-origin endpoint
+- New `localStorage` / `IndexedDB` / cookie write of user input
+- Routes under `/learn`, `/kids`, `/payments`, `/auth`
+- Any change to `src/lib/diagnostics.*` or telemetry surfaces
+
+If any trigger fires, `risk:high` is auto-applied and `centinela` blocks merge
+until the Stakeholder Analysis ADR exists in `docs/decisions/`. See the
+"Stakeholder Analysis" section below for the 7-step procedure.
+
 ## The 8-item ethics checklist
 
-Every PR that touches `src/components/`, `src/pages/`, `.github/ISSUE_TEMPLATE/`,
-or any user-visible affordance must answer these in its description.
+Per the tier rubric above. Required items have non-empty answers; others may be
+"N/A" with a one-line justification.
 
-**Required items** (1, 2, 6, 8) must have non-empty answers. Others may be
-"N/A" with a one-line justification. Trivial doc/test-only PRs skip the gate.
-
-### 1. Intent declared *(required)*
+### 1. Intent declared *(required at every non-zero tier)*
 
 **Q:** What behaviour change does this PR push the user toward, and whose
 benefit does it serve?
@@ -93,7 +133,7 @@ Without explicit intent, persuasion happens by accident. Maps to Fogg Concern #1
 The second isn't necessarily wrong, but it must be acknowledged so the rest of
 the checklist can be applied honestly.
 
-### 2. No deception, no coercion *(required)*
+### 2. No deception, no coercion *(required at tier 2)*
 
 **Q:** Does any copy, default, or affordance mislead about consequences or
 remove a reasonable opt-out?
@@ -108,17 +148,30 @@ Patterns to flag:
 - Confirmshaming ("No thanks, I prefer to pay full price")
 - Disguised ads
 - Roach-motel signups (easy to enter, painful to leave)
+- **False hierarchy** — when a destructive / privacy-reducing action and a
+  privacy-preserving action sit side-by-side, the privacy-preserving option
+  must have *equal or greater* visual weight (size, contrast against
+  background, position in reading order). axe-core will pass a cookie
+  banner where "Accept all" is `bg-primary` and "Reject all" is a low-contrast
+  text link — both technically WCAG AA. The rule must reject anyway.
 
 ### 3. Asymmetric persistence justified
 
 **Q:** If the UI nags, retries, or auto-reopens, is the user clearly in control
 of stopping it?
 
-Concern #3 (persistence) + #4 (asymmetric control). Examples:
+Concern #3 (persistence) + #4 (asymmetric control). Broader than install
+prompts — covers any UI that resists dismissal or commandeers user agency.
+Examples:
 
 - PWA install prompts must respect dismissal for ≥ 7 days, not re-prompt every reload
 - Update toasts include a "later" option, not just "reload now"
 - Cookie banners default to the *least* privacy-invasive option, not "Accept all"
+- **Modal dialogs** must be dismissible by ESC and by clicking outside
+- **Tooltips** that explicitly dismiss must stay dismissed for the session
+- **Scroll-jacking** marketing sections that block native browser scroll
+- **`beforeunload` traps** ("are you sure?") on any flow that hasn't accumulated user input
+- **Sticky CTAs** that cover content on mobile without a close affordance
 
 ### 4. Borrowed credibility honest
 
@@ -142,7 +195,7 @@ Concern #5. Examples to flag:
 - "We're sad to see you go" cancellation flows
 - Notification badges that count unread items the user has explicitly muted
 
-### 6. Surveillance is overt and supportive *(required)*
+### 6. Surveillance is overt and supportive *(required at tier 2)*
 
 **Q:** Is any telemetry visible to the user at the moment of capture, and used
 for help, not punishment?
@@ -153,18 +206,27 @@ Fogg's rule: surveillance is ethical only if **overt and supportive**.
 send). HydrationCanary's silent error capture is borderline — see Epic 12
 privacy-toast follow-up.
 
-### 7. Vulnerable-group impact considered
+### 7. Vulnerable-group impact considered *(required at every non-zero tier)*
 
 **Q:** Could a child, non-native reader, anxious / low-vision / motor-impaired
 user be harmed by this pattern?
 
-Fogg Ch. 9 §"When Persuasion Targets Vulnerable Groups". Examples:
+Fogg Ch. 9 §"When Persuasion Targets Vulnerable Groups". This is the most
+common real-harm vector — items #1, #2, #6, #8 cover intent and overt
+deception/surveillance, but harm by *quiet exclusion* lives here. Promoted
+from "optional" to "required" (F3 from the multi-agent review).
+
+Examples:
 
 - Motion that ignores `prefers-reduced-motion` fails here
 - Time-pressured CTAs ("Only 2 minutes left!") prey on anxiety
 - Dense text without summary or TL;DR excludes non-native readers
+- Sole reliance on color to convey state excludes color-blind users
+- Tap targets < 44 × 44 px exclude motor-impaired users
+- Read-the-label-or-die copy in modal dialogs excludes anxious / cognitively
+  fatigued users
 
-### 8. Unintended-but-predictable outcomes named *(required)*
+### 8. Unintended-but-predictable outcomes named *(required at every non-zero tier)*
 
 **Q:** List at least one foreseeable misuse and the mitigation.
 

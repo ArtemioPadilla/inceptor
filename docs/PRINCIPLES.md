@@ -24,6 +24,12 @@ team ceremonies of Scrum degenerate. Shape Up's primitives translate cleanly:
 | Cycle | The phase duration |
 | Cooldown | 2-day gap after each phase — no new features, only docs / refactors / dep bumps / debt-paying |
 
+**Cooldown is enforced structurally, not on honor.** Between phases, `main`
+carries a `cooldown/<phase>-end` git tag. `prometeo` refuses to plan
+`type:feat` issues until the tag is replaced by `cooldown-cleared` (which
+requires the cooldown debt list to be empty — see Epic 13 for the mechanism).
+Only `type:chore` and `type:docs` pass during cooldown.
+
 The Agile Manifesto values (working software over docs, responding to change,
 collaboration over contracts, individuals over process) live as **taste**, not
 ceremony.
@@ -47,28 +53,62 @@ retro ceremony.
 
 ## 2. TDD — red → green → refactor
 
-Every `type:feat` or `type:fix` issue ships a **failing behavior test first**,
-in its own commit, before any production code commit.
+`type:feat` and `type:fix` issues ship a **failing behavior test first**, then
+the implementation. Enforcement uses **commit trailers**, not git-log topology
+(which breaks on squash-merges, rebases, and legitimate single-commit fixes).
+
+### 2.1 The TDD tier rubric
+
+Not every change deserves a red→green dance. Three tiers, set via
+`tdd-tier:` issue label:
+
+| Tier | Applies when | Required artifact |
+|---|---|---|
+| `tdd-tier:strict` | Default for `type:feat` and `type:fix` that change behavior | A `test(...)` commit *and* a `Tdd-Red: <sha>` trailer on the green commit *(or `Tdd-Red-Verified: inline` if test and fix landed in one commit after the test was verified red in-tree)* |
+| `tdd-tier:smoke` | One-line variants, CSS-only tweaks, prop additions with default | A `?raw` source-text or render-once assertion is enough |
+| `tdd-tier:exempt` | Copy fixes, comments, ADR additions, dep bumps with no behavior change | No new test required |
+
+`prometeo` proposes the tier in its plan output; the human accepts or edits
+the label before invoking `/goal`. `centinela` enforces against the labelled
+tier, not against a global rule.
+
+### 2.2 The trailer convention
+
+The green commit carries a Git trailer:
+
+```
+feat(ui): button supports loading state (#N)
+
+Adds a `loading` prop that disables clicks and shows a spinner.
+
+Tdd-Red: 0a1b2c3
+```
+
+`Tdd-Red: <sha>` points back to the originating red commit on the branch
+(survives rebase, survives squash because the trailer is preserved in the
+merge commit message). For legitimate single-commit work (regression
+test+fix in one), use `Tdd-Red-Verified: inline` — declares that the test
+was written and verified red in the working tree before the fix.
+
+### 2.3 The loop
 
 - **prometeo** emits a `## Behavior contracts` section per issue: the 1-3
   user-observable behaviors that must hold (e.g. *"Field.Control renders
-  without `useId` SSR error"*, *"Button with `loading` prop disables clicks"*)
-- **forja** writes the failing test (`tests/<issue>.test.{ts,tsx}` or
-  `src/**/<name>.test.{ts,tsx}`), commits as
-  `test(scope): red for <behavior> (#N)`, runs `vitest --run` to confirm red,
-  then writes implementation, commits as `feat(scope): green for <behavior> (#N)`
-- **centinela** verifies `git log --oneline` shows the test-commit before the
-  feat-commit on the branch, and re-runs the test from the red commit's tree to
-  confirm it actually failed
+  without `useId` SSR error"*, *"Button with `loading` prop disables clicks"*).
+  Also proposes a `tdd-tier:` label.
+- **forja** writes the failing test, commits it (`test(scope): red for
+  <behavior> (#N)`), runs `vitest --run` to confirm red, writes the
+  implementation, commits it with the `Tdd-Red:` trailer pointing at the
+  red commit's SHA.
+- **centinela** greps the green commit for the trailer and re-runs the
+  red commit's test from its tree to confirm it failed.
 
-Source-text `?raw` assertions (the current style) stay as **cheap smoke tests**,
-but they no longer count as the behavior contract. The Form ↔ Field.Control SSR
-bug from Phase 1 would have been caught by a real render test.
+Source-text `?raw` assertions stay as smoke tests but they don't count as a
+strict-tier behavior contract. The Form ↔ Field.Control SSR bug from Phase 1
+would have been caught by a real render test.
 
-Bugs found in production get a **regression test first, fix second** — this is
-non-negotiable for centinela.
-
-`type:chore` and `type:docs` issues opt out of TDD.
+Bugs found in production: **regression test first, fix second** — non-negotiable
+regardless of tier.
 
 ---
 
@@ -96,25 +136,45 @@ trigger*; `/goal` is a *tunneling sequence*; ErrorBoundary fallbacks are
 *social-actor consolations*. We've been doing captology without naming it.
 
 The full framework — grounded in BJ Fogg's *Persuasive Technology* (2003) plus
-modern dark-patterns guidance — lives in [`docs/ETHICS.md`](./ETHICS.md). The
-load-bearing artifact is the **8-item ethics checklist**. Every UI-affecting PR
-passes it before merge:
+modern dark-patterns guidance — lives in [`docs/ETHICS.md`](./ETHICS.md).
 
-1. Intent declared (required)
-2. No deception, no coercion (required)
+Every UI-affecting PR passes the **8-item ethics checklist** before merge. The
+checklist is **tiered** by PR surface area (full rubric in `docs/ETHICS.md`):
+
+- **Tier-0** (docs / tests / typo fixes via path glob) — auto-skip
+- **Tier-1** (UI tweaks that don't add behavior) — required items: **#1, #7, #8**
+- **Tier-2** (new persuasive surface, new affordance, new flow, new telemetry) — required items: **#1, #2, #6, #7, #8** (Functional Triad classification may promote optional items #3, #4, #5 to required — see `docs/ETHICS.md`)
+
+The 8 items:
+
+1. Intent declared
+2. No deception, no coercion
 3. Asymmetric persistence justified
 4. Borrowed credibility honest
 5. Emotional cues reciprocal or disclosed
-6. Surveillance overt and supportive (required)
+6. Surveillance overt and supportive
 7. Vulnerable-group impact considered
-8. Unintended-but-predictable outcomes named (required)
+8. Unintended-but-predictable outcomes named
 
-Required items must have non-empty answers in the PR body; others may be
-"N/A" with justification. Trivial doc/test-only PRs skip the gate.
+**Item #7 is required at every non-zero tier** — it catches the most common
+real-harm vector (quiet exclusion of screen-reader / anxious / non-native /
+motor-impaired users), which the previous (1, 2, 6, 8) required set missed.
 
-Mechanical checks via `npm run ux:check` catch the 70% of dark patterns that
-have measurable signatures (deceptive defaults, `prefers-reduced-motion`
-violations, contrast failures, etc.).
+### `risk:high` is mechanical, not self-labelled
+
+`prometeo` auto-applies `risk:high` when its planned changes match any of:
+
+- New network request to a non-same-origin endpoint
+- New `localStorage` / `IndexedDB` / cookie write of user input
+- Routes under `/learn`, `/kids`, `/payments`, `/auth`
+- Any change to `src/lib/diagnostics.*` or telemetry surfaces
+
+`risk:high` requires the [Stakeholder Analysis ADR](./ETHICS.md#stakeholder-analysis)
+in `docs/decisions/` before merge.
+
+Mechanical checks via `npm run ux:check` catch the dark-pattern signatures that
+have measurable forms (deceptive defaults, `prefers-reduced-motion` violations,
+contrast failures, accessibility-washed CTAs — see ETHICS.md "false hierarchy").
 
 ---
 
