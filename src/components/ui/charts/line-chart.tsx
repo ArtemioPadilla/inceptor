@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { chartColor } from './chart-colors';
+import { useMounted } from './use-mounted';
 import { cn } from '@/lib/utils';
 
 export interface LineChartProps<T extends Record<string, unknown>> {
@@ -28,8 +29,10 @@ export function LineChart<T extends Record<string, unknown>>({
   height = 300,
   className,
 }: LineChartProps<T>) {
+  const mounted = useMounted();
   return (
     <div className={cn('w-full', className)} style={{ height }}>
+      {mounted && (
       <ResponsiveContainer width="100%" height="100%">
         <RechartsLineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
@@ -68,6 +71,7 @@ export function LineChart<T extends Record<string, unknown>>({
           ))}
         </RechartsLineChart>
       </ResponsiveContainer>
+      )}
     </div>
   );
 }

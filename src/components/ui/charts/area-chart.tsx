@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { chartColor } from './chart-colors';
+import { useMounted } from './use-mounted';
 import { cn } from '@/lib/utils';
 
 export interface AreaChartProps<T extends Record<string, unknown>> {
@@ -28,8 +29,10 @@ export function AreaChart<T extends Record<string, unknown>>({
   height = 300,
   className,
 }: AreaChartProps<T>) {
+  const mounted = useMounted();
   return (
     <div className={cn('w-full', className)} style={{ height }}>
+      {mounted && (
       <ResponsiveContainer width="100%" height="100%">
         <RechartsAreaChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <defs>
@@ -78,6 +81,7 @@ export function AreaChart<T extends Record<string, unknown>>({
           ))}
         </RechartsAreaChart>
       </ResponsiveContainer>
+      )}
     </div>
   );
 }

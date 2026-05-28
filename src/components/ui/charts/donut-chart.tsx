@@ -8,6 +8,7 @@ import {
   Legend,
 } from 'recharts';
 import { chartColor } from './chart-colors';
+import { useMounted } from './use-mounted';
 import { cn } from '@/lib/utils';
 
 export interface DonutDatum {
@@ -24,8 +25,10 @@ export interface DonutChartProps {
 }
 
 export function DonutChart({ data, height = 280, className, innerRadius = 60 }: DonutChartProps) {
+  const mounted = useMounted();
   return (
     <div className={cn('w-full', className)} style={{ height }}>
+      {mounted && (
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -54,6 +57,7 @@ export function DonutChart({ data, height = 280, className, innerRadius = 60 }: 
           <Legend wrapperStyle={{ color: 'var(--foreground)', fontSize: 12 }} />
         </PieChart>
       </ResponsiveContainer>
+      )}
     </div>
   );
 }

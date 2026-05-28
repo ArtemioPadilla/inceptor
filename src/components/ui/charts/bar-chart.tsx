@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { chartColor } from './chart-colors';
+import { useMounted } from './use-mounted';
 import { cn } from '@/lib/utils';
 
 export interface BarChartProps<T extends Record<string, unknown>> {
@@ -28,8 +29,10 @@ export function BarChart<T extends Record<string, unknown>>({
   height = 300,
   className,
 }: BarChartProps<T>) {
+  const mounted = useMounted();
   return (
     <div className={cn('w-full', className)} style={{ height }}>
+      {mounted && (
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
@@ -61,6 +64,7 @@ export function BarChart<T extends Record<string, unknown>>({
           ))}
         </RechartsBarChart>
       </ResponsiveContainer>
+      )}
     </div>
   );
 }
