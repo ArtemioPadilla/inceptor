@@ -31,12 +31,15 @@ export default function LargeTable() {
         Rendering <strong className="text-foreground">{ROW_COUNT.toLocaleString()}</strong> generated rows
         through TanStack Virtual. Try scrolling, sorting, filtering, toggling
         column visibility — input latency should stay well under 50 ms.
+        Filter and sort state is preserved in the URL — share the link or
+        refresh the page to restore the exact view.
       </p>
       <DataTable<FakeRow, unknown>
         columns={columns}
         data={data}
         height="600px"
         estimateRowSize={36}
+        syncToUrl={{ key: 'large' }}
       />
     </div>
   );
