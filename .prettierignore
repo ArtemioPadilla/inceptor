@@ -1,0 +1,9 @@
+dist/
+node_modules/
+package-lock.json
+.astro/
+tests/__screenshots__/
+playwright-report/
+test-results/
+public/
+src/content/docs/decisions/

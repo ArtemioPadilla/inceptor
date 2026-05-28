@@ -490,18 +490,37 @@ const tr = {
           copyLabel2.textContent = copiedLabel;
           setTimeout(function(){ copyLabel2.textContent = copyLabel; }, 2000);
         }
+        // navigator.clipboard.writeText is widely supported (96%+ on
+        // caniuse since 2023). When unavailable (HTTP / old browser), we
+        // fall back to selecting the text in a textarea so the user can
+        // copy manually with Ctrl/Cmd+C — better than the deprecated
+        // document.execCommand('copy') which has been removed in some
+        // browsers and is flagged by `npm run check`.
         if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text).then(onCopied);
+          navigator.clipboard.writeText(text).then(onCopied).catch(function() {
+            fallbackSelect(text);
+          });
         } else {
-          // Fallback for HTTP / older browsers
+          fallbackSelect(text);
+        }
+        function fallbackSelect(value) {
           var ta = document.createElement('textarea');
-          ta.value = text;
+          ta.value = value;
           ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
           document.body.appendChild(ta);
           ta.focus();
           ta.select();
-          try { document.execCommand('copy'); onCopied(); } catch(e) {}
-          document.body.removeChild(ta);
+          // No automatic copy in the fallback — the user presses Ctrl/Cmd+C.
+          // Tell the user via the existing label what to do.
+          if (copyLabel2) {
+            copyLabel2.textContent = 'Press Ctrl/Cmd+C';
+            setTimeout(function(){
+              copyLabel2.textContent = copyLabel;
+              document.body.removeChild(ta);
+            }, 4000);
+          } else {
+            setTimeout(function(){ document.body.removeChild(ta); }, 4000);
+          }
         }
       });
     }
