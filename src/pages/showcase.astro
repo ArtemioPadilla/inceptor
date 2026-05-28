@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ShowcaseDialog from '../components/islands/ShowcaseDialog';
 import ShowcaseDropdown from '../components/islands/ShowcaseDropdown';
 import ShowcaseForm from '../components/islands/ShowcaseForm';
+import ShowcaseKpis from '../components/islands/ShowcaseKpis';
 import ShowcaseSimples from '../components/islands/ShowcaseSimples';
 import ShowcaseTabs from '../components/islands/ShowcaseTabs';
 import ShowcaseToast from '../components/islands/ShowcaseToast';
@@ -168,6 +169,31 @@ import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
         see cached data render before the network round-trip completes.
       </p>
       <QueryDemo client:visible />
+    </section>
+
+    <!-- KPI cards & trackers (Tremor Raw) -->
+    <section aria-labelledby="section-kpi">
+      <h2 id="section-kpi" class="text-xl font-semibold mb-4">KPI cards &amp; trackers</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Copy-paste Tremor Raw primitives:
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">KpiCard</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">Metric</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">ProgressBar</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">Tracker</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">Callout</code>,
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">Divider</code>.
+        All themed via shadcn CSS vars — no <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">@tremor/react</code> dependency.
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Light</p>
+          <ShowcaseKpis client:visible />
+        </div>
+        <div class="dark rounded-lg border border-border bg-background p-6">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
+          <ShowcaseKpis client:visible />
+        </div>
+      </div>
     </section>
   </main>
 </BaseLayout>
