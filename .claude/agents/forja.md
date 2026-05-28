@@ -88,6 +88,13 @@ These are non-negotiable; they come from `CLAUDE.md`'s critical warnings.
 4. ❌ Mixing `@radix-ui/*` and `@base-ui/*` primitives in one component.
 5. ❌ `import … from "@tremor/react"` — copy Tremor Raw into `src/components/ui/`.
 6. ❌ `import … from "framer-motion"` — use `motion/react`.
+7. ❌ Production code commit on a `tdd-tier:strict` branch without a prior
+   `test(...)` commit that initially failed (verified by Tdd-Red trailer
+   below). The exception is `tdd-tier:smoke` or `tdd-tier:exempt` issues.
+8. ❌ TypeScript `interface` for any **cross-boundary** type (network,
+   storage, worker postMessage, form field). Use a Zod schema in
+   `src/schemas/` and derive the type via `z.infer`. See
+   `docs/PRINCIPLES.md` §3.
 
 If your plan requires any of these, **stop and report a BLOCKED criterion**;
 do not proceed.
@@ -101,10 +108,41 @@ do not proceed.
 - For multi-island React compositions (Accordion, Tabs, controlled Dialog),
   wrap the whole composition in one file under `src/components/islands/` and
   hydrate as one island.
-- For any new component, also add it to `/showcase` (or document in your report
-  why it doesn't belong there).
+- For any new component, also add it to `src/content/gallery.ts` (and
+  optionally to `src/pages/demos/*` if it deserves a composed demo).
 - Never push. Never open PRs. The orchestrator does that after centinela
   approves.
+
+## TDD discipline (strict-tier issues)
+
+For `tdd-tier:strict` issues, follow red→green→refactor:
+
+1. Read prometeo's `## Behavior contracts` section (1-3 user-observable
+   behaviors that must hold).
+2. Write a failing test that asserts those behaviors. Test file lives next
+   to the source it tests (`src/components/ui/<name>.test.tsx` for behavior
+   tests via React Testing Library).
+3. Commit ONLY the test:
+   ```
+   test(scope): red for <behavior> (#N)
+   ```
+   Run `vitest --run` to confirm RED.
+4. Write the minimum implementation that makes the test pass.
+5. Commit the implementation WITH a `Tdd-Red:` trailer pointing back to the
+   red commit's SHA:
+   ```
+   feat(scope): green for <behavior> (#N)
+
+   <body>
+
+   Tdd-Red: 0a1b2c3
+   ```
+6. If you wrote the test and the fix in a single working tree (legitimate
+   for trivial regression fixes), use `Tdd-Red-Verified: inline` instead —
+   declares the test was written and verified red before the fix.
+
+The trailer survives squash and rebase; `centinela` greps the green commit
+for it.
 
 ## Output format
 

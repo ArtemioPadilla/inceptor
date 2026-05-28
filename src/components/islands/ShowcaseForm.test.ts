@@ -14,8 +14,11 @@ describe('ShowcaseForm island', () => {
     expect(source).toMatch(/from ['"]@\/components\/ui\/button['"]/);
   });
 
-  it('uses zod for schema validation', () => {
-    expect(source).toMatch(/from ['"]zod['"]/);
+  it('uses zod-backed schema from the Spec-DD layer (src/schemas/)', () => {
+    // Zod is now consumed via src/schemas/login.ts (single source of truth
+    // per PRINCIPLES.md §3). The island imports LoginSchema + LoginValues.
+    expect(source).toMatch(/from ['"]@\/schemas\/login['"]/);
+    expect(source).toMatch(/LoginSchema/);
   });
 
   it('uses zodResolver from @hookform/resolvers/zod', () => {

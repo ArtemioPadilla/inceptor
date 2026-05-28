@@ -95,6 +95,15 @@ After #003 completes, the following can run in parallel:
 - **Prerequisites**: clean working tree
 - **Validation plan**: `npm run build`, `npm run check`, visual parity on Hello World
 - **Suggested handoff**: pause for user confirm → forja → centinela
+- **TDD tier**: `tdd-tier:strict` (default for `type:feat`/`type:fix`) | `tdd-tier:smoke` | `tdd-tier:exempt`
+- **Behavior contracts** (for strict tier — 1-3 user-observable behaviors that must hold):
+  - *e.g. "Button with loading prop disables clicks"*
+  - *e.g. "Field.Control renders without useId SSR error"*
+- **Functional Triad** (for `type:feat` only — informs ethics checklist):
+  - One of: `tool` (extends capability) / `medium` (presents experience) / `social-actor` (takes persona)
+  - This selects which optional ethics items become required (see `docs/ETHICS.md` — Triad → required-items table)
+- **risk:high triggers fired?**: list any of: new non-same-origin fetch / new persistent storage of user input / routes under `/learn|/kids|/payments|/auth` / `src/lib/diagnostics.*` change. If any: emit `risk:high` and require a Stakeholder Analysis ADR.
+- **Parallel-safe?**: `true` if this issue's diff doesn't touch any file another in-flight issue touches; `false` otherwise. The orchestrator uses this for worktree fan-out.
 
 ### #002 — …
 
