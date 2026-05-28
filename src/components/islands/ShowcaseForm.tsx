@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 
 // Spec-DD: the schema is the source of truth. See docs/PRINCIPLES.md §3.
 import { LoginSchema, type LoginValues } from '@/schemas/login';
+import ErrorBoundary from './ErrorBoundary';
 
 // Showcases the Form compound component (react-hook-form + Base UI Field +
 // zod resolver). Submit handler is console.log only — this is a UI demo.
@@ -33,6 +34,7 @@ export default function ShowcaseForm() {
   }
 
   return (
+    <ErrorBoundary name="ShowcaseForm">
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
@@ -81,5 +83,6 @@ export default function ShowcaseForm() {
         <Button type="submit">Sign in</Button>
       </form>
     </Form>
+    </ErrorBoundary>
   );
 }

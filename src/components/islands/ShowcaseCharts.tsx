@@ -3,6 +3,7 @@ import { LineChart } from '@/components/ui/charts/line-chart';
 import { BarChart } from '@/components/ui/charts/bar-chart';
 import { AreaChart } from '@/components/ui/charts/area-chart';
 import { DonutChart } from '@/components/ui/charts/donut-chart';
+import ErrorBoundary from './ErrorBoundary';
 
 const monthly = [
   { month: 'Jan', issues: 4, prs: 2 },
@@ -22,6 +23,7 @@ const donutData = [
 
 export default function ShowcaseCharts() {
   return (
+    <ErrorBoundary name="ShowcaseCharts">
     <div className="space-y-8">
       <div>
         <p className="text-sm font-medium text-muted-foreground mb-2">LineChart</p>
@@ -40,5 +42,6 @@ export default function ShowcaseCharts() {
         <DonutChart data={donutData} height={260} />
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

@@ -1,4 +1,5 @@
 import { $installPrompt, $needsRefresh, markNeedsRefresh, setUpdateActivator } from '@/stores/install';
+import ErrorBoundary from './ErrorBoundary';
 
 /**
  * Showcase demo for the PWA install + update prompt components.
@@ -63,6 +64,7 @@ export default function ShowcasePWA() {
   }
 
   return (
+    <ErrorBoundary name="ShowcasePWA">
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
         Simulate the global PWA signals. The install button and update toast
@@ -92,5 +94,6 @@ export default function ShowcasePWA() {
         </button>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

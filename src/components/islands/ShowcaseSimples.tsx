@@ -19,11 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import ErrorBoundary from './ErrorBoundary';
 
 // Renders all "simple" (non-compound, non-interactive-state) shadcn components
 // in one island to minimize hydration overhead on the /showcase page.
 export default function ShowcaseSimples() {
   return (
+    <ErrorBoundary name="ShowcaseSimples">
     <div className="space-y-8">
       {/* Button — all variants */}
       <section>
@@ -125,5 +127,6 @@ export default function ShowcaseSimples() {
         </Table>
       </section>
     </div>
+    </ErrorBoundary>
   );
 }

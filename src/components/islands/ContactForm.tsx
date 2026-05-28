@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ContactSchema, type ContactValues } from '@/schemas/contact';
 import { flags } from '@/lib/flags';
+import ErrorBoundary from './ErrorBoundary';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -24,6 +25,14 @@ type Status = 'idle' | 'submitting' | 'success' | 'error';
  * No backend required — pick a free static-friendly handler at deploy time.
  */
 export default function ContactForm() {
+  return (
+    <ErrorBoundary name="ContactForm">
+      <ContactFormInner />
+    </ErrorBoundary>
+  );
+}
+
+function ContactFormInner() {
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
