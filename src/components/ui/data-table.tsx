@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   type ColumnDef,
+  type ColumnSizingState,
   type SortingState,
   type VisibilityState,
   flexRender,
@@ -29,6 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { useDataTableUrlState } from '@/components/ui/use-data-table-url-state';
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -41,6 +43,13 @@ export interface DataTableProps<TData, TValue> {
   height?: string | number;
   /** Estimated row height in px for virtualization. Defaults to 40. */
   estimateRowSize?: number;
+  /**
+   * Sync filter/sort/visibility/sizing to URLSearchParams so views are
+   * shareable and survive page refresh. Pass `{ key: 'myTable' }` to
+   * namespace URL params when multiple DataTables share a page.
+   * Defaults to false (no URL syncing).
+   */
+  syncToUrl?: boolean | { key: string };
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -58,11 +67,83 @@ export function DataTable<TData, TValue>({
   initialGlobalFilter = '',
   height = '500px',
   estimateRowSize = 40,
+  syncToUrl = false,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState(initialGlobalFilter);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(initialColumnVisibility);
+  // Derive the URL-sync config from the syncToUrl prop.
+  const urlEnabled = Boolean(syncToUrl);
+  const urlKey = typeof syncToUrl === 'object' ? syncToUrl.key : undefined;
+
+  // useDataTableUrlState reads from URLSearchParams on mount and writes back
+  // on change (debounced, via replaceState). When syncToUrl is false it's a
+  // no-op that returns the empty state so all other logic below is unchanged.
+  const [urlState, writeUrl] = useDataTableUrlState(urlEnabled, urlKey);
+
+  // Seed each piece of table state from the URL (if enabled) or from the prop.
+  // urlState defaults to empty strings/arrays/objects when URL sync is off, so
+  // the prop values take precedence via the fallback expressions below.
+  const [globalFilter, setGlobalFilter] = React.useState(
+    urlEnabled && urlState.globalFilter ? urlState.globalFilter : initialGlobalFilter,
+  );
+  const [sorting, setSorting] = React.useState<SortingState>(
+    urlEnabled && urlState.sorting.length > 0 ? urlState.sorting : [],
+  );
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(
+    urlEnabled && Object.keys(urlState.columnVisibility).length > 0
+      ? urlState.columnVisibility
+      : initialColumnVisibility,
+  );
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>(
+    urlEnabled ? urlState.columnSizing : {},
+  );
+
+  // Mirror URL state changes (driven by popstate / back-forward) back into the
+  // local React state so the table re-renders with the restored values.
+  React.useEffect(() => {
+    if (!urlEnabled) return;
+    setGlobalFilter(urlState.globalFilter);
+    setSorting(urlState.sorting);
+    setColumnVisibility(urlState.columnVisibility);
+    setColumnSizing(urlState.columnSizing);
+  }, [urlEnabled, urlState]);
+
+  // Wrapped state-setter helpers that also write to the URL when sync is on.
+  const onGlobalFilter = (v: string) => {
+    setGlobalFilter(v);
+    if (urlEnabled) writeUrl({ globalFilter: v });
+  };
+
+  const onSorting = React.useCallback(
+    (updater: React.SetStateAction<SortingState>) => {
+      setSorting((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        if (urlEnabled) writeUrl({ sorting: next });
+        return next;
+      });
+    },
+    [urlEnabled, writeUrl],
+  );
+
+  const onColumnVisibility = React.useCallback(
+    (updater: React.SetStateAction<VisibilityState>) => {
+      setColumnVisibility((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        if (urlEnabled) writeUrl({ columnVisibility: next });
+        return next;
+      });
+    },
+    [urlEnabled, writeUrl],
+  );
+
+  const onColumnSizing = React.useCallback(
+    (updater: React.SetStateAction<ColumnSizingState>) => {
+      setColumnSizing((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        if (urlEnabled) writeUrl({ columnSizing: next });
+        return next;
+      });
+    },
+    [urlEnabled, writeUrl],
+  );
 
   const table = useReactTable({
     data,
@@ -73,13 +154,15 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    onColumnVisibilityChange: setColumnVisibility,
+    onSortingChange: onSorting,
+    onGlobalFilterChange: onGlobalFilter,
+    onColumnVisibilityChange: onColumnVisibility,
+    onColumnSizingChange: onColumnSizing,
     state: {
       sorting,
       globalFilter,
       columnVisibility,
+      columnSizing,
     },
   });
 
@@ -110,7 +193,7 @@ export function DataTable<TData, TValue>({
         <Input
           placeholder="Filter all columns…"
           value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          onChange={(e) => onGlobalFilter(e.target.value)}
           className="max-w-sm"
           aria-label="Global filter"
         />
