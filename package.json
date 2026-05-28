@@ -14,6 +14,8 @@
     "tdd": "vitest --watch",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
+    "a11y": "playwright test tests/visual/a11y.spec.ts",
+    "ux:check": "vitest run src/tests/ux-contrast.test.ts src/tests/ux-motion.test.ts",
     "monday": "bash scripts/monday.sh",
     "ship": "bash scripts/ship.sh",
     "doctor": "bash scripts/doctor.sh",
@@ -50,12 +52,19 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.60.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@vite-pwa/astro": "^1.2.0",
+    "@vitest/expect": "^4.1.7",
+    "jsdom": "^29.1.1",
     "npm-run-all": "^4.1.5",
+    "pa11y": "^9.1.1",
     "sharp": "^0.34.5",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"

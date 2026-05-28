@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,19 +13,14 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-// Minimal schema for the demo login form
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address.'),
-  password: z.string().min(8, 'Password must be at least 8 characters.'),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
+// Spec-DD: the schema is the source of truth. See docs/PRINCIPLES.md §3.
+import { LoginSchema, type LoginValues } from '@/schemas/login';
 
 // Showcases the Form compound component (react-hook-form + Base UI Field +
 // zod resolver). Submit handler is console.log only — this is a UI demo.
 export default function ShowcaseForm() {
   const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
       password: '',

@@ -41,14 +41,41 @@ and stop.
 In order, stop at the first failure:
 
 ```bash
-npm run build       # must pass
-npm run check       # Astro check, must pass
-npm run type-check  # tsc --noEmit, must pass
-npm run test        # Vitest, must pass
+npm run check       # composite: check:astro + type-check + test + build
+npm run ux:check    # tier-1+ PRs only — contrast + reduced-motion guards
+```
+
+`npm run check` is the umbrella that runs Astro check, `tsc --noEmit`, Vitest,
+and the production build. If it passes, all four gates pass.
+
+`npm run ux:check` is the *mechanical* portion of the UX/ethics gate (Epic 12):
+runs contrast + reduced-motion guards on `global.css` and the island tree.
+Skip it on tier-0 PRs (path glob: only `docs/**`, `*.md`, `tests/**`).
+
+For tier-2 PRs (new persuasive surface), also run:
+
+```bash
+npm run a11y        # axe-core on /, /gallery, /demos/dashboard, /docs
 ```
 
 Capture exit codes and the first ~20 lines of any error output. Do not retry —
 one failure is a REJECTED verdict.
+
+### 3.1 TDD red→green verification (strict-tier issues only)
+
+If the issue carries `tdd-tier:strict` (default for `type:feat` and `type:fix`):
+
+1. Inspect `git log --oneline main..HEAD --grep='^test('` — there MUST be a
+   `test(...)` commit on the branch
+2. Inspect the most recent `feat(` or `fix(` commit's message body — it MUST
+   contain a `Tdd-Red: <sha>` trailer (or `Tdd-Red-Verified: inline`)
+3. If `Tdd-Red: <sha>` is present, run `git show <sha> -- '*.test.*'` to verify
+   the cited red commit added at least one test file
+4. (Optional) `git checkout <sha> -- src tests && npm test -- --run` to confirm
+   the test file existed and failed at that revision; restore HEAD afterwards
+
+Skip on `tdd-tier:smoke` (a `?raw` source assertion is enough) and
+`tdd-tier:exempt` (no test required).
 
 ### 4. Run forbidden-import checks
 
@@ -71,15 +98,42 @@ If any FAIL appears, REJECT.
 
 ### 5. Visual/render confirmations (where applicable)
 
-For component or dashboard issues, read the source of `/showcase` and
-`/dashboard` pages to confirm the new component/element is wired up:
+For component issues, confirm wiring by source:
 
-```bash
-grep -l "<ComponentName" src/pages/showcase.astro || echo "FAIL: not in showcase"
-```
+- New primitive → must appear in `src/content/gallery.ts` manifest
+  (`grep -l "<ComponentName" src/content/gallery.ts` should match)
+- New dashboard / demo → must have a route under `src/pages/demos/` and
+  be listed in `src/pages/demos/index.astro`
 
 You do not need to render in a browser — confirmation via source is enough.
-Playwright snapshots are the job of CI (issue #027), not centinela.
+Playwright snapshots are part of the visual workflow in CI.
+
+### 5.1 Ethics & UX gate (tier-1+ PRs)
+
+For PRs that touch `src/components/**`, `src/pages/**`, or
+`.github/ISSUE_TEMPLATE/**` (UI-affecting):
+
+1. Determine the **tier** from the diff:
+   - **tier-0**: only `docs/**`, `*.md`, `tests/**`, or typo-shaped → skip ethics gate
+   - **tier-1**: UI tweak without new behavior → required: items #1, #7, #8
+   - **tier-2**: new affordance / flow / telemetry / network call → required: items #1, #2, #6, #7, #8 + Triad promotions
+
+2. Greppable presence-check on the PR body: every required item must have a
+   non-empty answer. "N/A — <reason>" is acceptable for non-required items.
+
+3. `mechanical` checks via `npm run ux:check` MUST pass (contrast + reduced
+   motion).
+
+4. If the diff matches any `risk:high` trigger (new non-same-origin fetch,
+   new `localStorage`/cookie write of user input, routes under
+   `/learn|/kids|/payments|/auth`, or `src/lib/diagnostics.*` change), the PR
+   MUST include a Stakeholder Analysis ADR in `docs/decisions/`. If not
+   present, REJECT with `verdict_token: NEEDS_HUMAN`.
+
+A failure here is classified `ETHICS_OR_UX_FAIL` (distinct from `BUILD_FAIL`)
+so the orchestrator routes the diagnosis back to `forja` with the right
+prompt — "you shipped a dark pattern" needs different remediation than "you
+broke the build".
 
 ### 6. Bundle-size sanity check
 
@@ -103,7 +157,34 @@ You may NOT:
 ### 8. Verdict
 
 If everything passes: respond with `APPROVED` plus the report below.
-If anything fails: respond with `REJECTED` plus the failure section.
+
+If anything fails: respond with `REJECTED` plus the failure section AND a
+trailing fenced JSON block carrying machine-readable verdict tokens:
+
+```json
+{
+  "verdict_token": "RETRY_FORJA",
+  "failure_class": "BUILD_FAIL"
+}
+```
+
+**`verdict_token`** (one of):
+
+- `RETRY_FORJA` — the failure is mechanical (TS error, missing import, broken
+  test). Hand back to forja with the diagnosis.
+- `NEEDS_HUMAN` — the failure needs judgment (ethics ambiguity, scope
+  disagreement, missing ADR). Surface to the orchestrator.
+- `BLOCKED_UPSTREAM` — depends on something outside this PR (a missing
+  dependency upgrade, an external service config). Park the PR.
+
+**`failure_class`** (one of):
+
+- `BUILD_FAIL` — `npm run build` failed
+- `TYPE_FAIL` — `tsc --noEmit` failed
+- `TEST_FAIL` — Vitest failed
+- `FORBIDDEN_IMPORT` — grep scan caught a banned import
+- `ETHICS_OR_UX_FAIL` — checklist gate or `ux:check` failed
+- `REPORTING_MISMATCH` — forja's report doesn't match the actual diff
 
 ## Output format — APPROVED
 
