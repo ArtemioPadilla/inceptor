@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#050505"/>
+      <stop offset="1" stop-color="#0f1f1a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.85" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#10b981" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <image href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCEtLQogIElERCBzY2FmZm9sZCBicmFuZCBtYXJrLgoKICBUaHJlZSBub2RlcyBhcnJhbmdlZCBvbiBhIGNpcmNsZSwgY29ubmVjdGVkIGJ5IGN1cnZlZCBhcnJvd3MgdGhhdCB0cmFjZQogIHRoZSBpc3N1ZS1kcml2ZW4gbG9vcDogb3BlbiDihpIgYnJhbmNoIOKGkiBtZXJnZSDihpIgKGJhY2sgdG8gb3BlbikuIFRoZQogIGNlbnRyYWwgZG90IGlzIHRoZSAic3BhcmsiIOKAlCBhIG5ldyBpc3N1ZSBhcnJpdmluZy4gRW1lcmFsZCBhY2NlbnQgb24KICBuZWFyLWJsYWNrIHN1cmZhY2UgbWF0Y2hlcyB0aGUgZXhpc3RpbmcgYnJhbmQgY29sb3IgKCMxMGI5ODEgZW1lcmFsZC01MDApLgoKICBUaGUgbWFyayBpcyA1MTLDlzUxMiB3aXRoIGEgOTYtdW5pdCBjb3JuZXIgcmFkaXVzIHNvIGl0IHdvcmtzIGFzIGEKICBtYXNrYWJsZSBQV0EgaWNvbiAoc2FmZSB6b25lIH44MCUgb2YgY2FudmFzLCB3ZWxsIGluc2lkZSB0aGUgMTAyLXVuaXQKICBpbnNldCA9IH4yMCUgbWFyZ2luIHJlY29tbWVuZGVkIGJ5IHNwZWMuYXBwL21hc2thYmxlKS4KLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJzdXJmYWNlIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzBhMGEwYSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxYTFhMWEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9InNwYXJrIiBjeD0iMC41IiBjeT0iMC41IiByPSIwLjUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMzNGQzOTkiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIwLjYiIHN0b3AtY29sb3I9IiMxMGI5ODEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTBiOTgxIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgoKICA8IS0tIFJvdW5kZWQtc3F1YXJlIHN1cmZhY2UgLS0+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSI5NiIgZmlsbD0idXJsKCNzdXJmYWNlKSIvPgoKICA8IS0tIE91dGVyIGd1aWRlIHJpbmcgKHZlcnkgZmFpbnQg4oCUIHZpc3VhbCBzdHJ1Y3R1cmUpIC0tPgogIDxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMTYwIgogICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTBiOTgxIiBzdHJva2Utb3BhY2l0eT0iMC4xNSIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gVGhyZWUgYXJjIHNlZ21lbnRzIGZvcm1pbmcgdGhlIGxvb3AuIEVhY2ggYXJjIHNwYW5zIDEwMMKwLCBsZWF2aW5nCiAgICAgICAyMMKwIGdhcHMgZm9yIHRoZSBhcnJvd2hlYWRzIHRvIGxpdmUuIEFyY3MgZ28gY291bnRlci1jbG9ja3dpc2UgdG8KICAgICAgIHN1Z2dlc3QgZm9yd2FyZCBtb3Rpb24gKHRvcCDihpIgYm90dG9tLXJpZ2h0IOKGkiBib3R0b20tbGVmdCDihpIgdG9wKS4gLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTBiOTgxIiBzdHJva2Utd2lkdGg9IjE0IiBzdHJva2UtbGluZWNhcD0icm91bmQiPgogICAgPCEtLSBBcmMgMTogMTIgbydjbG9jayDihpIgNCBvJ2Nsb2NrIChpc3N1ZSDihpIgYnJhbmNoKSAtLT4KICAgIDxwYXRoIGQ9Ik0gMjU2IDk2CiAgICAgICAgICAgICBBIDE2MCAxNjAgMCAwIDEgMzk0LjU2IDMzNiIgc3Ryb2tlLW9wYWNpdHk9IjAuOTUiLz4KICAgIDwhLS0gQXJjIDI6IDQgbydjbG9jayDihpIgOCBvJ2Nsb2NrIChicmFuY2gg4oaSIG1lcmdlKSAtLT4KICAgIDxwYXRoIGQ9Ik0gMzcyLjc5IDM3Mi43OQogICAgICAgICAgICAgQSAxNjAgMTYwIDAgMCAxIDExNy40NCAzMzYiIHN0cm9rZS1vcGFjaXR5PSIwLjc1Ii8+CiAgICA8IS0tIEFyYyAzOiA4IG8nY2xvY2sg4oaSIDEyIG8nY2xvY2sgKG1lcmdlIOKGkiBuZXh0IGlzc3VlKSAtLT4KICAgIDxwYXRoIGQ9Ik0gMTM5LjIxIDM3Mi43OQogICAgICAgICAgICAgQSAxNjAgMTYwIDAgMCAxIDIzNC4yMSA5OS41MSIgc3Ryb2tlLW9wYWNpdHk9IjAuNTUiLz4KICA8L2c+CgogIDwhLS0gVGhyZWUgbm9kZXMgYXQgYXJjIGVuZHBvaW50cyAtLT4KICA8ZyBmaWxsPSIjMTBiOTgxIj4KICAgIDxjaXJjbGUgY3g9IjI1NiIgY3k9Ijk2IiByPSIxOCIvPgogICAgPGNpcmNsZSBjeD0iMzk0LjU2IiBjeT0iMzM2IiByPSIxOCIgZmlsbC1vcGFjaXR5PSIwLjgiLz4KICAgIDxjaXJjbGUgY3g9IjExNy40NCIgY3k9IjMzNiIgcj0iMTgiIGZpbGwtb3BhY2l0eT0iMC42Ii8+CiAgPC9nPgoKICA8IS0tIENlbnRyYWwgc3Bhcmsg4oCUIHRoZSBpc3N1ZSBjYXRhbHlzdCAtLT4KICA8Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjU2IiBmaWxsPSJ1cmwoI3NwYXJrKSIvPgogIDxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjIiIGZpbGw9IiMzNGQzOTkiLz4KCjwvc3ZnPgo=" x="800" y="120" width="320" height="320"/>
+
+  <g transform="translate(60, 70)">
+    <rect rx="999" width="220" height="36" fill="#10b981" fill-opacity="0.12"
+          stroke="#10b981" stroke-opacity="0.4" stroke-width="1"/>
+    <circle cx="20" cy="18" r="5" fill="#34d399"/>
+    <text x="35" y="23" font-family="ui-sans-serif, system-ui, sans-serif"
+          font-size="14" fill="#a7f3d0" font-weight="600">
+      Issue-Driven Development
+    </text>
+  </g>
+
+  <text x="60" y="240" font-family="ui-sans-serif, system-ui, sans-serif"
+        font-size="56" font-weight="800" fill="#f5f5f5" letter-spacing="-1">
+    Ship faster.
+  </text>
+  <text x="60" y="310" font-family="ui-sans-serif, system-ui, sans-serif"
+        font-size="56" font-weight="800" fill="#10b981" letter-spacing="-1">
+    Ship principled.
+  </text>
+
+  <text x="60" y="380" font-family="ui-sans-serif, system-ui, sans-serif"
+        font-size="22" fill="#a3a3a3" font-weight="500">
+    Astro 5 · React 19 · shadcn/Base UI · TanStack · Tremor Raw · Motion · PWA
+  </text>
+
+  <g transform="translate(60, 440)">
+    <text font-family="ui-monospace, monospace" font-size="18" fill="#d4d4d8">
+      <tspan x="0" y="0">Shape Up cadence · TDD · Spec-DD · Ethics gate · /goal orchestration</tspan>
+    </text>
+  </g>
+
+  <text x="60" y="580" font-family="ui-monospace, monospace"
+        font-size="14" fill="#737373">
+    github.com/ArtemioPadilla/issue-driven-web-template
+  </text>
+</svg>

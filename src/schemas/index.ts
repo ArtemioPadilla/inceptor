@@ -11,3 +11,9 @@
  */
 
 export { LoginSchema, type LoginValues } from './login';
+export {
+  ContactSchema,
+  type ContactValues,
+  NewsletterSchema,
+  type NewsletterValues,
+} from './contact';

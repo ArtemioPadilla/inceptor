@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/islands/ContactForm';
+import NewsletterForm from '../components/islands/NewsletterForm';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Send a message or subscribe to occasional updates about the scaffold."
+  lang="en"
+>
+  <main class="mx-auto max-w-3xl px-4 py-12">
+    <header class="mb-10">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground">Get in touch</h1>
+      <p class="mt-2 text-muted-foreground">
+        Two ways to reach me: drop a message, or subscribe for occasional updates
+        when the scaffold ships a major feature.
+      </p>
+    </header>
+
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold text-foreground">Send a message</h2>
+      <p class="mt-1 mb-4 text-sm text-muted-foreground">
+        Skeleton form. Set <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">PUBLIC_CONTACT_ENDPOINT</code>
+        to a Web3Forms, Formspree, or Netlify Forms URL to wire it up.
+      </p>
+      <ContactForm client:visible />
+    </section>
+
+    <section class="rounded-lg border border-border bg-card p-6">
+      <h2 class="text-xl font-semibold text-foreground">Subscribe</h2>
+      <p class="mt-1 mb-4 text-sm text-muted-foreground">
+        Newsletter skeleton. Wire <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">PUBLIC_NEWSLETTER_ENDPOINT</code>
+        to Buttondown, ConvertKit, or any JSON-accepting subscribe URL.
+      </p>
+      <NewsletterForm client:visible />
+    </section>
+  </main>
+</BaseLayout>
