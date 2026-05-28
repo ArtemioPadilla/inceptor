@@ -3,6 +3,8 @@ import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import ThemeToggle from '../components/common/ThemeToggle.astro';
 import OfflineBanner from '../components/islands/OfflineBanner';
+import InstallButton from '../components/islands/InstallButton';
+import UpdateToast from '../components/islands/UpdateToast';
 
 interface Props {
   title?: string;
@@ -39,6 +41,17 @@ const {
         }
       })();
     </script>
+    <!--
+      Wire the @vite-pwa/astro virtual module into our Nano Stores so the
+      UpdateToast appears when a new SW is ready. This must be a module
+      script (no is:inline) so the @/* alias resolves at build time.
+      Placed after the theme script so the critical theme-flash prevention
+      runs first.
+    -->
+    <script>
+      import { initPwaRegister } from '@/lib/pwa-register';
+      initPwaRegister();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
@@ -57,5 +70,14 @@ const {
       blocking first paint. position: fixed means it doesn't affect layout.
     -->
     <OfflineBanner client:idle />
+    <!--
+      InstallButton: appears when `beforeinstallprompt` fires (Chromium only).
+      Stays invisible on Safari/Firefox — no extra conditional needed.
+      UpdateToast: appears when a new SW is waiting; the Reload button
+      skip-waits + reloads. Both use client:idle for the same reason as
+      OfflineBanner — no need to block first paint.
+    -->
+    <InstallButton client:idle />
+    <UpdateToast client:idle />
   </body>
 </html>
