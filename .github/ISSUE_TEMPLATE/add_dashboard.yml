@@ -1,0 +1,50 @@
+name: "📊 Add a dashboard / chart"
+description: Add a chart wrapper or dashboard page powered by Recharts + TanStack Query
+title: "feat(dashboard): <short title>"
+labels:
+  - "type:feat"
+  - "phase-4"
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Chart / dashboard name
+      placeholder: e.g. SalesByRegion, /dashboard/finance
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options:
+        - Single chart wrapper (src/components/ui/charts/*.tsx)
+        - Dashboard page composing multiple charts
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Data source
+      description: Where does the data come from? Live API (TanStack Query)? Static? Local SSE? Be specific.
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Visual design / mock
+      description: Paste a sketch, Figma link, or word description. Mention if dark mode needs special handling.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] Component uses CSS-var-driven colors (`var(--chart-N)`, `var(--border)`, etc.)
+        - [ ] Recharts code is lazy-chunked (not in root bundle)
+        - [ ] If new dashboard page: appears in `/dashboard` or a nested route
+        - [ ] Light + dark variants visible on `/showcase` (or page)
+        - [ ] `npm run build && npm run test` pass
+    validations:
+      required: true

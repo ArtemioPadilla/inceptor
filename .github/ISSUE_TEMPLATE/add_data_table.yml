@@ -1,0 +1,55 @@
+name: "🗂️ Add a data table"
+description: New `<DataTable>` consumer or extension of the DataTable core
+title: "feat(data-table): <short title>"
+labels:
+  - "type:feat"
+  - "phase-3"
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Consumer / island name
+      placeholder: e.g. UsersTable, OrdersTable
+    validations:
+      required: true
+  - type: textarea
+    id: columns
+    attributes:
+      label: Column definitions
+      description: List each column with accessorKey, header, and any custom cell renderer.
+      placeholder: |
+        - id (number, narrow)
+        - name (string, sortable)
+        - status (enum, badge cell)
+    validations:
+      required: true
+  - type: input
+    id: row_count
+    attributes:
+      label: Expected row count
+      description: Affects whether virtualization defaults are sufficient.
+      placeholder: e.g. ~100, ~10k, ~1M
+    validations:
+      required: true
+  - type: dropdown
+    id: url_state
+    attributes:
+      label: URL state sync?
+      description: Enables `syncToUrl` so filter/sort state lives in `?q=...&sort=...` (see #14).
+      options:
+        - "Yes (shareable views)"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] Island file at `src/components/islands/<name>.tsx`
+        - [ ] Uses `DataTable` from `@/components/ui/data-table`
+        - [ ] Columns typed via TypeScript generics
+        - [ ] If `url_state: Yes`, passes `syncToUrl={{ key: '...' }}`
+        - [ ] `npm run build && npm run test` pass
+    validations:
+      required: true
