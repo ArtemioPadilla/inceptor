@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { flags } from '../../lib/flags';
+
+type BlogEntry = CollectionEntry<'blog'>;
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((entry: BlogEntry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: BlogEntry;
+}
+
+const { entry } = Astro.props;
+
+// Early redirect when the blog is disabled.
+if (!flags.blog) {
+  return Astro.redirect('/', 308);
+}
+
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={`${entry.data.title} — Blog`} description={entry.data.description}>
+  <main class="mx-auto max-w-3xl px-4 py-12">
+    <nav class="mb-6 text-sm">
+      <a href="/blog/" class="text-muted-foreground hover:text-foreground">← Blog</a>
+    </nav>
+
+    <header class="mb-8 border-b border-border pb-6">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground" style="view-transition-name: page-title">
+        {entry.data.title}
+      </h1>
+      <p class="mt-2 text-muted-foreground">{entry.data.description}</p>
+      <div class="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+        <time datetime={entry.data.pubDate.toISOString()}>
+          {entry.data.pubDate.toISOString().slice(0, 10)}
+        </time>
+        {entry.data.updatedDate && (
+          <span>
+            updated {entry.data.updatedDate.toISOString().slice(0, 10)}
+          </span>
+        )}
+        {entry.data.tags.length > 0 && (
+          <span class="flex gap-1.5">
+            {entry.data.tags.map((tag) => (
+              <span class="rounded bg-muted px-1.5 py-0.5 font-mono">{tag}</span>
+            ))}
+          </span>
+        )}
+      </div>
+    </header>
+
+    <article class="prose prose-neutral dark:prose-invert max-w-none">
+      <Content />
+    </article>
+  </main>
+</BaseLayout>
