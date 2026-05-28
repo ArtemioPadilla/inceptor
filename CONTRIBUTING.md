@@ -22,8 +22,14 @@ npm run check         # astro diagnostics
 Baselines live under `tests/__screenshots__/{chromium-light,chromium-dark}/`.
 
 The CI workflow at `.github/workflows/visual.yml` re-runs Playwright on every PR.
-Any pixel diff beyond the configured threshold fails the build until you commit
-refreshed baselines.
+
+> ⚠️ **Initial baselines were captured on macOS** and may produce false-positive
+> diffs against Ubuntu CI runners due to system font metric differences (~20–50px
+> in total page height). The CI job is currently configured with
+> `continue-on-error: true` (advisory mode). The fix is to refresh baselines from
+> a Linux environment — see "Refresh baselines in CI's environment" below. Once
+> baselines are platform-stable, remove the `continue-on-error` flag in
+> `.github/workflows/visual.yml` to turn the gate back on.
 
 ### Update baselines after an intentional visual change
 
@@ -49,6 +55,24 @@ npm run test:visual    # equivalent to: playwright test
   data is stable and reproducible.
 - **Animations and transitions** are disabled by a `<style>` tag injected
   before each screenshot capture, so no frames are caught mid-animation.
+
+### Refresh baselines in CI's environment (Linux)
+
+The Playwright project ships a Docker image matching the CI runner. From a host
+with Docker running:
+
+```bash
+docker run --rm \
+  -v "$(pwd):/work" -w /work \
+  -e CI=true \
+  mcr.microsoft.com/playwright:v1.60.0-noble \
+  sh -c "npm ci && npm run build && npx playwright test --update-snapshots"
+git add tests/__screenshots__/
+git commit -m "test(visual): refresh baselines (linux)"
+```
+
+After this, the macOS/Linux differential disappears and the CI gate becomes
+trustworthy enough to flip back to a hard fail.
 
 ### First-time local setup
 
