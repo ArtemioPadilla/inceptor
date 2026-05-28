@@ -303,6 +303,88 @@ A 2-day "no new features" rule held by self-discipline alone will be skipped. Pi
 
 Recommendation: the tagged option — mechanical, no orchestrator state.
 
+## Epic 14 — Daily DX surface
+
+*Source: DX architect subagent.* The Monday ritual promises 15 minutes but
+the dev opens `ROADMAP.md` (now 350+ lines), greps GitHub, then types a
+free-form `/goal` string from memory. Ship a small, opinionated command
+surface so the daily flow is mechanical.
+
+- [ ] `npm run monday` — Monday-morning dashboard: open PRs, in-progress branches, last week's `centinela` rejections, top-3 oldest open issues, numbered menu the dev replies `1/2/3` to
+- [ ] `npm run ship` — runs `check` + `git push -u origin HEAD` + `gh pr create --fill --web` in one step
+- [ ] `npm run check` consolidates: `build` + `check:astro` (renamed) + `type-check` + `test` + (when Epic 12 lands) `ux:check`
+- [ ] `npm run doctor` — preflight: node version, gh auth, `ANTHROPIC_API_KEY`, clean tree, branch-naming compliance, with actionable fixes
+- [ ] `npm run docs` — opens `docs/INDEX.md` (orientation map, lands with Epic 15)
+- [ ] `scripts/parallel-worktrees.sh` — spawn forja in `git worktree add .claude/worktrees/issue-<N>` for parallel-safe issues from prometeo's plan; reconcile at end
+- [ ] `scripts/new-issue.sh` — interactive wrapper around `gh issue create --template`, infers labels from branch
+- [ ] `.claude/commands/monday.md`, `ship.md`, `doctor.md` — slash-command mirrors
+- [ ] **TDD tiers** — add `tdd-tier:strict|smoke|exempt` issue labels with rubric in `docs/PRINCIPLES.md` §2.1 (also implements F1's structural cousin for testing — see Review findings)
+- [ ] **chore-train lane** — long-lived `chore/<week>` branch where `centinela-light` auto-approves dep bumps + copy edits + ADR additions, squash-merged Fridays. Docs in `CONTRIBUTING.md` §"When NOT to use IDD"
+- [ ] **Centinela verdict tokens** — REJECTED output appends `verdict_token: RETRY_FORJA|NEEDS_HUMAN|BLOCKED_UPSTREAM` + `failure_class: BUILD|TYPE|TEST|FORBIDDEN_IMPORT|ETHICS|REPORTING_MISMATCH` as a trailing fenced JSON block. ADR `docs/decisions/0003-centinela-verdict-tokens.md`
+- [ ] **prometeo `parallel_safe: bool`** per issue in plan frontmatter so `/goal` can fan out
+
+## Epic 15 — Docs site (Astro Starlight at `/docs/*`)
+
+*Source: Documentation strategist subagent.* Resolves F5 (consolidate the
+doc surface).
+
+- [ ] Install `@astrojs/starlight`; mount at `/docs/*` route prefix in `astro.config.mjs`
+- [ ] Configure Pagefind search (Starlight default — no Algolia until corpus > 200 pages)
+- [ ] Information architecture — 7 sections (see ADR for full tree):
+  - **Start here** (quick start, what you get, 60-second IDD tour)
+  - **Stack** (Astro, React, Tailwind v4, shadcn/Base UI, TanStack, Tremor, Recharts, Motion, PWA, forbidden imports — single canonical list)
+  - **How we work** (IDD, Shape Up, TDD, Spec-DD, /goal, sub-agents)
+  - **Ethics & UX** (Fogg framework, 8-item checklist with tiers, UX quality bar, Stakeholder Analysis)
+  - **Building** (adding a component, hydration, compound-component gotcha, theming, testing, visual regression)
+  - **Reference** (live components gallery — embeds `src/components/ui/*`; commands cheatsheet; env vars; file structure)
+  - **Decisions** (auto-generated index of `docs/decisions/`)
+- [ ] **Single-source forbidden-imports JSON** at `.claude/checklists/forbidden-imports.json` — MDX page renders as a table, `centinela` greps the same file (closes F5's drift problem permanently)
+- [ ] `scripts/sync-stack-versions.mjs` — reads `package.json`, regenerates `src/content/docs/_generated/stack-versions.mdx` in `prebuild`
+- [ ] Live components: `/docs/reference/components/<name>` MDX imports the actual `src/components/ui/<name>` and renders inline (one React island per component, `client:visible`)
+- [ ] `npm run docs:check` — broken-link checker (lychee) + Pagefind dry-run
+- [ ] Wire `npm run a11y` + `lighthouse` (Epic 12) to crawl `/docs/*` — same quality bar as the app
+- [ ] **Repo markdown reorganization** — implements F5:
+  - **Keep at root** (slim): `README.md` (pitch + quick-start + link to `/docs`, ~50 lines), `CLAUDE.md` (~150 lines — Claude reads from disk at runtime, cannot move), `CONTRIBUTING.md` (~30 lines — pointer to docs site), `ROADMAP.md` (active operational doc)
+  - **Move**: `INTEGRATION-PLAN.md` → `docs/history/integration-plan.md`
+  - **Delete**: `SETUP.md` (content moves to `/docs/start-here/`); leave a 1-line stub redirecting
+  - **Single source of truth**: docs source `.md` files in `docs/`, MDX-imported into the Starlight site
+- [ ] ADR `docs/decisions/0004-starlight-for-docs.md` recording the choice
+- [ ] *(stretch)* TypeDoc on `src/lib/*` exports embedded as reference page
+- [ ] *(stretch)* Per-page "Was this page helpful?" → FeedbackFAB integration
+
+## Epic 16 — Gallery + Demo + Marketing surface
+
+*Source: Demo + gallery designer subagent.* The current `/showcase` mixes
+component-reference with marketing dump. Split into three distinct surfaces.
+
+- [ ] **Vocabulary + scope**:
+  - **Gallery** (`/gallery`, `/gallery/<component>`) — every primitive in isolation, source-of-truth for visual regression
+  - **Demos** (`/demos/<name>`) — composed real-feeling pages (dashboard, data, large-table, PWA, forms…)
+  - **Marketing** (`/`) — 8-second pitch + paths into Gallery, Demos, Docs
+- [ ] **Built-in, not Storybook** — Astro pages + visual regression infra we already have. Avoid 150 MB devDeps + parallel routing model
+- [ ] `src/content/gallery/index.ts` — manifest of every component with metadata (name, slug, status badge, install command, source path, demo island)
+- [ ] `src/components/gallery/GalleryPage.astro` — per-component layout shell (header, hero, variant matrix, snippet + source side-by-side, props table, recipes, "used in" footer)
+- [ ] `src/components/gallery/CodeSnippet.tsx` — Shiki-highlighted source via `?raw` import + `navigator.clipboard.writeText` copy button (simultaneously fixes the `document.execCommand('copy')` deprecation in FeedbackFAB — Epic 5)
+- [ ] `src/components/gallery/VariantGrid.tsx` — cva-aware variant matrix (auto-render `variant × size × state` where possible)
+- [ ] `src/components/gallery/PropsTable.astro` — declarative props table from colocated `<name>.gallery.ts` files
+- [ ] **Migrate** every existing `Showcase*` island → `/gallery/<component>` page; retain light+dark side-by-side
+- [ ] `/gallery/index.astro` — thumbnail grid linking each component page
+- [ ] **Move routes**: `/dashboard` → `/demos/dashboard`, `/data` → `/demos/data`, `/data/large` → `/demos/data/large` (with 301 redirects)
+- [ ] `/demos/index.astro` — composed-demo index
+- [ ] **Rewrite `/`** — real launchpad: hero + "What's inside" thumbnail grid (auto-from Playwright baselines) + "See it composed" demo links + "Docs + workflow" links. Bundles Epic 4 brand assets (OG image, favicon.ico, real PWA icons)
+- [ ] **Restructure Playwright baselines** per-component — `tests/__screenshots__/gallery-<component>-<theme>.png`. Replaces the giant `/showcase` baseline. **Unblocks Epic 1** — per-component baselines are mechanical to refresh in Docker
+- [ ] `tests/visual/gallery.spec.ts` — iterates manifest, auto-enrolls new components
+- [ ] *(stretch)* `<Playground>` React island for live prop editing on Button first
+- [ ] *(stretch)* `/gallery.json` build-time endpoint emitting the manifest for external embedding
+
+### Per-archetype demo strategy (when archetypes land)
+
+- **backend** — `/demos/api` with self-hosted Swagger UI from OpenAPI derived from `src/schemas/`
+- **decentralized** — `/demos/wallet` with wallet-connect, opt-in gated
+- **onion** — `/demos/onion-safe` asserts at build time (Playwright network spy) that the gallery loads with **zero external requests**
+
+---
+
 ### F7. Functional Triad must change implementation, not just label it
 
 *Source: Methodology + Ethics subagents.* Modifies: `docs/ETHICS.md` §Functional Triad, Epic 13.
