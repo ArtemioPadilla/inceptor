@@ -1,0 +1,61 @@
+name: "✨ Add a UI component"
+description: Request a new shadcn/ui-style component for src/components/ui/
+title: "feat(ui): add <ComponentName> component"
+labels:
+  - "type:feat"
+  - "phase-1"
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Component name
+      description: PascalCase, e.g. `Tooltip`, `Accordion`, `Slider`
+      placeholder: e.g. Tooltip
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Composition
+      description: Is this a single primitive or a compound component?
+      options:
+        - Primitive (single element — Button, Input, Badge, etc.)
+        - Compound (shared state — Dialog, Tabs, DropdownMenu, etc.)
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: Proposed API
+      description: Sketch the props / sub-components. Reference an existing example from `src/components/ui/`.
+      placeholder: |
+        <Tooltip>
+          <TooltipTrigger>...</TooltipTrigger>
+          <TooltipContent>...</TooltipContent>
+        </Tooltip>
+    validations:
+      required: false
+  - type: dropdown
+    id: primitive
+    attributes:
+      label: Primitive source
+      description: Where does the interactive behavior come from? (CLAUDE.md forbids `@radix-ui` and `framer-motion`.)
+      options:
+        - "@base-ui-components/react"
+        - "No external primitive (CSS / native HTML only)"
+        - "Other (describe in acceptance criteria)"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete checks centinela can validate. Each criterion on its own line.
+      value: |
+        - [ ] `src/components/ui/<name>.tsx` exports the component
+        - [ ] No `@radix-ui`, no `framer-motion` imports
+        - [ ] Visible on `/showcase` in both light and dark
+        - [ ] Has a `?raw` test in `src/components/ui/<name>.test.ts`
+        - [ ] `npm run build && npm run test` pass
+    validations:
+      required: true
