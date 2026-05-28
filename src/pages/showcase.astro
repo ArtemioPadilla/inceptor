@@ -11,6 +11,7 @@ import ThemeIndicator from '../components/islands/ThemeIndicator';
 import QueryDemo from '../components/islands/QueryDemo';
 import ShowcaseDataTable from '../components/islands/ShowcaseDataTable';
 import ShowcaseCharts from '../components/islands/ShowcaseCharts';
+import ShowcasePWA from '../components/islands/ShowcasePWA';
 
 // /showcase — living documentation for every installed shadcn/ui component.
 // Each section renders the component in both light and dark side-by-side.
@@ -219,6 +220,21 @@ import ShowcaseCharts from '../components/islands/ShowcaseCharts';
           <p class="text-xs uppercase tracking-wide text-muted-foreground mb-4">Dark</p>
           <ShowcaseCharts client:visible />
         </div>
+      </div>
+    </section>
+    <!-- PWA install + update prompts -->
+    <section aria-labelledby="section-pwa">
+      <h2 id="section-pwa" class="text-xl font-semibold mb-4">PWA prompts</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">InstallButton</code>
+        appears when <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">beforeinstallprompt</code>
+        fires (Chromium only). <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">UpdateToast</code>
+        appears after a new service worker is ready. Both are mounted globally in
+        BaseLayout with <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">client:idle</code>.
+        Use the simulation buttons below to preview them.
+      </p>
+      <div class="rounded-lg border border-border bg-background p-6">
+        <ShowcasePWA client:visible />
       </div>
     </section>
   </main>
