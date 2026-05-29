@@ -13,7 +13,7 @@ Date: 2026-05-28
 ## Context
 
 This scaffold's primary developer is one person, sometimes working with Claude
-Code sub-agents (`prometeo`, `forja`, `centinela`). The IDD workflow already in
+Code sub-agents (`prometeo`, `forja`, `centinela`). The Inceptor workflow already in
 place — issue → PR → merge, orchestrated via native `/goal` — needs a cadence
 framework on top of it.
 

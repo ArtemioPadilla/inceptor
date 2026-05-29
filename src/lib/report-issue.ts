@@ -1,4 +1,4 @@
-const REPO = 'ArtemioPadilla/issue-driven-web-template';
+const REPO = 'ArtemioPadilla/inceptor';
 
 export interface ReportIssueInput {
   title: string;

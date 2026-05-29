@@ -1,5 +1,5 @@
 ---
-title: The 60-second IDD tour
+title: The 60-second Inceptor tour
 description: How a feature actually moves from idea to shipped in this scaffold.
 ---
 
@@ -7,7 +7,7 @@ Every feature ships through the same loop.
 
 ## 1. File the issue
 
-Use one of the [issue templates](https://github.com/ArtemioPadilla/issue-driven-web-template/issues/new/choose)
+Use one of the [issue templates](https://github.com/ArtemioPadilla/inceptor/issues/new/choose)
 or run `npm run new-issue` (auto-detects labels from your branch).
 
 The issue should answer four Shape Up questions:

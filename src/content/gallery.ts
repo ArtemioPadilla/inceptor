@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'compound' | 'data' | 'charts' | 'motion' | 'pwa' | 'idd';
+  category: 'primitives' | 'compound' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -151,7 +151,7 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'pwa',
     island: 'ShowcasePWA',
   },
-  // IDD
+  // Inceptor
   {
     slug: 'error-boundary',
     name: 'ErrorBoundary',
@@ -159,7 +159,7 @@ export const galleryManifest: GalleryEntry[] = [
       'Throw an error inside an island — get a pre-filled GitHub issue with stack trace, component path, URL, and UA.',
     source: 'src/components/islands/ErrorBoundary.tsx',
     status: 'stable',
-    category: 'idd',
+    category: 'inceptor',
     island: 'ShowcaseErrorBoundary',
   },
 ];
@@ -175,7 +175,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
   charts: 'KPIs & charts',
   motion: 'Motion',
   pwa: 'PWA',
-  idd: 'IDD reporting',
+  inceptor: 'Inceptor reporting',
 };
 
 export const categoryOrder: GalleryEntry['category'][] = [
@@ -185,5 +185,5 @@ export const categoryOrder: GalleryEntry['category'][] = [
   'charts',
   'motion',
   'pwa',
-  'idd',
+  'inceptor',
 ];

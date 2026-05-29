@@ -15,7 +15,7 @@ export const en = {
   home: {
     title: 'Ship faster. Ship principled.',
     tagline:
-      'An Astro + React scaffold for issue-driven development with built-in ethics, accessibility, and TDD guardrails.',
+      'An Astro + React scaffold for Inceptor with built-in ethics, accessibility, and TDD guardrails.',
     ctaPrimary: 'Browse the gallery',
     ctaSecondary: 'Read the docs',
   },

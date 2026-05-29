@@ -10,7 +10,7 @@ import { DataTable } from '@/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
 
 // The repo whose GitHub Issues drive the live data on the dashboard.
-const REPO = 'ArtemioPadilla/issue-driven-web-template';
+const REPO = 'ArtemioPadilla/inceptor';
 
 interface GitHubIssue {
   id: number;

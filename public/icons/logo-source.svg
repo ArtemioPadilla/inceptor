@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  IDD scaffold brand mark.
+  Inceptor scaffold brand mark.
 
   Three nodes arranged on a circle, connected by curved arrows that trace
-  the issue-driven loop: open → branch → merge → (back to open). The
+  the Inceptor loop: open → branch → merge → (back to open). The
   central dot is the "spark" — a new issue arriving. Emerald accent on
   near-black surface matches the existing brand color (#10b981 emerald-500).
 

@@ -7,4 +7,4 @@ description: What lives where in this scaffold.
 > linked below; this page will be expanded with site-native content in a
 > follow-up.
 
-See [`CLAUDE.md` — File organization](https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/CLAUDE.md#file-organization).
+See [`CLAUDE.md` — File organization](https://github.com/ArtemioPadilla/inceptor/blob/main/CLAUDE.md#file-organization).

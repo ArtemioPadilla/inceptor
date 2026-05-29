@@ -132,7 +132,7 @@ be circular to wrap (ErrorBoundary itself depends on report-issue).
 ## Epic 4 — Brand & PWA assets — ✅ closed (#67)
 
 - [x] Replace `pwa-512` placeholder lettermark with real artwork —
-      `public/icons/logo-source.svg` 3-node IDD loop (#67); a designer can
+      `public/icons/logo-source.svg` 3-node Inceptor loop (#67); a designer can
       swap the SVG and re-run `scripts/generate-og.mjs`
 - [x] Add `pwa-192.png` (#67)
 - [x] Add maskable icon variants — `pwa-maskable-512.png` (#67)
@@ -183,7 +183,7 @@ be circular to wrap (ErrorBoundary itself depends on report-issue).
       `src/components/ui/` (compound-component intra-island Context is
       legitimate per CLAUDE.md rule scope)
 - [ ] Promote `prometeo` / `forja` / `centinela` sub-agents to a generic
-      IDD skill set so other repos can adopt without copying `.claude/agents/*.md`
+      Inceptor skill set so other repos can adopt without copying `.claude/agents/*.md`
 - [x] Add `.editorconfig` (#64)
 - [x] Add Prettier (`format` / `format:check` scripts) (#64)
 - [ ] Add a `format:check` step in CI — scripts exist but `ci.yml` runs only

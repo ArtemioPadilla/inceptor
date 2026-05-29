@@ -41,7 +41,7 @@ const ogSvg = `<?xml version="1.0" encoding="UTF-8"?>
     <circle cx="20" cy="18" r="5" fill="#34d399"/>
     <text x="35" y="23" font-family="ui-sans-serif, system-ui, sans-serif"
           font-size="14" fill="#a7f3d0" font-weight="600">
-      Issue-Driven Development
+      Inceptor
     </text>
   </g>
 
@@ -67,7 +67,7 @@ const ogSvg = `<?xml version="1.0" encoding="UTF-8"?>
 
   <text x="60" y="580" font-family="ui-monospace, monospace"
         font-size="14" fill="#737373">
-    github.com/ArtemioPadilla/issue-driven-web-template
+    github.com/ArtemioPadilla/inceptor
   </text>
 </svg>`;
 
