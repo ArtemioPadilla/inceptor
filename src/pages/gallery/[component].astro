@@ -89,7 +89,7 @@ const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.s
         Rendered example — light + dark
       </h2>
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div class="rounded-lg border border-border bg-background p-6">
+        <div class="light rounded-lg border border-border bg-background p-6 text-foreground">
           <p class="mb-4 text-xs uppercase tracking-wide text-muted-foreground">Light</p>
           {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
           {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
@@ -104,7 +104,7 @@ const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.s
           {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
           {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
         </div>
-        <div class="dark rounded-lg border border-border bg-background p-6">
+        <div class="dark rounded-lg border border-border bg-background p-6 text-foreground">
           <p class="mb-4 text-xs uppercase tracking-wide text-muted-foreground">Dark</p>
           {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
           {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}

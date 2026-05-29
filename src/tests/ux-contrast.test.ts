@@ -37,7 +37,9 @@ function extractVars(blockSelector: RegExp): Vars {
   return out;
 }
 
-const lightVars = extractVars(/:root\s*\{([\s\S]*?)\}/);
+// `:root` may be grouped with `.light` (the alias used to force light tokens
+// inside a `.dark` page — see global.css). Match either form.
+const lightVars = extractVars(/:root(?:\s*,\s*\.light)?\s*\{([\s\S]*?)\}/);
 const darkVars = extractVars(/\.dark\s*\{([\s\S]*?)\}/);
 
 /** Parse an oklch(L C H) string to sRGB. Best-effort, sufficient for AA contrast. */
