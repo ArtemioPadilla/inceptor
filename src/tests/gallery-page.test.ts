@@ -79,7 +79,7 @@ describe('gallery manifest', () => {
   });
 
   it('includes every required category', () => {
-    for (const cat of ['primitives', 'compound', 'data', 'charts', 'motion', 'pwa', 'idd']) {
+    for (const cat of ['primitives', 'compound', 'data', 'charts', 'motion', 'pwa', 'inceptor']) {
       expect(manifestSrc).toContain(`'${cat}'`);
     }
   });

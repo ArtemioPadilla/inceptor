@@ -11,10 +11,10 @@ interface RepoInfo {
 
 function RepoStatsInner() {
   const { data, isLoading, error } = useQuery<RepoInfo>({
-    queryKey: ['repo', 'issue-driven-web-template'],
+    queryKey: ['repo', 'inceptor'],
     queryFn: async () => {
       const res = await fetch(
-        'https://api.github.com/repos/ArtemioPadilla/issue-driven-web-template',
+        'https://api.github.com/repos/ArtemioPadilla/inceptor',
       );
       if (!res.ok) throw new Error(`GitHub API ${res.status}`);
       return res.json() as Promise<RepoInfo>;

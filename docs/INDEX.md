@@ -13,7 +13,7 @@ lands) will use the same structure.
 | Understand the workflow / methodology | [`docs/PRINCIPLES.md`](./PRINCIPLES.md) |
 | Look up the ethics checklist | [`docs/ETHICS.md`](./ETHICS.md) |
 | Add a new component | [`docs/COMPONENTS.md`](./COMPONENTS.md) |
-| See the IDD workflow + sub-agents | [`CLAUDE.md`](../CLAUDE.md) — Workflow section |
+| See the Inceptor workflow + sub-agents | [`CLAUDE.md`](../CLAUDE.md) — Workflow section |
 | Pick the next thing to ship | [`ROADMAP.md`](../ROADMAP.md) |
 | See what's already shipped | [`INTEGRATION-PLAN.md`](../INTEGRATION-PLAN.md) — historical record |
 | Open a PR | `npm run ship` |
@@ -24,7 +24,7 @@ lands) will use the same structure.
 | Refresh visual baselines | `npm run test:visual:update` (see [`CONTRIBUTING.md`](../CONTRIBUTING.md)) |
 | Write an ADR | Copy [`docs/decisions/TEMPLATE.md`](./decisions/TEMPLATE.md) |
 | Browse past ADRs | [`docs/decisions/`](./decisions/) |
-| Report a bug | Use the FeedbackFAB on any rendered page, or [open an issue](https://github.com/ArtemioPadilla/issue-driven-web-template/issues/new/choose) |
+| Report a bug | Use the FeedbackFAB on any rendered page, or [open an issue](https://github.com/ArtemioPadilla/inceptor/issues/new/choose) |
 
 ## Quick refs
 

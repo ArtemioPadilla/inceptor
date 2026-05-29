@@ -7,14 +7,14 @@ description: Get a working local copy of the scaffold in under five minutes.
 
 - **Node.js** ≥ 22 (use `nvm` or `fnm`)
 - **npm** ≥ 10
-- **git**, **gh** (GitHub CLI) — gh is required for the `/goal` IDD workflow
+- **git**, **gh** (GitHub CLI) — gh is required for the `/goal` Inceptor workflow
 
 Run `npm run doctor` at any time to verify your environment.
 
 ## Clone & install
 
 ```sh
-gh repo create my-thing --template ArtemioPadilla/issue-driven-web-template --public --clone
+gh repo create my-thing --template ArtemioPadilla/inceptor --public --clone
 cd my-thing
 npm install
 ```
@@ -44,5 +44,5 @@ Visit `http://localhost:4321/` for the app, `http://localhost:4321/docs/` for th
 ## Next
 
 Read [What you get](/docs/start-here/what-you-get/) for the feature inventory,
-or [The 60-second IDD tour](/docs/start-here/idd-tour/) to understand the
+or [The 60-second Inceptor tour](/docs/start-here/inceptor-tour/) to understand the
 workflow before you make your first change.

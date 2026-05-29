@@ -28,7 +28,7 @@ export const docsSidebar: DocsGroup[] = [
       { label: 'Documentation home', slug: '' },
       { label: 'Quick start', slug: 'start-here/quick-start' },
       { label: 'What you get', slug: 'start-here/what-you-get' },
-      { label: 'The 60-second IDD tour', slug: 'start-here/idd-tour' },
+      { label: 'The 60-second Inceptor tour', slug: 'start-here/inceptor-tour' },
     ],
   },
   {
@@ -41,7 +41,7 @@ export const docsSidebar: DocsGroup[] = [
   {
     label: 'How we work',
     items: [
-      { label: 'Issue-driven development', slug: 'how-we-work/idd' },
+      { label: 'Inceptor', slug: 'how-we-work/inceptor' },
       { label: 'Shape Up cadence', slug: 'how-we-work/shape-up' },
       { label: 'TDD with trailers', slug: 'how-we-work/tdd' },
       { label: 'Spec-DD with Zod', slug: 'how-we-work/spec-dd' },

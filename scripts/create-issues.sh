@@ -157,7 +157,7 @@ if ! $SKIP_META; then
   create_milestone "v0.6 - Dashboards"            "Phase 4 — Tremor Raw + Recharts + /dashboard page"
   create_milestone "v0.7 - Offline-first"         "Phase 5 — @vite-pwa/astro + offline UI"
   create_milestone "v0.8 - Motion"                "Phase 6 — view transitions + tailwindcss-motion + Motion lazy"
-  create_milestone "v1.0 - IDD-aware stack"       "Phase 7 — FeedbackFAB+React + visual regression + issue templates"
+  create_milestone "v1.0 - Inceptor-aware stack"       "Phase 7 — FeedbackFAB+React + visual regression + issue templates"
   echo
 fi
 
@@ -353,7 +353,7 @@ create_issue "feat: Motion (lazy) for complex islands" \
 - [ ] No \`framer-motion\` imports anywhere')"
 
 create_issue "feat: FeedbackFAB captures React errors" \
-  "v1.0 - IDD-aware stack" "phase-7,type:feat" \
+  "v1.0 - Inceptor-aware stack" "phase-7,type:feat" \
   "$(make_body 24 'phase-7/issue-024-feedback-react' '#6' 'L' \
     'ErrorBoundary on each island. Capture component path. Hydration mismatch detection.' \
     '- [ ] ErrorBoundary auto-applied
@@ -361,7 +361,7 @@ create_issue "feat: FeedbackFAB captures React errors" \
 - [ ] Hydration mismatches captured')"
 
 create_issue "chore: update CLAUDE.md with installed stack context" \
-  "v1.0 - IDD-aware stack" "phase-7,type:chore" \
+  "v1.0 - Inceptor-aware stack" "phase-7,type:chore" \
   "$(make_body 25 'phase-7/issue-025-claude-md' '#17' 'S' \
     'Refresh CLAUDE.md to reflect actually-installed versions and add /goal docs.' \
     '- [ ] Versions current
@@ -369,7 +369,7 @@ create_issue "chore: update CLAUDE.md with installed stack context" \
 - [ ] Compound-component gotcha with example')"
 
 create_issue "docs: new issue templates (component, dashboard, table)" \
-  "v1.0 - IDD-aware stack" "phase-7,type:docs" \
+  "v1.0 - Inceptor-aware stack" "phase-7,type:docs" \
   "$(make_body 26 'phase-7/issue-026-issue-templates' '#25' 'M' \
     'add_component.yml, add_dashboard.yml, add_data_table.yml. Pre-fill Claude triage context.' \
     '- [ ] Three YAML templates
@@ -377,7 +377,7 @@ create_issue "docs: new issue templates (component, dashboard, table)" \
 - [ ] Pre-applied labels')"
 
 create_issue "chore: visual regression in CI (Playwright)" \
-  "v1.0 - IDD-aware stack" "phase-7,type:chore" \
+  "v1.0 - Inceptor-aware stack" "phase-7,type:chore" \
   "$(make_body 27 'phase-7/issue-027-visual-regression' '#7, #17' 'L' \
     'Playwright CI job snapshots /showcase and /dashboard in light + dark.' \
     '- [ ] Playwright configured

@@ -1,4 +1,4 @@
-# INTEGRATION-PLAN.md — UI stack integration for issue-driven-web-template
+# INTEGRATION-PLAN.md — UI stack integration for inceptor
 
 This is the canonical, machine-parsable source of truth for the integration of
 the recommended UI stack (Recipe C: shadcn/ui + Base UI + Tailwind v4 + TanStack
@@ -555,13 +555,13 @@ grep -r 'from "framer-motion"' src/ && echo "FAIL" || echo "PASS"
 
 ---
 
-## Phase 7 — IDD integration (the unique value)
+## Phase 7 — Inceptor integration (the unique value)
 
-**Milestone**: `v1.0 - IDD-aware stack`
+**Milestone**: `v1.0 - Inceptor-aware stack`
 
 ### Issue 024 — feat: FeedbackFAB captures React errors
 
-**Phase**: 7  | **Milestone**: v1.0 - IDD-aware stack  | **Labels**: phase-7, type:feat
+**Phase**: 7  | **Milestone**: v1.0 - Inceptor-aware stack  | **Labels**: phase-7, type:feat
 **Branch**: phase-7/issue-024-feedback-react
 **Depends on**: #006
 **Effort**: L
@@ -579,7 +579,7 @@ Extend the existing FeedbackFAB to:
 
 ### Issue 025 — chore: update CLAUDE.md with stack context
 
-**Phase**: 7  | **Milestone**: v1.0 - IDD-aware stack  | **Labels**: phase-7, type:chore
+**Phase**: 7  | **Milestone**: v1.0 - Inceptor-aware stack  | **Labels**: phase-7, type:chore
 **Branch**: phase-7/issue-025-claude-md
 **Depends on**: #017
 **Effort**: S
@@ -590,12 +590,12 @@ component locations). Add stack-specific guidance for Claude triage workflow.
 
 **Acceptance criteria**
 - [ ] `CLAUDE.md` lists exact installed versions
-- [ ] Documents the IDD workflow (native `/goal` + prometeo/forja/centinela sub-agents)
+- [ ] Documents the Inceptor workflow (native `/goal` + prometeo/forja/centinela sub-agents)
 - [ ] Includes the "compound-component gotcha" with example fix
 
 ### Issue 026 — docs: new issue templates
 
-**Phase**: 7  | **Milestone**: v1.0 - IDD-aware stack  | **Labels**: phase-7, type:docs
+**Phase**: 7  | **Milestone**: v1.0 - Inceptor-aware stack  | **Labels**: phase-7, type:docs
 **Branch**: phase-7/issue-026-issue-templates
 **Depends on**: #025
 **Effort**: M
@@ -612,7 +612,7 @@ where it goes, acceptance criteria template).
 
 ### Issue 027 — chore: visual regression in CI
 
-**Phase**: 7  | **Milestone**: v1.0 - IDD-aware stack  | **Labels**: phase-7, type:chore
+**Phase**: 7  | **Milestone**: v1.0 - Inceptor-aware stack  | **Labels**: phase-7, type:chore
 **Branch**: phase-7/issue-027-visual-regression
 **Depends on**: #007, #017
 **Effort**: L

@@ -11,7 +11,7 @@ file and only overrides stack/deploy specifics in its own `archetype.md`.
 
 ---
 
-## 1. Way of working — Shape Up + IDD
+## 1. Way of working — Shape Up + Inceptor
 
 We use a **Shape Up** cadence, not Scrum. Solo-dev-plus-AI-sub-agents makes the
 team ceremonies of Scrum degenerate. Shape Up's primitives translate cleanly:

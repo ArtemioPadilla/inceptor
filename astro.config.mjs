@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
 // Subpath the site is served under. GitHub *project* pages live at
-// `<domain>/<repo>/`, so the Pages build sets ASTRO_BASE=/issue-driven-web-template
+// `<domain>/<repo>/`, so the Pages build sets ASTRO_BASE=/inceptor
 // (see .github/workflows/deploy.yml). Local dev + root deploys leave it unset →
 // base '/'. The trailing slash is normalized by Astro.
 const BASE = process.env.ASTRO_BASE || '/';
@@ -17,7 +17,7 @@ const asset = (p) => `${BASE.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
 export default defineConfig({
   // Production origin — used for sitemap absolute URLs + Open Graph.
   // artemiop.com is the custom domain configured on the GitHub Pages account;
-  // this project repo is served at https://artemiop.com/issue-driven-web-template/.
+  // this project repo is served at https://artemiop.com/inceptor/.
   site: 'https://artemiop.com',
   base: BASE,
   // i18n routing — English at root (no prefix), Spanish under /es/.
@@ -62,10 +62,10 @@ export default defineConfig({
         'icons/logo-source.svg',
       ],
       manifest: {
-        name: 'issue-driven-web-template',
-        short_name: 'IDD Template',
+        name: 'inceptor',
+        short_name: 'Inceptor Template',
         description:
-          'Astro + React + shadcn + TanStack + Tremor Raw + Motion + PWA — issue-driven development scaffold',
+          'Astro + React + shadcn + TanStack + Tremor Raw + Motion + PWA — Inceptor scaffold',
         theme_color: '#10b981',
         background_color: '#0a0a0a',
         display: 'standalone',

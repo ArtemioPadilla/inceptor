@@ -7,4 +7,4 @@ description: Installed versions and architectural choices.
 > linked below; this page will be expanded with site-native content in a
 > follow-up.
 
-See [`CLAUDE.md`](https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/CLAUDE.md#stack-installed) — the "Stack (installed)" table is the canonical source.
+See [`CLAUDE.md`](https://github.com/ArtemioPadilla/inceptor/blob/main/CLAUDE.md#stack-installed) — the "Stack (installed)" table is the canonical source.

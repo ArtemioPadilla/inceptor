@@ -7,4 +7,4 @@ description: Why Dialog and Tabs must live in one island.
 > linked below; this page will be expanded with site-native content in a
 > follow-up.
 
-See [`docs/COMPONENTS.md` §4](https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/docs/COMPONENTS.md).
+See [`docs/COMPONENTS.md` §4](https://github.com/ArtemioPadilla/inceptor/blob/main/docs/COMPONENTS.md).

@@ -7,4 +7,4 @@ description: Native Claude Code orchestration with this scaffold's sub-agents.
 > linked below; this page will be expanded with site-native content in a
 > follow-up.
 
-See [`CLAUDE.md` § Workflow](https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/CLAUDE.md#workflow-native-goal--idd-sub-agents) for example conditions and reference the [native /goal docs](https://code.claude.com/docs/en/goal).
+See [`CLAUDE.md` § Workflow](https://github.com/ArtemioPadilla/inceptor/blob/main/CLAUDE.md#workflow-native-goal--inceptor-sub-agents) for example conditions and reference the [native /goal docs](https://code.claude.com/docs/en/goal).

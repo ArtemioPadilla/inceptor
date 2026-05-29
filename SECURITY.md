@@ -6,7 +6,7 @@ Only the `main` branch is supported.
 
 Please do not file public issues for sensitive findings. Use:
 
-- GitHub's private advisory flow: [report here](https://github.com/ArtemioPadilla/issue-driven-web-template/security/advisories/new)
+- GitHub's private advisory flow: [report here](https://github.com/ArtemioPadilla/inceptor/security/advisories/new)
 - Or email the maintainer (update this line in your fork)
 
 Acknowledgement within ~72 hours; remediation within 14 days for confirmed issues, severity-dependent.

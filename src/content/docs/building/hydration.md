@@ -7,4 +7,4 @@ description: "client:load vs idle vs visible vs media vs only."
 > linked below; this page will be expanded with site-native content in a
 > follow-up.
 
-See [`docs/COMPONENTS.md` §3](https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/docs/COMPONENTS.md).
+See [`docs/COMPONENTS.md` §3](https://github.com/ArtemioPadilla/inceptor/blob/main/docs/COMPONENTS.md).

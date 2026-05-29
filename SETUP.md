@@ -3,7 +3,7 @@
 ## 1. Use this template
 
 ```bash
-gh repo create my-project --template ArtemioPadilla/issue-driven-web-template --public
+gh repo create my-project --template ArtemioPadilla/inceptor --public
 cd my-project
 npm install
 ```

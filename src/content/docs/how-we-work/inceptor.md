@@ -1,9 +1,9 @@
 ---
-title: Issue-Driven Development
+title: Inceptor
 description: Every feature ships as issue → PR → merge → deploy.
 ---
 
-This scaffold practices **Issue-Driven Development**. There is no "just push
+This scaffold practices **Inceptor**. There is no "just push
 to main", no "I'll write the tests later", no "we'll document it after launch".
 Every change has:
 
@@ -13,12 +13,12 @@ Every change has:
 4. **Three sub-agent passes** — `prometeo` plans, `forja` implements, `centinela` validates
 5. **Squash merge** to `main`, branch deleted
 
-Read [the 60-second tour](/docs/start-here/idd-tour/) for the workflow walkthrough.
+Read [the 60-second tour](/docs/start-here/inceptor-tour/) for the workflow walkthrough.
 
-## When NOT to use IDD
+## When NOT to use Inceptor
 
 Some changes are noise as full PRs. Use the `chore/<week>` train branch (when
-[Epic 14](https://github.com/ArtemioPadilla/issue-driven-web-template/blob/main/ROADMAP.md)
+[Epic 14](https://github.com/ArtemioPadilla/inceptor/blob/main/ROADMAP.md)
 lands) for:
 
 - Typo fixes
@@ -26,7 +26,7 @@ lands) for:
 - ADR additions (these are docs, not features)
 - Comment edits
 
-Squash-merge these in batches on Fridays. Full IDD is for behavior changes.
+Squash-merge these in batches on Fridays. Full Inceptor is for behavior changes.
 
 ## See also
 

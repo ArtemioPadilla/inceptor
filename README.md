@@ -1,6 +1,6 @@
-# issue-driven-web-template
+# inceptor
 
-> A web starter template built around **Issue-Driven Development (IDD)** — ship a Hello World, then let structured GitHub issues guide every feature forward.
+> A web starter template built around **Inceptor** — ship a Hello World, then let structured GitHub issues guide every feature forward.
 
 ## Documentation
 
@@ -37,7 +37,7 @@ User finds bug → FeedbackFAB → GitHub Issue → Claude plans → PR → Merg
 
 ```bash
 # 1. Use this template
-gh repo create my-project --template ArtemioPadilla/issue-driven-web-template
+gh repo create my-project --template ArtemioPadilla/inceptor
 
 # 2. Clone and install
 cd my-project

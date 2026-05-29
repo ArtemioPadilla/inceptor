@@ -8,7 +8,7 @@ tags:
 ---
 
 This is a placeholder post for the blog scaffold that ships with
-issue-driven-web-template.
+inceptor.
 
 If you want a blog, edit this post and add more files under
 `src/content/blog/`. They're automatically picked up by the content

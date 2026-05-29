@@ -1,8 +1,8 @@
-# issue-driven-web-template — Claude Code Context
+# inceptor — Claude Code Context
 
 ## Repository purpose
 
-A web starter template built around **Issue-Driven Development (IDD)**. Every
+A web starter template built around **Inceptor**. Every
 feature ships as: GitHub issue → Claude triages → PR → merge → deploy. The
 FeedbackFAB lets real users file issues with diagnostics pre-filled.
 
@@ -70,7 +70,7 @@ the full UI stack now in place.
 | `npx shadcn@latest add <component>` | add a shadcn/ui component |
 | `npx astro add <integration>` | add an Astro integration |
 
-## IDD conventions
+## Inceptor conventions
 
 - **Branch naming**: `phase-N/issue-NNN-short-slug`
   (e.g. `phase-0/issue-001-upgrade-astro-5`)
@@ -79,9 +79,9 @@ the full UI stack now in place.
 - **PR title**: same as the issue title; PR body must include `Closes #N`
 - **Issue labels**: `phase-0` through `phase-7`, plus one of `type:chore`,
   `type:feat`, `type:docs`
-- **Milestones**: `v0.2 - Stack modernization` through `v1.0 - IDD-aware stack`
+- **Milestones**: `v0.2 - Stack modernization` through `v1.0 - Inceptor-aware stack`
 
-## Workflow: native `/goal` + IDD sub-agents
+## Workflow: native `/goal` + Inceptor sub-agents
 
 This repo uses Claude Code's **native** `/goal` command (Claude Code v2.1.139+)
 with three project-specific sub-agents under `.claude/agents/`. Native `/goal`
@@ -178,7 +178,7 @@ Then hydrate as a single island in the page:
 This is what `src/components/islands/ShowcaseDialog.tsx`, `ShowcaseTabs.tsx`,
 `ShowcaseDropdown.tsx`, `ShowcaseToast.tsx`, and `ShowcaseForm.tsx` all do today.
 
-## IDD reporting (Phase 7)
+## Inceptor reporting (Phase 7)
 
 React islands are wrapped in `<ErrorBoundary>` (from
 `src/components/islands/ErrorBoundary.tsx`) which captures runtime errors and

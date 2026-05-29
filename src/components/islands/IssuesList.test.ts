@@ -31,7 +31,7 @@ describe('IssuesList', () => {
     // verify both the base URL and the REPO constant rather than the full
     // literal string.
     expect(source).toMatch(/api\.github\.com\/repos\//);
-    expect(source).toMatch(/ArtemioPadilla\/issue-driven-web-template/);
+    expect(source).toMatch(/ArtemioPadilla\/inceptor/);
   });
 
   it('does not import from framer-motion', () => {

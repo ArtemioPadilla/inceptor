@@ -38,7 +38,7 @@ if command -v gh >/dev/null 2>&1; then
   if gh auth status >/dev/null 2>&1; then
     ok "gh auth: signed in"
   else
-    warn "gh auth: not signed in — run \`gh auth login\` for the IDD flow to work"
+    warn "gh auth: not signed in — run \`gh auth login\` for the Inceptor flow to work"
   fi
 else
   warn "gh not found — install from https://cli.github.com (needed for /goal, ship, monday)"
@@ -57,7 +57,7 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   elif printf "%s" "$branch" | grep -qE '^(phase-[0-9]+/issue-[0-9]+-|chore/|docs/|test/|fix/)' ; then
     ok "branch \`$branch\` follows naming convention"
   else
-    warn "branch \`$branch\` does not match IDD naming (phase-N/issue-NNN-slug or chore/...)"
+    warn "branch \`$branch\` does not match Inceptor naming (phase-N/issue-NNN-slug or chore/...)"
   fi
 else
   fail "not inside a git repository"

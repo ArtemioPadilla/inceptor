@@ -30,7 +30,7 @@ description: Feature inventory shipped with the scaffold.
 
 ## Built-in workflow
 
-- **IDD sub-agents** — `prometeo`, `forja`, `centinela` in `.claude/agents/`
+- **Inceptor sub-agents** — `prometeo`, `forja`, `centinela` in `.claude/agents/`
 - **FeedbackFAB** — floating button that captures errors and pre-fills GitHub issues
 - **ErrorBoundary + HydrationCanary** — runtime errors become pre-filled issue reports
 - **Visual regression** — Playwright snapshots in CI

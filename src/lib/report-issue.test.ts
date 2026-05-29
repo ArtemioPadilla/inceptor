@@ -27,7 +27,7 @@ describe('buildIssueUrl', () => {
 
   it('points at the correct repo', () => {
     const url = buildIssueUrl({ title: 'x' });
-    expect(url).toContain('ArtemioPadilla/issue-driven-web-template');
+    expect(url).toContain('ArtemioPadilla/inceptor');
   });
 });
 

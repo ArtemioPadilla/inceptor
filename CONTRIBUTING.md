@@ -1,4 +1,4 @@
-# Contributing to issue-driven-web-template
+# Contributing to inceptor
 
 ## Development workflow
 

@@ -17,7 +17,7 @@ interface GitHubIssue {
   pull_request?: { url: string };
 }
 
-const REPO = 'ArtemioPadilla/issue-driven-web-template';
+const REPO = 'ArtemioPadilla/inceptor';
 
 function IssuesListInner() {
   const queryClient = useQueryClient();
