@@ -18,10 +18,17 @@
   }
 }
 
-@variant dark (&:where(.dark, .dark *));
+/* Dark applies under `.dark` — but NOT inside a `.light` island. This lets the
+   gallery render a true light preview and a true dark preview side-by-side on
+   the same page (a `.light` container re-declares the light tokens below AND
+   opts its subtree out of `dark:` utilities). */
+@variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 @layer base {
-  :root {
+  /* `.light` shares :root's values, so a `.light` container forces light tokens
+     even when nested under `html.dark`. No duplication — one source of truth. */
+  :root,
+  .light {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
