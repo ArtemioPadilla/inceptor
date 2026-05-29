@@ -1,5 +1,24 @@
 # Performance playbook
 
+## Measured baseline (2026-05-28, desktop preset, `npm run lighthouse`)
+
+| Page | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| `/` | 100 | 100 | 100 | 100 |
+| `/gallery` | 100 | 95 | 100 | 100 |
+| `/docs` | 100 | 100 | 100 | 100 |
+| `/demos/dashboard` | 92 | 93 | 96 | 100 |
+
+**Lighthouse criterion (Perf ≥ 90) — met on all pages** (min 92). The CI gate in
+`.lighthouserc.json` asserts Perf/A11y ≥ 0.90 and BP/SEO ≥ 0.95 at `error`, plus
+Core Web Vitals (CLS hard-fails > 0.1; FCP/LCP/TBT warn). The noisy
+`unused-javascript` and `network-dependency-tree` preset audits are set to `warn`
+— they're not part of our documented quality bar.
+
+**Open follow-up:** `/demos/dashboard` accessibility is 93, below our 0.95
+aspiration (Recharts SVG labelling is the likely cause). Tracked in ROADMAP
+Epic 12. Until fixed, the A11y gate sits at 0.90.
+
 The mechanical perf gates (Lighthouse CI, `.lighthouserc.json`) cover
 synthetic Web Vitals. They don't cover three things you have to measure
 by hand:
