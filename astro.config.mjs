@@ -5,10 +5,21 @@ import AstroPWA from '@vite-pwa/astro';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
+// Subpath the site is served under. GitHub *project* pages live at
+// `<domain>/<repo>/`, so the Pages build sets ASTRO_BASE=/issue-driven-web-template
+// (see .github/workflows/deploy.yml). Local dev + root deploys leave it unset →
+// base '/'. The trailing slash is normalized by Astro.
+const BASE = process.env.ASTRO_BASE || '/';
+// Public-asset prefix that respects BASE (BASE already ends without a trailing
+// slash unless it's '/'). Used for the PWA manifest icon paths below.
+const asset = (p) => `${BASE.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
+
 export default defineConfig({
-  // Set this to your production URL for sitemap absolute URLs + Open Graph.
-  // Replace when deploying — see ROADMAP Epic 6 (production readiness).
-  site: 'https://issue-driven-web-template.example',
+  // Production origin — used for sitemap absolute URLs + Open Graph.
+  // artemiop.com is the custom domain configured on the GitHub Pages account;
+  // this project repo is served at https://artemiop.com/issue-driven-web-template/.
+  site: 'https://artemiop.com',
+  base: BASE,
   // i18n routing — English at root (no prefix), Spanish under /es/.
   // `prefixDefaultLocale: false` keeps existing English URLs unchanged.
   i18n: {
@@ -20,12 +31,14 @@ export default defineConfig({
     },
   },
   // 301 redirects from the old top-level demo routes to their new /demos/*
-  // locations. Old URLs survive; visual baselines re-anchor automatically.
+  // locations. Targets are base-prefixed via asset() — Astro does NOT add the
+  // base to redirect targets automatically, so without this they'd 404 on a
+  // subpath deploy. Old URLs survive; visual baselines re-anchor automatically.
   redirects: {
-    '/dashboard': '/demos/dashboard',
-    '/data': '/demos/data',
-    '/data/large': '/demos/data/large',
-    '/showcase': '/gallery',
+    '/dashboard': asset('demos/dashboard'),
+    '/data': asset('demos/data'),
+    '/data/large': asset('demos/data/large'),
+    '/showcase': asset('gallery'),
   },
   integrations: [
     // MDX for the /docs/* content collection — lets pages embed React components
@@ -56,18 +69,18 @@ export default defineConfig({
         theme_color: '#10b981',
         background_color: '#0a0a0a',
         display: 'standalone',
-        start_url: '/',
-        scope: '/',
+        start_url: BASE,
+        scope: BASE,
         icons: [
-          { src: '/icons/pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/icons/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: asset('icons/pwa-192.png'), sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: asset('icons/pwa-512.png'), sizes: '512x512', type: 'image/png', purpose: 'any' },
           {
-            src: '/icons/pwa-maskable-512.png',
+            src: asset('icons/pwa-maskable-512.png'),
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
           },
-          { src: '/icons/logo-source.svg', sizes: 'any', type: 'image/svg+xml' },
+          { src: asset('icons/logo-source.svg'), sizes: 'any', type: 'image/svg+xml' },
         ],
       },
       workbox: {

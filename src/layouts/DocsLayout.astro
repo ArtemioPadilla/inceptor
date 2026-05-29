@@ -3,6 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import DocsSidebar from '../components/docs/DocsSidebar.astro';
 import DocsSearch from '../components/docs/DocsSearch.astro';
 import { docsOrder } from '../content/docs-sidebar';
+import { withBase } from '@/lib/href';
 
 interface Props {
   /** Page title shown in the browser tab and as the <h1>. */
@@ -26,7 +27,7 @@ const next = idx >= 0 && idx < docsOrder.length - 1 ? docsOrder[idx + 1] : null;
     <aside class="docs-aside">
       <div class="sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto pb-12 pr-2">
         <a
-          href="/docs/"
+          href={withBase('/docs/')}
           class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
         >
           ← Docs
@@ -53,7 +54,7 @@ const next = idx >= 0 && idx < docsOrder.length - 1 ? docsOrder[idx + 1] : null;
           <nav class="mt-12 grid grid-cols-1 gap-4 border-t border-border pt-6 sm:grid-cols-2">
             {prev ? (
               <a
-                href={`/docs/${prev.slug}/`.replace(/\/+$/, '/')}
+                href={withBase(`/docs/${prev.slug}/`.replace(/\/+$/, '/'))}
                 class="group flex flex-col rounded-lg border border-border bg-card px-4 py-3 text-card-foreground transition-colors hover:bg-accent/40"
                 rel="prev"
               >
@@ -65,7 +66,7 @@ const next = idx >= 0 && idx < docsOrder.length - 1 ? docsOrder[idx + 1] : null;
             )}
             {next ? (
               <a
-                href={`/docs/${next.slug}/`.replace(/\/+$/, '/')}
+                href={withBase(`/docs/${next.slug}/`.replace(/\/+$/, '/'))}
                 class="group flex flex-col items-end rounded-lg border border-border bg-card px-4 py-3 text-right text-card-foreground transition-colors hover:bg-accent/40"
                 rel="next"
               >

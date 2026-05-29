@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { t } from '../../i18n';
 ---
@@ -25,19 +26,19 @@ import { t } from '../../i18n';
 
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
         <a
-          href="/gallery/"
+          href={withBase('/gallery/')}
           class="inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-400"
         >
           {t('es', 'home.ctaPrimary')} →
         </a>
         <a
-          href="/docs/"
+          href={withBase('/docs/')}
           class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
         >
           {t('es', 'home.ctaSecondary')}
         </a>
         <a
-          href="/"
+          href={withBase('/')}
           class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
         >
           {t('es', 'nav.switchLanguage')}

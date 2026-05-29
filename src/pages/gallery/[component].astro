@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { galleryManifest, type GalleryEntry } from '../../content/gallery';
 
@@ -35,7 +36,7 @@ const repoBlob = `https://github.com/ArtemioPadilla/issue-driven-web-template/bl
 <BaseLayout title={`${entry.name} — Gallery`} description={entry.summary}>
   <main class="mx-auto max-w-6xl px-4 py-12">
     <nav class="mb-6 text-sm">
-      <a href="/gallery/" class="text-muted-foreground hover:text-foreground">← Gallery</a>
+      <a href={withBase('/gallery/')} class="text-muted-foreground hover:text-foreground">← Gallery</a>
     </nav>
 
     <header class="mb-8 border-b border-border pb-6">
@@ -125,9 +126,9 @@ const repoBlob = `https://github.com/ArtemioPadilla/issue-driven-web-template/bl
       <h2 class="mb-2 text-sm font-semibold text-foreground">Recipes &amp; props</h2>
       <p class="text-sm text-muted-foreground">
         Per-component recipes, prop tables, and variant matrices land in a follow-up
-        (see <a href="/docs/history/roadmap/" class="text-primary hover:underline">ROADMAP Epic 16</a>).
+        (see <a href={withBase('/docs/history/roadmap/')} class="text-primary hover:underline">ROADMAP Epic 16</a>).
         For now: open the source link above, or read the
-        <a href="/docs/building/adding-a-component/" class="text-primary hover:underline">
+        <a href={withBase('/docs/building/adding-a-component/')} class="text-primary hover:underline">
           contribution guide
         </a>.
       </p>
