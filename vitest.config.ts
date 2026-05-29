@@ -13,16 +13,12 @@ export default defineConfig({
     // global `afterEach`). Without this, multiple `render()` calls in the
     // same test file leak DOM into each other.
     globals: true,
-    // Default to node for the source-text + schema tests.
-    // Behavior tests (RTL render tests) opt in to jsdom via `// @vitest-environment jsdom`
-    // pragma at the top of the file. This keeps the fast tests fast.
+    // Default to node for the source-text + schema tests (fast, no DOM).
+    // RTL render tests opt in to jsdom via a `// @vitest-environment jsdom`
+    // pragma at the top of the file (see button.test.tsx, ErrorBoundary.test.tsx).
+    // NOTE: vitest 4 removed `environmentMatchGlobs` — the per-file pragma is
+    // now the only supported way to switch environment per test file.
     environment: 'node',
-    environmentMatchGlobs: [
-      // .tsx tests use React Testing Library by convention → jsdom
-      ['src/**/*.test.tsx', 'jsdom'],
-      // Behavior tests live under tests/behavior/ → jsdom regardless of extension
-      ['src/**/behavior/*.test.{ts,tsx}', 'jsdom'],
-    ],
     setupFiles: ['./vitest.setup.ts'],
   },
 });
