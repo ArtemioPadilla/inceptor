@@ -1,5 +1,6 @@
 ---
 import { docsSidebar } from '../../content/docs-sidebar';
+import { withBase } from '@/lib/href';
 
 interface Props {
   /** Slug of the currently-rendered page (without leading slash) */
@@ -25,7 +26,7 @@ function isCurrent(slug: string): boolean {
             {group.items.map((item) => (
               <li>
                 <a
-                  href={`/docs/${item.slug}/`.replace(/\/+$/, '/')}
+                  href={withBase(`/docs/${item.slug}/`.replace(/\/+$/, '/'))}
                   class:list={[
                     'block rounded-md px-2 py-1 transition-colors',
                     isCurrent(item.slug)

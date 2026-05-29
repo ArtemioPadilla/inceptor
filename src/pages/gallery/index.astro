@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   galleryManifest,
@@ -34,7 +35,7 @@ import {
               {entries.map((entry) => (
                 <li>
                   <a
-                    href={`/gallery/${entry.slug}/`}
+                    href={withBase(`/gallery/${entry.slug}/`)}
                     class="group block rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/40"
                   >
                     <div class="flex items-start justify-between gap-2">
@@ -68,12 +69,12 @@ import {
     <footer class="mt-12 border-t border-border pt-6 text-sm text-muted-foreground">
       <p>
         Looking for composed demos? Visit
-        <a href="/demos/" class="text-primary hover:underline">/demos</a>
+        <a href={withBase('/demos/')} class="text-primary hover:underline">/demos</a>
         for full dashboard / data / PWA pages.
       </p>
       <p class="mt-1">
         Building something new? See the
-        <a href="/docs/building/adding-a-component/" class="text-primary hover:underline">
+        <a href={withBase('/docs/building/adding-a-component/')} class="text-primary hover:underline">
           contribution guide
         </a>.
       </p>

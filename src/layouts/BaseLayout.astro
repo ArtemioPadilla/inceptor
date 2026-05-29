@@ -6,6 +6,7 @@ import OfflineBanner from '../components/islands/OfflineBanner';
 import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
 import UpdateToast from '../components/islands/UpdateToast';
+import { withBase } from '../lib/href';
 
 interface Props {
   title?: string;
@@ -63,21 +64,21 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="icon" type="image/png" sizes="32x32" href={withBase('/favicon.ico')} />
+    <link rel="apple-touch-icon" sizes="180x180" href={withBase('/apple-touch-icon.png')} />
     <meta name="theme-color" content="#10b981" />
-    {/* Open Graph + Twitter Card — uses the generated /og-image.png */}
+    {/* Open Graph + Twitter Card — base-aware absolute URL to the OG image */}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL('/og-image.png', Astro.site ?? 'https://issue-driven-web-template.example').toString()} />
+    <meta property="og:image" content={new URL(withBase('/og-image.png'), Astro.site ?? 'https://artemiop.com').toString()} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL('/og-image.png', Astro.site ?? 'https://issue-driven-web-template.example').toString()} />
+    <meta name="twitter:image" content={new URL(withBase('/og-image.png'), Astro.site ?? 'https://artemiop.com').toString()} />
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased" style="view-transition-name: body-bg">
     <div class="absolute top-4 right-4 z-50">
