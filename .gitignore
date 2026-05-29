@@ -1,5 +1,7 @@
 .env
 .env.*
+# …but the committed example file must NOT be ignored (it carries no secrets)
+!.env.example
 node_modules/
 dist/
 .astro/
@@ -7,3 +9,4 @@ dist/
 image002.png
 names.md
 test-results/
+.lighthouseci/
