@@ -2,102 +2,182 @@
 import { withBase } from '@/lib/href';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../content/gallery';
+
+const stats = [
+  { value: '53', label: 'pages prebuilt' },
+  { value: '349', label: 'tests green' },
+  { value: '0 KB', label: 'JS by default' },
+  { value: '100', label: 'Lighthouse perf' },
+];
+
+const flow = [
+  {
+    title: 'File the issue',
+    body: 'Use a template or run <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.7rem]">npm run new-issue</code>. Diagnostics pre-fill from the FeedbackFAB.',
+  },
+  {
+    title: 'Invoke <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.7rem]">/goal</code>',
+    body: 'prometeo plans, forja implements with a red→green test first, centinela validates the build, types, tests and ethics gate.',
+  },
+  {
+    title: 'PR opens',
+    body: 'Carries the issue reference, sub-agent reports and the 8-item ethics checklist. CI re-validates on every push.',
+  },
+  {
+    title: 'Merge',
+    body: 'The issue closes itself. Visual regression snapshots both <span class="font-mono text-[0.8em]">/gallery</span> and <span class="font-mono text-[0.8em]">/demos</span>.',
+  },
+];
 ---
 
-<BaseLayout title="inceptor" lang="en">
-  <main class="mx-auto max-w-6xl px-4 py-12">
+<BaseLayout title="Inceptor — issue-driven web scaffold" lang="en">
+  <!-- ───────────────────────── HERO ───────────────────────── -->
+  <section class="relative overflow-hidden grain">
+    <!-- atmosphere -->
+    <div class="pointer-events-none absolute inset-0 bg-grid mask-fade-b"></div>
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-[600px] glow-emerald"></div>
 
-    <section class="mb-16 text-center">
-      <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400">
-        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Inceptor
+    <div class="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pb-20 pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:pb-28 lg:pt-28">
+      <!-- copy -->
+      <div>
+        <div class="rise inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1.5 text-xs font-medium tracking-wide text-primary backdrop-blur" style="animation-delay:.02s">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+          </span>
+          <span class="font-mono">inceptor</span>
+          <span class="text-muted-foreground">· issue-driven web scaffold</span>
+        </div>
+
+        <h1
+          class="rise mt-6 font-display text-5xl font-semibold leading-[0.98] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+          style="view-transition-name: page-title; animation-delay:.08s"
+        >
+          Start every build<br />
+          at <span class="italic text-primary">full speed.</span>
+        </h1>
+
+        <p class="rise mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg" style="animation-delay:.16s">
+          A zero-cost, static-first scaffold with interactive islands — Astro 5, React 19,
+          Tailwind v4, shadcn/Base UI, TanStack, Tremor Raw, Motion and PWA — wired to a
+          principled workflow: Shape Up cadence, TDD, Zod-driven specs and a built-in ethics gate.
+        </p>
+
+        <div class="rise mt-9 flex flex-wrap items-center gap-3" style="animation-delay:.24s">
+          <a
+            href={withBase('/docs/start-here/quick-start/')}
+            class="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Quick start
+            <span class="transition-transform group-hover:translate-x-0.5">→</span>
+          </a>
+          <a
+            href={withBase('/gallery/')}
+            class="inline-flex items-center gap-2 rounded-xl border border-border bg-card/60 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-colors hover:border-primary/40 hover:bg-accent/50"
+          >
+            Explore the gallery
+          </a>
+        </div>
+
+        <div class="rise mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-muted-foreground" style="animation-delay:.3s">
+          <a href={withBase('/demos/')} class="transition-colors hover:text-primary">/demos</a>
+          <span class="text-border">·</span>
+          <a href={withBase('/docs/')} class="transition-colors hover:text-primary">/docs</a>
+          <span class="text-border">·</span>
+          <a href={withBase('/blog/')} class="transition-colors hover:text-primary">/blog</a>
+          <span class="text-border">·</span>
+          <a href="https://github.com/ArtemioPadilla/inceptor" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-primary">github ↗</a>
+        </div>
       </div>
 
-      <h1
-        class="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
-        style="view-transition-name: page-title"
-      >
-        A scaffold that ships everything you need.
-      </h1>
+      <!-- the loop graphic -->
+      <div class="rise relative mx-auto hidden aspect-square w-full max-w-md place-items-center lg:grid" style="animation-delay:.2s">
+        <div class="absolute inset-8 rounded-full glow-emerald opacity-70 blur-2xl"></div>
+        <svg viewBox="0 0 400 400" class="float-slow relative h-full w-full" role="img" aria-label="The Inceptor loop: issue, build, review, merge — repeating.">
+          <defs>
+            <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--color-primary-400)" />
+              <stop offset="100%" stop-color="var(--color-primary-600)" />
+            </linearGradient>
+            <radialGradient id="core" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--color-primary-400)" />
+              <stop offset="100%" stop-color="var(--color-primary-700)" />
+            </radialGradient>
+          </defs>
+          <!-- orbit -->
+          <g class="spin-slow" style="transform-origin:200px 200px">
+            <circle cx="200" cy="200" r="150" fill="none" stroke="url(#ig)" stroke-width="1.5" stroke-dasharray="4 10" opacity="0.55" />
+            <circle cx="200" cy="50" r="9" fill="url(#ig)" />
+            <circle cx="330" cy="275" r="9" fill="url(#ig)" />
+            <circle cx="70" cy="275" r="9" fill="url(#ig)" />
+          </g>
+          <!-- connecting arcs (the loop) -->
+          <g fill="none" stroke="url(#ig)" stroke-width="2.5" stroke-linecap="round" opacity="0.9">
+            <path d="M200 80 A 120 120 0 0 1 304 260" />
+            <path d="M304 260 A 120 120 0 0 1 96 260" />
+            <path d="M96 260 A 120 120 0 0 1 200 80" />
+          </g>
+          <!-- core spark -->
+          <circle cx="200" cy="200" r="34" fill="url(#core)" />
+          <circle cx="200" cy="200" r="34" fill="none" stroke="var(--color-primary-400)" stroke-width="1" opacity="0.5" />
+          <path d="M200 184 v32 M184 200 h32" stroke="var(--primary-foreground)" stroke-width="3" stroke-linecap="round" opacity="0.85" />
+        </svg>
+        <!-- stage labels -->
+        <span class="absolute left-1/2 top-1 -translate-x-1/2 rounded-md border border-border bg-card/80 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground backdrop-blur">issue</span>
+        <span class="absolute bottom-12 right-0 rounded-md border border-border bg-card/80 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground backdrop-blur">merge</span>
+        <span class="absolute bottom-12 left-0 rounded-md border border-border bg-card/80 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground backdrop-blur">review</span>
+      </div>
+    </div>
 
-      <p class="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-        Astro 5 · React 19 · Tailwind v4 · shadcn/Base UI · TanStack · Tremor Raw · Motion · PWA.
-        Plus Shape Up cadence, TDD with commit trailers, Zod-driven Spec-DD, and an 8-item
-        ethics checklist baked into the workflow.
-      </p>
+    <!-- stat strip -->
+    <div class="relative mx-auto max-w-6xl px-5">
+      <dl class="rise grid grid-cols-2 divide-border rounded-2xl border border-border bg-card/40 backdrop-blur sm:grid-cols-4 sm:divide-x" style="animation-delay:.36s">
+        {stats.map((s) => (
+          <div class="px-6 py-5">
+            <dt class="font-display text-3xl font-semibold text-foreground">{s.value}</dt>
+            <dd class="mt-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">{s.label}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
 
-      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <a
-          href={withBase('/docs/start-here/quick-start/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-400"
-        >
-          Quick start →
-        </a>
-        <a
-          href={withBase('/gallery/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          Component gallery
-        </a>
-        <a
-          href={withBase('/demos/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          Demos
-        </a>
-        <a
-          href={withBase('/docs/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          Docs
-        </a>
-        <a
-          href={withBase('/blog/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          Blog
-        </a>
-        <a
-          href="https://github.com/ArtemioPadilla/inceptor"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          GitHub ↗
+  <main class="mx-auto max-w-6xl px-5">
+    <!-- ─────────────── WHAT'S INSIDE ─────────────── -->
+    <section class="py-20 lg:py-24">
+      <div class="mb-10 flex items-end justify-between gap-4">
+        <div>
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The kit</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">What's inside</h2>
+        </div>
+        <a href={withBase('/gallery/')} class="shrink-0 font-mono text-sm text-muted-foreground transition-colors hover:text-primary">
+          browse all {galleryManifest.length} →
         </a>
       </div>
-    </section>
 
-    <!-- What's inside grid -->
-    <section class="mb-16">
-      <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-foreground">What's inside</h2>
-        <a href={withBase('/gallery/')} class="text-sm text-primary hover:underline">Browse all {galleryManifest.length} →</a>
-      </div>
-      <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
         {
           categoryOrder.slice(0, 6).map((cat) => {
             const entries = getByCategory(cat);
             if (entries.length === 0) return null;
             const first = entries[0];
             return (
-              <li>
+              <li class="bg-card">
                 <a
                   href={withBase(`/gallery/${first.slug}/`)}
-                  class="group block h-full rounded-lg border border-border bg-card p-5 transition-colors hover:bg-accent/40"
+                  class="group relative flex h-full flex-col p-6 transition-colors hover:bg-accent/40"
                 >
-                  <p class="text-xs uppercase tracking-wider text-muted-foreground">
+                  <span class="absolute inset-x-0 top-0 h-px scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100"></span>
+                  <p class="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-primary/80">
                     {categoryLabels[cat]}
                   </p>
-                  <h3 class="mt-1 text-base font-semibold text-foreground group-hover:underline">
+                  <h3 class="mt-2 text-lg font-semibold text-foreground">
                     {first.name}
                   </h3>
-                  <p class="mt-2 text-sm text-muted-foreground">{first.summary}</p>
-                  {entries.length > 1 && (
-                    <p class="mt-3 text-xs text-muted-foreground">
-                      + {entries.length - 1} more in {categoryLabels[cat].toLowerCase()}
-                    </p>
-                  )}
+                  <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{first.summary}</p>
+                  <span class="mt-auto pt-4 font-mono text-xs text-muted-foreground">
+                    {entries.length > 1 ? `+${entries.length - 1} more →` : 'view →'}
+                  </span>
                 </a>
               </li>
             );
@@ -106,41 +186,44 @@ import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '.
       </ul>
     </section>
 
-    <!-- Inceptor pitch -->
-    <section class="mb-16 rounded-xl border border-border bg-card p-8 text-card-foreground">
-      <h2 class="text-2xl font-bold">How development happens here</h2>
-      <ol class="mt-4 space-y-3 text-sm text-muted-foreground">
-        <li class="flex gap-3">
-          <span class="font-mono text-primary">1.</span>
-          <span><strong class="text-foreground">File the issue</strong> — use a template or run <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">npm run new-issue</code>.</span>
-        </li>
-        <li class="flex gap-3">
-          <span class="font-mono text-primary">2.</span>
-          <span><strong class="text-foreground">Invoke <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">/goal</code></strong> — prometeo plans, forja implements with a red→green test first, centinela validates.</span>
-        </li>
-        <li class="flex gap-3">
-          <span class="font-mono text-primary">3.</span>
-          <span><strong class="text-foreground">PR opens</strong> with the issue reference, sub-agent reports, ethics checklist. CI re-validates.</span>
-        </li>
-        <li class="flex gap-3">
-          <span class="font-mono text-primary">4.</span>
-          <span><strong class="text-foreground">Merge.</strong> Issue closes automatically. Visual regression snapshots both `/gallery` and `/demos`.</span>
-        </li>
-      </ol>
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a href={withBase('/docs/start-here/inceptor-tour/')} class="text-sm font-semibold text-primary hover:underline">
-          Read the 60-second tour →
-        </a>
-        <a href={withBase('/docs/how-we-work/inceptor/')} class="text-sm text-muted-foreground hover:text-foreground">
-          Full workflow doc
-        </a>
+    <!-- ─────────────── HOW IT HAPPENS ─────────────── -->
+    <section class="pb-20 lg:pb-24">
+      <div class="relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-12">
+        <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 glow-emerald opacity-50 blur-2xl"></div>
+        <div class="relative">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The loop</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            How a feature ships
+          </h2>
+          <ol class="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+            {flow.map((step, i) => (
+              <li class="flex gap-4">
+                <span class="select-none font-display text-4xl font-semibold leading-none text-primary/70">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 class="font-semibold text-foreground" set:html={step.title} />
+                  <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground" set:html={step.body} />
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div class="mt-10 flex flex-wrap gap-4">
+            <a href={withBase('/docs/start-here/inceptor-tour/')} class="inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary/80">
+              Read the 60-second tour →
+            </a>
+            <a href={withBase('/docs/how-we-work/inceptor/')} class="text-muted-foreground transition-colors hover:text-foreground">
+              Full workflow doc
+            </a>
+          </div>
+        </div>
       </div>
+
+      <p class="mt-10 text-center text-sm text-muted-foreground">
+        See a bug? Hit the
+        <span class="font-medium text-primary">chat bubble</span>
+        bottom-right — it files a GitHub issue with diagnostics pre-filled.
+      </p>
     </section>
-
-    <!-- FAB hint -->
-    <p class="text-center text-xs text-muted-foreground">
-      Click the <span class="text-emerald-400">chat bubble</span> in the bottom-right to file a bug with full diagnostics pre-filled.
-    </p>
-
   </main>
 </BaseLayout>
