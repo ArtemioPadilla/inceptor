@@ -7,18 +7,34 @@ import {
   categoryOrder,
   getByCategory,
 } from '../../content/gallery';
+
+// Import every gallery island statically so Astro can wire hydration.
+// (Dynamic lookups via a registry don't work for `client:*` directives.)
+import ShowcaseSimples from '../../components/islands/ShowcaseSimples';
+import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
+import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
+import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
+import ShowcaseToast from '../../components/islands/ShowcaseToast';
+import ShowcaseForm from '../../components/islands/ShowcaseForm';
+import ShowcaseDataTable from '../../components/islands/ShowcaseDataTable';
+import ShowcaseKpis from '../../components/islands/ShowcaseKpis';
+import ShowcaseCharts from '../../components/islands/ShowcaseCharts';
+import MotionDemo from '../../components/islands/MotionDemo';
+import ShowcasePWA from '../../components/islands/ShowcasePWA';
+import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundary';
 ---
 
-<BaseLayout title="Component gallery" description="Every component in this scaffold, one click away.">
-  <main class="mx-auto max-w-6xl px-4 py-12">
-    <header class="mb-10">
-      <h1 class="text-3xl font-bold tracking-tight text-foreground" style="view-transition-name: page-title">
+<BaseLayout title="Component gallery" description="Every component in this scaffold, rendered live.">
+  <main class="mx-auto max-w-5xl px-5 py-12">
+    <header class="mb-12">
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The kit</p>
+      <h1 class="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground" style="view-transition-name: page-title">
         Component gallery
       </h1>
-      <p class="mt-2 text-muted-foreground">
-        {galleryManifest.length} components, every variant on screen, every primitive
-        documented. Each page shows the rendered example in light + dark and links
-        to its source file.
+      <p class="mt-3 max-w-2xl text-muted-foreground">
+        All {galleryManifest.length} components, rendered live in the current theme. Toggle the
+        theme in the header to see any of them flip. Open a component for its
+        light + dark side-by-side, variant matrix and source.
       </p>
     </header>
 
@@ -27,46 +43,62 @@ import {
         const entries = getByCategory(cat);
         if (entries.length === 0) return null;
         return (
-          <section class="mb-10">
-            <h2 class="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <section class="mb-14">
+            <h2 class="mb-5 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-primary">
               {categoryLabels[cat]}
+              <span class="h-px flex-1 bg-border" />
             </h2>
-            <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="space-y-6">
               {entries.map((entry) => (
-                <li>
-                  <a
-                    href={withBase(`/gallery/${entry.slug}/`)}
-                    class="group block rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/40"
-                  >
-                    <div class="flex items-start justify-between gap-2">
-                      <h3 class="text-sm font-semibold text-foreground group-hover:underline">
-                        {entry.name}
-                      </h3>
+                <article class="overflow-hidden rounded-xl border border-border bg-card">
+                  <div class="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+                    <div class="flex items-center gap-2.5">
+                      <h3 class="font-semibold text-foreground">{entry.name}</h3>
                       <span
                         class:list={[
-                          'rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide',
+                          'rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide',
                           entry.status === 'stable' &&
-                            'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
+                            'border-primary/30 bg-primary/10 text-primary',
                           entry.status === 'beta' &&
-                            'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30',
+                            'border-yellow-500/40 bg-yellow-500/15 text-yellow-600 dark:text-yellow-300',
                           entry.status === 'experimental' &&
-                            'bg-orange-500/15 text-orange-300 border border-orange-500/30',
+                            'border-orange-500/40 bg-orange-500/15 text-orange-600 dark:text-orange-300',
                         ]}
                       >
                         {entry.status}
                       </span>
                     </div>
-                    <p class="mt-1.5 text-xs text-muted-foreground">{entry.summary}</p>
-                  </a>
-                </li>
+                    <a
+                      href={withBase(`/gallery/${entry.slug}/`)}
+                      class="shrink-0 font-mono text-xs text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      open →
+                    </a>
+                  </div>
+                  <p class="px-5 pt-4 text-sm text-muted-foreground">{entry.summary}</p>
+                  <div class="p-5">
+                    {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
+                    {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
+                    {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
+                    {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
+                    {entry.island === 'ShowcaseToast' && <ShowcaseToast client:visible />}
+                    {entry.island === 'ShowcaseForm' && <ShowcaseForm client:visible />}
+                    {entry.island === 'ShowcaseDataTable' && <ShowcaseDataTable client:visible />}
+                    {entry.island === 'ShowcaseKpis' && <ShowcaseKpis client:visible />}
+                    {entry.island === 'ShowcaseCharts' && <ShowcaseCharts client:visible />}
+                    {entry.island === 'MotionDemo' && <MotionDemo client:visible />}
+                    {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
+                    {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
+                  </div>
+                </article>
               ))}
-            </ul>
+            </div>
           </section>
         );
       })
     }
 
-    <footer class="mt-12 border-t border-border pt-6 text-sm text-muted-foreground">
+    <footer class="mt-4 border-t border-border pt-6 text-sm text-muted-foreground">
       <p>
         Looking for composed demos? Visit
         <a href={withBase('/demos/')} class="text-primary hover:underline">/demos</a>
