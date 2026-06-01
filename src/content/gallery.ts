@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'forms' | 'compound' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
+  category: 'primitives' | 'forms' | 'compound' | 'overlays' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -109,6 +109,18 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'compound',
     island: 'ShowcaseForm',
   },
+  // Overlays — anchored/portal popups on Base UI
+  {
+    slug: 'overlays',
+    name: 'Overlays',
+    summary:
+      'Tooltip, Popover, Alert dialog, Hover card, Context menu — all on Base UI portals.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'overlays',
+    install: 'npx shadcn@latest add tooltip popover alert-dialog hover-card context-menu --yes',
+    island: 'ShowcaseOverlays',
+  },
   // Data — TanStack Table / Virtual
   {
     slug: 'data-table',
@@ -184,6 +196,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
   primitives: 'Primitives',
   forms: 'Form controls',
   compound: 'Compound components',
+  overlays: 'Overlays',
   data: 'Data',
   charts: 'KPIs & charts',
   motion: 'Motion',
@@ -195,6 +208,7 @@ export const categoryOrder: GalleryEntry['category'][] = [
   'primitives',
   'forms',
   'compound',
+  'overlays',
   'data',
   'charts',
   'motion',
