@@ -8,6 +8,7 @@ import { galleryManifest, type GalleryEntry } from '../../content/gallery';
 import ShowcaseSimples from '../../components/islands/ShowcaseSimples';
 import ShowcaseFormControls from '../../components/islands/ShowcaseFormControls';
 import ShowcaseOverlays from '../../components/islands/ShowcaseOverlays';
+import ShowcaseDisclosure from '../../components/islands/ShowcaseDisclosure';
 import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
 import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
 import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
@@ -96,6 +97,7 @@ const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.s
           {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
           {entry.island === 'ShowcaseFormControls' && <ShowcaseFormControls client:visible />}
           {entry.island === 'ShowcaseOverlays' && <ShowcaseOverlays client:visible />}
+          {entry.island === 'ShowcaseDisclosure' && <ShowcaseDisclosure client:visible />}
           {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
           {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
           {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
@@ -113,6 +115,7 @@ const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.s
           {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
           {entry.island === 'ShowcaseFormControls' && <ShowcaseFormControls client:visible />}
           {entry.island === 'ShowcaseOverlays' && <ShowcaseOverlays client:visible />}
+          {entry.island === 'ShowcaseDisclosure' && <ShowcaseDisclosure client:visible />}
           {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
           {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
           {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
