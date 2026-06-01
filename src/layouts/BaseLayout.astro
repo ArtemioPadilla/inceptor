@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
-import ThemeToggle from '../components/common/ThemeToggle.astro';
+import SiteHeader from '../components/common/SiteHeader.astro';
 import OfflineBanner from '../components/islands/OfflineBanner';
 import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
@@ -89,9 +89,7 @@ const {
     <meta name="twitter:image" content={new URL(withBase('/og-image.png'), Astro.site ?? 'https://artemiop.com').toString()} />
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased" style="view-transition-name: body-bg">
-    <div class="absolute top-4 right-4 z-50">
-      <ThemeToggle />
-    </div>
+    <SiteHeader />
     <slot />
     <FeedbackFAB lang={lang} />
     <!--
