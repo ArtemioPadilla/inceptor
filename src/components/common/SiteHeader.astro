@@ -1,0 +1,63 @@
+---
+/**
+ * Global navigation header. Rendered by BaseLayout on every page so the
+ * wordmark (→ home) and section links are always reachable — previously
+ * most pages had no way back to home or across sections.
+ */
+import ThemeToggle from './ThemeToggle.astro';
+import { withBase } from '@/lib/href';
+
+const nav = [
+  { href: '/gallery/', label: 'Gallery' },
+  { href: '/demos/', label: 'Demos' },
+  { href: '/docs/', label: 'Docs' },
+  { href: '/blog/', label: 'Blog' },
+];
+
+// Mark the active section so the current area is obvious. Compare on the
+// path *after* the base, so it works under /inceptor/ too.
+const here = Astro.url.pathname.replace(/\/+$/, '') + '/';
+const isActive = (href: string) => here.includes(href);
+---
+
+<header class="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur-md">
+  <nav class="mx-auto flex max-w-6xl items-center gap-3 px-5 py-2.5">
+    <a
+      href={withBase('/')}
+      class="group flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-foreground"
+      aria-label="Inceptor — home"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" class="text-primary transition-transform group-hover:rotate-90">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 3" opacity="0.55"></circle>
+        <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+      </svg>
+      Inceptor
+    </a>
+
+    <div class="ml-auto flex items-center gap-0.5 font-mono text-xs sm:gap-1 sm:text-sm">
+      {
+        nav.map((n) => (
+          <a
+            href={withBase(n.href)}
+            aria-current={isActive(n.href) ? 'page' : undefined}
+            class:list={[
+              'rounded-md px-2 py-1 transition-colors hover:text-primary',
+              isActive(n.href) ? 'text-primary' : 'text-muted-foreground',
+            ]}
+          >
+            {n.label}
+          </a>
+        ))
+      }
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden rounded-md px-2 py-1 text-muted-foreground transition-colors hover:text-primary sm:inline"
+      >
+        GitHub ↗
+      </a>
+      <span class="ml-1"><ThemeToggle /></span>
+    </div>
+  </nav>
+</header>
