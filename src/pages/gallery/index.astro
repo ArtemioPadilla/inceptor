@@ -11,6 +11,7 @@ import {
 // Import every gallery island statically so Astro can wire hydration.
 // (Dynamic lookups via a registry don't work for `client:*` directives.)
 import ShowcaseSimples from '../../components/islands/ShowcaseSimples';
+import ShowcaseFormControls from '../../components/islands/ShowcaseFormControls';
 import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
 import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
 import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
@@ -78,6 +79,7 @@ import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundar
                   <p class="px-5 pt-4 text-sm text-muted-foreground">{entry.summary}</p>
                   <div class="p-5">
                     {entry.island === 'ShowcaseSimples' && <ShowcaseSimples client:visible />}
+                    {entry.island === 'ShowcaseFormControls' && <ShowcaseFormControls client:visible />}
                     {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
                     {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
                     {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}

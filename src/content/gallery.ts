@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'compound' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
+  category: 'primitives' | 'forms' | 'compound' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -49,6 +49,18 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'primitives',
     install: 'npx shadcn@latest add button input label card table badge --yes',
     island: 'ShowcaseSimples',
+  },
+  // Form controls — Base UI input primitives
+  {
+    slug: 'form-controls',
+    name: 'Form controls',
+    summary:
+      'Select, Checkbox, Radio group, Switch, Slider, Textarea — every input on Base UI primitives.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'forms',
+    install: 'npx shadcn@latest add select checkbox radio-group switch slider textarea --yes',
+    island: 'ShowcaseFormControls',
   },
   // Compound components — shared internal state, single-island only
   {
@@ -170,6 +182,7 @@ export function getByCategory(category: GalleryEntry['category']): GalleryEntry[
 
 export const categoryLabels: Record<GalleryEntry['category'], string> = {
   primitives: 'Primitives',
+  forms: 'Form controls',
   compound: 'Compound components',
   data: 'Data',
   charts: 'KPIs & charts',
@@ -180,6 +193,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
 
 export const categoryOrder: GalleryEntry['category'][] = [
   'primitives',
+  'forms',
   'compound',
   'data',
   'charts',
