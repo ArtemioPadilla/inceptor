@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'forms' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
+  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -61,6 +61,17 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'forms',
     install: 'npx shadcn@latest add select checkbox radio-group switch slider textarea --yes',
     island: 'ShowcaseFormControls',
+  },
+  // Advanced inputs — Base UI + composed controls
+  {
+    slug: 'advanced',
+    name: 'Advanced inputs',
+    summary:
+      'Toggle, Toggle group, Number field, Toolbar, Sheet, Rating, Tag input, Input OTP.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'advanced',
+    island: 'ShowcaseAdvanced',
   },
   // Compound components — shared internal state, single-island only
   {
@@ -219,6 +230,7 @@ export function getByCategory(category: GalleryEntry['category']): GalleryEntry[
 export const categoryLabels: Record<GalleryEntry['category'], string> = {
   primitives: 'Primitives',
   forms: 'Form controls',
+  advanced: 'Advanced inputs',
   compound: 'Compound components',
   overlays: 'Overlays',
   disclosure: 'Disclosure & layout',
@@ -233,6 +245,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
 export const categoryOrder: GalleryEntry['category'][] = [
   'primitives',
   'forms',
+  'advanced',
   'compound',
   'overlays',
   'disclosure',
