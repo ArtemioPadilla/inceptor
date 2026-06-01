@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'forms' | 'compound' | 'overlays' | 'disclosure' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
+  category: 'primitives' | 'forms' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -134,6 +134,17 @@ export const galleryManifest: GalleryEntry[] = [
       'npx shadcn@latest add accordion collapsible avatar skeleton separator scroll-area aspect-ratio --yes',
     island: 'ShowcaseDisclosure',
   },
+  // Navigation & feedback — breadcrumb/pagination/alert/spinner/meter/empty…
+  {
+    slug: 'feedback',
+    name: 'Navigation & feedback',
+    summary:
+      'Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'feedback',
+    island: 'ShowcaseFeedback',
+  },
   // Data — TanStack Table / Virtual
   {
     slug: 'data-table',
@@ -211,6 +222,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
   compound: 'Compound components',
   overlays: 'Overlays',
   disclosure: 'Disclosure & layout',
+  feedback: 'Navigation & feedback',
   data: 'Data',
   charts: 'KPIs & charts',
   motion: 'Motion',
@@ -224,6 +236,7 @@ export const categoryOrder: GalleryEntry['category'][] = [
   'compound',
   'overlays',
   'disclosure',
+  'feedback',
   'data',
   'charts',
   'motion',
