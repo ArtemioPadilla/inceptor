@@ -5,7 +5,8 @@ description: Architecture Decision Record.
 
 ## Status
 
-Accepted
+Superseded by [0004](./0004-custom-docs-route) — Starlight was never shipped; a
+custom `/docs/[...slug].astro` route replaced it.
 
 Date: 2026-05-28
 
