@@ -1,86 +1,74 @@
-# inceptor
+# Inceptor
 
-> A web starter template built around **Inceptor** — ship a Hello World, then let structured GitHub issues guide every feature forward.
+> An Astro 5 + React 19 starter where every feature ships through a GitHub issue: **issue → `/goal` → PR → merge → deploy.** Batteries-included UI, zero JS by default.
 
-## Documentation
+**[Live demo → artemiop.com/inceptor](https://artemiop.com/inceptor/)**
 
-- [Principles](docs/PRINCIPLES.md) — how we work (Shape Up + TDD + Spec-DD), ethics, UX bar, governance, non-negotiables
-- [Ethics](docs/ETHICS.md) — persuasive-tech framework + 8-item checklist (Fogg-grounded)
-- [Decisions log](docs/decisions/) — ADRs for irreversible architectural choices
-- [Component contribution guide](docs/COMPONENTS.md) — adding components, hydration, theming, dark mode
-- [Integration plan](INTEGRATION-PLAN.md) — historical record of the 27-issue rollout
-- [Roadmap](ROADMAP.md) — post-integration follow-ups grouped into epics
-- [Contributing](CONTRIBUTING.md) — workflow, tests, visual regression
-- [Claude Code context](CLAUDE.md) — repo conventions and stack details
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ArtemioPadilla/inceptor/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![Components](https://img.shields.io/badge/components-~44-emerald)](./docs/component-catalog.md)
+[![Deps beyond stack](https://img.shields.io/badge/deps%20beyond%20stack-0-success)](./docs/component-catalog.md)
 
-## What's included
+Inceptor is a production-grade web template built around **Issue-Driven Development**. It ships an islands-architecture Astro site with a full UI kit, a custom docs site, a component gallery, live demos, a blog, and PWA/offline support — and a `FeedbackFAB` that lets real users file pre-filled GitHub issues straight from the running app.
 
-- **Hello World** — minimal Astro + Tailwind page, deployable in minutes
-- **FeedbackFAB** — floating button that captures JS errors, network failures, and lets users report issues directly to GitHub with full diagnostics pre-filled
-- **GitHub Actions + Claude** — AI-powered issue triage, automatic plans, and PR generation on every new issue
-- **CI/CD pipeline** — build, test, and deploy on push to `main`
-- **Feature flags** — beta/prod environment detection from day 1
-- **Issue templates** — structured templates for bugs, features, questions
-- **Milestone workflow** — `v1.0` milestone pre-loaded with bootstrap issues
+## What you get
 
-## Philosophy
+### Stack
 
-Most templates give you a blank canvas. This one gives you a **living backlog**.
+| Package | Role |
+|---|---|
+| **Astro 5** | Islands architecture, ships zero JS by default |
+| **React 19** (`@astrojs/react`) | Only for interactive islands |
+| **Tailwind v4** (`@tailwindcss/vite`) | Styling — no `@astrojs/tailwind` |
+| **Base UI** (`@base-ui-components/react`) | shadcn-compatible primitives (not Radix) |
+| **TanStack Table + Query + Virtual** | DataTable, per-island data, virtualization |
+| **Tremor Raw** (copy-paste) | KPIs, trackers, charts — you own the source |
+| **Motion** (`motion/react`) | Lazy React animations |
+| **PWA** (`@vite-pwa/astro` + Workbox) | Service worker + offline cache |
 
-Every significant piece of functionality starts as a GitHub Issue. The FeedbackFAB lets real users report problems directly from the app. Claude triages, plans, and helps implement. You review and merge.
+Everything else (Recharts, Nano Stores, react-hook-form + Zod, lucide, vitest) lives in [`CLAUDE.md`](./CLAUDE.md). No dependencies beyond this curated stack — dependency-free components add zero extra weight.
 
-```
-User finds bug → FeedbackFAB → GitHub Issue → Claude plans → PR → Merge → Deploy
-```
+### ~44 components across 13 gallery categories
+
+Primitives, form controls, advanced inputs, navigation, compound components (Dialog/Tabs/Toast/Form), overlays, disclosure, feedback, DataTable, KPIs, charts, and data-viz extras. Full inventory in [`docs/component-catalog.md`](./docs/component-catalog.md).
+
+### Explore it live
+
+- **[Gallery](https://artemiop.com/inceptor/gallery/)** — every component rendered live
+- **[Demos](https://artemiop.com/inceptor/demos/)** — dashboard + data-table in context
+- **[Docs](https://artemiop.com/inceptor/docs/)** — custom docs site with search
+- **[Blog](https://artemiop.com/inceptor/blog/)** — content-collection example
 
 ## Quick start
 
 ```bash
-# 1. Use this template
-gh repo create my-project --template ArtemioPadilla/inceptor
-
-# 2. Clone and install
-cd my-project
+git clone https://github.com/ArtemioPadilla/inceptor.git
+cd inceptor
 npm install
-
-# 3. Run locally
-npm run dev
-
-# 4. Configure secrets (see SETUP.md)
-# 5. Push to main → auto-deploy
+npm run dev          # http://localhost:4321
 ```
 
-## Stack
+Useful scripts: `npm run build`, `npm run preview`, `npm run check` (typecheck + tests + build), `npm run test`.
 
-- [Astro](https://astro.build) — static site generator
-- [Tailwind CSS](https://tailwindcss.com) — utility-first CSS
-- [GitHub Actions](https://github.com/features/actions) — CI/CD + Claude integration
-- [Firebase Hosting](https://firebase.google.com/products/hosting) — deployment target (swappable)
+## Deploy
 
-## Structure
+Inceptor ships static HTML + a service worker, so any static host works. The default is **GitHub Pages** (repo Settings → Pages → Source: "GitHub Actions"); pushes to `main` deploy automatically. Cloudflare Pages, Netlify, and Vercel guides are in **[`docs/deploy/`](./docs/deploy/)**.
+
+## How development works
+
+Every feature starts as a GitHub issue. Claude triages it, you kick off the native `/goal` loop — which orchestrates the `prometeo` → `forja` → `centinela` sub-agents to plan, implement, and validate the work — and it lands as a PR against `main` that auto-deploys on merge. The in-app `FeedbackFAB` closes the loop: real users file issues with stack trace, URL, and diagnostics pre-filled.
 
 ```
-├── src/
-│   ├── pages/
-│   │   └── index.astro          # Hello World page
-│   ├── components/
-│   │   └── common/
-│   │       └── FeedbackFAB.astro  # Issue reporter FAB
-│   └── layouts/
-│       └── BaseLayout.astro
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml               # Build + test on PR
-│   │   ├── cd.yml               # Deploy on push to main
-│   │   └── claude.yml           # AI issue triage
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.yml
-│       ├── feature_request.yml
-│       └── question.yml
-├── SETUP.md                     # Step-by-step configuration guide
-└── ROADMAP.md                   # Pre-loaded issues + milestones
+User finds bug → FeedbackFAB → GitHub Issue → Claude /goal → PR → Merge → Deploy
 ```
+
+## Documentation
+
+- [Component catalog](./docs/component-catalog.md) — full inventory + coverage scorecard
+- [Roadmap](./ROADMAP.md) — post-integration follow-ups grouped into epics
+- [Claude Code context](./CLAUDE.md) — repo conventions, stack details, IDD workflow
+- [docs/](./docs/) — principles, ethics, ADRs, component guide, deploy targets
 
 ## License
 
-MIT
+[MIT](./LICENSE)
