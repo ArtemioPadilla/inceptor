@@ -83,7 +83,10 @@ export const docsSidebar: DocsGroup[] = [
       { label: 'Template', slug: 'decisions/template' },
       { label: '0001 — Shape Up over Scrum', slug: 'decisions/0001-shape-up-over-scrum' },
       { label: '0002 — Base UI over Radix', slug: 'decisions/0002-base-ui-over-radix' },
-      { label: '0003 — Starlight for the docs site', slug: 'decisions/0003-starlight-for-docs' },
+      { label: '0003 — Centinela verdict tokens', slug: 'decisions/0003-centinela-verdict-tokens' },
+      { label: '0004 — Custom /docs route', slug: 'decisions/0004-custom-docs-route' },
+      { label: '0005 — Base UI component library', slug: 'decisions/0005-base-ui-component-library' },
+      { label: '0003 — Starlight for the docs site (superseded)', slug: 'decisions/0003-starlight-for-docs' },
     ],
   },
   {
