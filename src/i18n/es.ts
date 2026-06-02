@@ -21,6 +21,18 @@ export const es: typeof en = {
     ctaPrimary: 'Ver la galería',
     ctaSecondary: 'Leer la documentación',
   },
+  gallery: {
+    title: 'Galería de componentes',
+    tagline:
+      'Explora el conjunto completo de primitivas shadcn sobre Base UI y las gráficas con tema, cada una renderizada como una isla de Astro.',
+    cta: 'Abrir la galería',
+  },
+  docsLanding: {
+    title: 'Documentación',
+    tagline:
+      'Guías, convenciones y decisiones de arquitectura para construir sobre el scaffold de Inceptor.',
+    cta: 'Leer la documentación',
+  },
   footer: {
     builtWith: 'Hecho con Astro, Tailwind, shadcn y Claude Code',
     license: 'Licencia MIT',

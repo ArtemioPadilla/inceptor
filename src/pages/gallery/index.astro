@@ -29,6 +29,9 @@ import ShowcaseCharts from '../../components/islands/ShowcaseCharts';
 import MotionDemo from '../../components/islands/MotionDemo';
 import ShowcasePWA from '../../components/islands/ShowcasePWA';
 import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundary';
+
+// Counts derived from the manifest so the header stays self-maintaining.
+const populatedCategoryCount = categoryOrder.filter((cat) => getByCategory(cat).length > 0).length;
 ---
 
 <BaseLayout title="Component gallery" description="Every component in this scaffold, rendered live.">
@@ -39,9 +42,9 @@ import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundar
         Component gallery
       </h1>
       <p class="mt-3 max-w-2xl text-muted-foreground">
-        All {galleryManifest.length} components, rendered live in the current theme. Toggle the
-        theme in the header to see any of them flip. Open a component for its
-        light + dark side-by-side, variant matrix and source.
+        All {galleryManifest.length} components across {populatedCategoryCount} categories, rendered live in the
+        current theme. Toggle the theme in the header to see any of them flip. Open a component for
+        its light + dark side-by-side, variant matrix and source.
       </p>
     </header>
 

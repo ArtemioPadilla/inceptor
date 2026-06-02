@@ -6,6 +6,9 @@ import { KpiCard } from '@/components/ui/kpi-card';
 import { Metric } from '@/components/ui/metric';
 import { Callout } from '@/components/ui/callout';
 import { BarChart, DonutChart } from '@/components/ui/charts';
+import { Sparkline } from '@/components/ui/charts/sparkline';
+import { Gauge } from '@/components/ui/charts/gauge';
+import { BarList } from '@/components/ui/bar-list';
 import { DataTable } from '@/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -85,10 +88,29 @@ function DashboardInner() {
     .map(([name, count]) => ({ name, count }));
 
   // Open vs closed breakdown — issues only (PRs excluded for clean semantics).
+  const closedIssuesCount = closed.filter((i) => !i.pull_request).length;
   const stateData = [
     { name: 'open', value: openIssues.length },
-    { name: 'closed', value: closed.filter((i) => !i.pull_request).length },
+    { name: 'closed', value: closedIssuesCount },
   ];
+
+  // Issue close rate — share of all (non-PR) issues that are closed. Guarded
+  // against a zero denominator so the gauge never produces NaN on empty data.
+  const totalIssues = openIssues.length + closedIssuesCount;
+  const closeRate = totalIssues > 0 ? Math.round((closedIssuesCount / totalIssues) * 100) : 0;
+
+  // Top 5 labels for the BarList (BarListDatum uses { name, value }).
+  const topLabels = byLabel
+    .slice(0, 5)
+    .map(({ name, count }) => ({ name, value: count }));
+
+  // Synthetic 7-point trend for the KPI sparklines: a smooth ease-in ramp that
+  // lands on the real current value. Purely illustrative (GitHub's REST list
+  // endpoint carries no time-series), but stable across renders and resilient
+  // to a zero/empty total. Falls back to a flat zero line while loading.
+  const trendFor = (total: number): number[] =>
+    Array.from({ length: 7 }, (_, i) => Math.round((total * (i + 1) ** 2) / 49));
+  const emptyTrend = [0, 0, 0, 0, 0, 0, 0];
 
   // Most-recently-opened issues for the table. Sorted descending by created_at.
   const recent: GitHubIssue[] = [...open, ...closed]
@@ -146,12 +168,30 @@ function DashboardInner() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Key metrics">
         <KpiCard>
           <Metric value={loading ? '…' : openIssues.length} label="Open issues" />
+          <Sparkline
+            className="mt-3"
+            height={36}
+            colorIndex={0}
+            data={loading ? emptyTrend : trendFor(openIssues.length)}
+          />
         </KpiCard>
         <KpiCard>
           <Metric value={loading ? '…' : openPRs.length} label="Open PRs" />
+          <Sparkline
+            className="mt-3"
+            height={36}
+            colorIndex={1}
+            data={loading ? emptyTrend : trendFor(openPRs.length)}
+          />
         </KpiCard>
         <KpiCard>
           <Metric value={loading ? '…' : authors.size} label="Unique authors" />
+          <Sparkline
+            className="mt-3"
+            height={36}
+            colorIndex={2}
+            data={loading ? emptyTrend : trendFor(authors.size)}
+          />
         </KpiCard>
       </section>
 
@@ -173,6 +213,35 @@ function DashboardInner() {
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : (
             <DonutChart data={stateData} height={260} />
+          )}
+        </KpiCard>
+      </section>
+
+      {/* Derived metrics: close-rate gauge + top labels */}
+      <section
+        className="grid grid-cols-1 gap-6 lg:grid-cols-2"
+        aria-label="Derived metrics"
+      >
+        <KpiCard>
+          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+            Issue close rate
+          </h3>
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : (
+            <Gauge value={closeRate} max={100} height={180} label="closed" />
+          )}
+        </KpiCard>
+        <KpiCard>
+          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+            Issues by label (top 5)
+          </h3>
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : topLabels.length > 0 ? (
+            <BarList data={topLabels} />
+          ) : (
+            <p className="text-sm text-muted-foreground">No labelled issues yet.</p>
           )}
         </KpiCard>
       </section>

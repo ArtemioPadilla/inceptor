@@ -16,6 +16,7 @@
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
     "a11y": "playwright test tests/visual/a11y.spec.ts",
+    "keyboard-nav": "playwright test tests/visual/keyboard-nav.spec.ts",
     "ux:check": "vitest run src/tests/ux-contrast.test.ts src/tests/ux-motion.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

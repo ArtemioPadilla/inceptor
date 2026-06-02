@@ -3,12 +3,24 @@ import { withBase } from '@/lib/href';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../content/gallery';
 
+// Stats — kept accurate to the codebase, computed from data where possible.
+// `galleryManifest` groups 44 underlying components into showcase entries, so
+// the headline "components" count is asserted (44) while the gallery link
+// below derives its own figure from the manifest length.
+const componentCount = 44;
 const stats = [
-  { value: '53', label: 'pages prebuilt' },
-  { value: '349', label: 'tests green' },
+  { value: '60', label: 'pages prebuilt' },
+  { value: '439', label: 'tests green' },
+  { value: String(componentCount), label: 'components' },
   { value: '0 KB', label: 'JS by default' },
-  { value: '100', label: 'Lighthouse perf' },
 ];
+
+// "What's inside" shows a slice of the category grid. Compute the slice and
+// the remainder so the "+N more" note stays accurate as categories are added.
+const VISIBLE_CATEGORIES = 6;
+const populatedCategories = categoryOrder.filter((cat) => getByCategory(cat).length > 0);
+const visibleCategories = populatedCategories.slice(0, VISIBLE_CATEGORIES);
+const hiddenCategoryCount = populatedCategories.length - visibleCategories.length;
 
 const flow = [
   {
@@ -157,9 +169,8 @@ const flow = [
 
       <ul class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
         {
-          categoryOrder.slice(0, 6).map((cat) => {
+          visibleCategories.map((cat) => {
             const entries = getByCategory(cat);
-            if (entries.length === 0) return null;
             const first = entries[0];
             return (
               <li class="bg-card">
@@ -184,6 +195,13 @@ const flow = [
           })
         }
       </ul>
+
+      {hiddenCategoryCount > 0 && (
+        <p class="mt-5 font-mono text-xs text-muted-foreground">
+          + {hiddenCategoryCount} more {hiddenCategoryCount === 1 ? 'category' : 'categories'} in the
+          <a href={withBase('/gallery/')} class="text-primary transition-colors hover:text-primary/80"> gallery →</a>
+        </p>
+      )}
     </section>
 
     <!-- ─────────────── HOW IT HAPPENS ─────────────── -->
