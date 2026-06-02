@@ -47,7 +47,7 @@ const demos = [
         demos.map((demo) => (
           <li>
             <a
-              href={demo.href}
+              href={withBase(demo.href)}
               class="group block rounded-lg border border-border bg-card p-5 transition-colors hover:bg-accent/40"
             >
               <h2 class="text-base font-semibold text-foreground group-hover:underline">
