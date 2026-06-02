@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ContactSchema, type ContactValues } from '@/schemas/contact';
 import { flags } from '@/lib/flags';
+import { formEndpoint } from '@/lib/api';
 import ErrorBoundary from './ErrorBoundary';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
@@ -41,7 +42,10 @@ function ContactFormInner() {
     defaultValues: { name: '', email: '', message: '', website: '' },
   });
 
-  const endpoint = (import.meta.env.PUBLIC_CONTACT_ENDPOINT as string | undefined) ?? '';
+  const endpoint = formEndpoint(
+    import.meta.env.PUBLIC_CONTACT_ENDPOINT as string | undefined,
+    '/api/contact',
+  );
 
   async function onSubmit(values: ContactValues) {
     setErrorMsg(null);

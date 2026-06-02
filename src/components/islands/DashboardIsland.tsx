@@ -11,6 +11,7 @@ import { Gauge } from '@/components/ui/charts/gauge';
 import { BarList } from '@/components/ui/bar-list';
 import { DataTable } from '@/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
+import { githubIssuesUrl } from '@/lib/api';
 
 // The repo whose GitHub Issues drive the live data on the dashboard.
 const REPO = 'ArtemioPadilla/inceptor';
@@ -32,9 +33,7 @@ function useGitHubIssues(state: 'open' | 'closed') {
   return useQuery<GitHubIssue[]>({
     queryKey: ['issues', REPO, state],
     queryFn: async () => {
-      const res = await fetch(
-        `https://api.github.com/repos/${REPO}/issues?state=${state}&per_page=100`,
-      );
+      const res = await fetch(githubIssuesUrl(REPO, state, 100));
       if (!res.ok) throw new Error(`GitHub API ${res.status}`);
       return res.json() as Promise<GitHubIssue[]>;
     },

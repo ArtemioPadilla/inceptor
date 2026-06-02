@@ -28,6 +28,10 @@ Timeline so far (≈100 merged PRs):
   data-viz, `/demos/settings`, privacy toast, keyboard-nav test, RTL behavior
   tests, Spanish landings, ADRs 0003–0005, forbidden-imports single-source,
   lessons.md, README polish, accurate stats.
+- **Self-hosted backend archetypes** (#109) — opt-in `server-node/` (Hono,
+  reuses the Zod schemas) + `server-flask/` (Flask + Pydantic), one `/api/*`
+  contract (forms, GitHub proxy, feedback→issue, OpenAPI/Swagger), Docker
+  compose + bare scripts, `/demos/api`, ADR 0006. See Epic 19.
 
 **Still genuinely deferred** (need external action — each has a runbook):
 
@@ -94,7 +98,7 @@ Advisory (`continue-on-error: true`) until baselines match Linux CI.
 - [x] Deployment — GitHub Pages workflow + guides (#67); **live at artemiop.com/inceptor/** with base-wired subpath (#83)
 - [x] `repoSlug` reads `PUBLIC_REPO_SLUG` env (#68)
 - [x] Privacy-respecting analytics skeleton (Plausible/Umami), flag-gated (#68)
-- [ ] **GitHub API auth** — token + server-side fetch for `DashboardIsland`/`IssuesList` (60 req/h unauth too low)
+- [x] **GitHub API auth** — token-backed server-side proxy (`/api/issues`, `/api/repo-stats`) in the self-hosted backend lifts the 60 req/h cap; islands route through it when `PUBLIC_API_BASE` is set (#109, Epic 19)
 - [ ] Set `ANTHROPIC_API_KEY` secret for the Claude triage workflow *(user secret)*
 
 ## Epic 7 — Workflow & tooling
@@ -123,7 +127,7 @@ Advisory (`continue-on-error: true`) until baselines match Linux CI.
 - [x] `docs/lessons.md` created — lessons log + centinela double-reject convention (#100)
 - [~] Behavior tests — RTL runtime tests for button, ErrorBoundary, switch, checkbox, tabs, rating, tag-input (#63, #68, #100); the Form/Field SSR-bug regression test still not written
 - [ ] Document Shape Up cadence **in `CONTRIBUTING.md`** (lives in PRINCIPLES today)
-- [ ] *(later, backend archetype)* `@hono/zod-openapi` from shared schemas
+- [x] Backend archetype reusing the shared schemas — `server-node/` (Hono) validates against `src/schemas/` directly; OpenAPI from `z.toJSONSchema()` (#109, Epic 19)
 
 ## Epic 11 — Governance baseline — ✅ closed (#60, #67, #68)
 
@@ -178,7 +182,8 @@ Advisory (`continue-on-error: true`) until baselines match Linux CI.
 
 ### Per-archetype demos (when archetypes land)
 
-- **backend** `/demos/api` (Swagger from `src/schemas/`) · **decentralized** `/demos/wallet` · **onion** `/demos/onion-safe` (zero-external-request assertion)
+- [x] **backend** `/demos/api` — documents the live `/api/*` contract + Swagger link (#109, Epic 19)
+- [ ] **decentralized** `/demos/wallet` · **onion** `/demos/onion-safe` (zero-external-request assertion)
 
 ---
 
@@ -236,6 +241,22 @@ a human or Dependabot PR bypasses all of it because CI runs only `check` +
 - [ ] **Pin Node** (`.nvmrc` + `engines`) + surface `npm run doctor` as Quick-Start step 0. *(M/S)*
 - [ ] **Document the non-Claude-Code path** — `/goal` has no fallback in CONTRIBUTING; add a "two ways to ship" + `docs/start-here/first-feature.md`. *(M/M)*
 - [ ] CI triggers match real branch names (`phase-*/**`, `chore/**`, `fix/**`, `docs/**`); README `check` description; `npm run help` for the 24 scripts; post-deploy smoke-check (curl 200). *(L–M/S)*
+
+## Epic 19 — Self-hosted backend archetypes — ✅ shipped (#109)
+
+Opt-in backend that fills the gaps the static site left dangling (forms POSTing
+nowhere, browser-side GitHub at 60 req/h, feedback as a prefilled URL), **without
+dropping the static deploy**. One `PUBLIC_API_BASE` switch; unset = today's
+behavior. Two interchangeable runtimes share one `/api/*` contract. ADR 0006.
+
+- [x] `server-node/` — Hono; **reuses** `src/schemas/` (Zod) for validation; OpenAPI from `z.toJSONSchema()`; vitest (#109)
+- [x] `server-flask/` — Flask + Pydantic mirror; pytest + ruff; same contract (#109)
+- [x] Endpoints — `/api/contact`, `/api/newsletter`, `/api/issues`, `/api/repo-stats`, `/api/feedback`, `/api/openapi.json`, `/api/docs`, `/api/health` (#109)
+- [x] `PUBLIC_API_BASE` discovery in `src/lib/api.ts`; islands + forms route through the backend when set (#109)
+- [x] Cross-runtime `openapi.golden.json` contract + a test in both suites (#109)
+- [x] Docker compose (`--profile backend`) + bare scripts; `/demos/api`; `docs/building/backend` (#109)
+- [ ] `FeedbackFAB` → `POST /api/feedback` when a backend is wired (today it still opens the prefilled issue URL) *(follow-up)*
+- [ ] *(stretch)* serverless deploy targets (Workers/Lambda) for the same handlers; rate-limit + spam middleware
 
 ---
 

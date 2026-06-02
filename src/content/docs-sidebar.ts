@@ -67,6 +67,7 @@ export const docsSidebar: DocsGroup[] = [
       { label: 'Theming & dark mode', slug: 'building/theming' },
       { label: 'Testing — Vitest + Playwright', slug: 'building/testing' },
       { label: 'Visual regression', slug: 'building/visual-regression' },
+      { label: 'Self-hosted backend', slug: 'building/backend' },
     ],
   },
   {

@@ -1,0 +1,17 @@
+# Keep backend image build contexts small + reproducible. Build context is the
+# repo root (so the servers can copy the shared src/schemas/).
+**/node_modules
+**/dist
+**/.astro
+**/__pycache__
+**/*.pyc
+.venv
+**/.venv
+.git
+.github
+**/.env
+*.log
+dist
+coverage
+playwright-report
+test-results

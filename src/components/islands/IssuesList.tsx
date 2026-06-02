@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import QueryProvider from './QueryProvider';
 import ErrorBoundary from './ErrorBoundary';
+import { githubIssuesUrl } from '@/lib/api';
 
 interface GitHubIssue {
   id: number;
@@ -26,9 +27,7 @@ function IssuesListInner() {
   const { data, isLoading, error } = useQuery<GitHubIssue[]>({
     queryKey,
     queryFn: async () => {
-      const res = await fetch(
-        `https://api.github.com/repos/${REPO}/issues?state=open&per_page=30`,
-      );
+      const res = await fetch(githubIssuesUrl(REPO, 'open', 30));
       if (!res.ok) throw new Error(`GitHub API ${res.status}`);
       const json = (await res.json()) as GitHubIssue[];
       // Filter out PRs (the issues API includes them with .pull_request)

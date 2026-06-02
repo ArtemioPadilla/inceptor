@@ -1,0 +1,27 @@
+{
+  "name": "inceptor-server-node",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted backend archetype for Inceptor — Hono + Zod (ADR 0006).",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit",
+    "gen:openapi": "tsx scripts/gen-openapi.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@hono/swagger-ui": "^0.5.1",
+    "@hono/zod-validator": "^0.7.0",
+    "hono": "^4.6.14",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}

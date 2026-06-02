@@ -1,0 +1,91 @@
+---
+import { withBase } from '@/lib/href';
+import { apiBase, apiEnabled } from '@/lib/api';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Documents the self-hosted backend archetype (ADR 0006). The live Swagger
+// link only resolves when a backend is actually running + PUBLIC_API_BASE set.
+const endpoints = [
+  { method: 'GET', path: '/api/health', desc: 'Liveness probe.' },
+  { method: 'POST', path: '/api/contact', desc: 'Validate (shared schema) + deliver the contact form.' },
+  { method: 'POST', path: '/api/newsletter', desc: 'Validate + deliver a newsletter signup.' },
+  { method: 'GET', path: '/api/issues', desc: 'Token-backed GitHub issues proxy (PRs filtered, no 60 req/h cap).' },
+  { method: 'GET', path: '/api/repo-stats', desc: 'Repo stars / forks / open issues.' },
+  { method: 'POST', path: '/api/feedback', desc: 'Create a real GitHub issue server-side (503 without a token).' },
+  { method: 'GET', path: '/api/openapi.json', desc: 'OpenAPI 3.1, generated from the schemas.' },
+  { method: 'GET', path: '/api/docs', desc: 'Swagger UI.' },
+];
+const methodColor: Record<string, string> = {
+  GET: 'text-emerald-600 dark:text-emerald-400',
+  POST: 'text-amber-600 dark:text-amber-400',
+};
+---
+
+<BaseLayout title="Backend API — inceptor" description="Self-hosted backend archetype (Node/Hono + Flask/Pydantic): the shared /api contract.">
+  <main class="mx-auto max-w-3xl px-4 py-12 space-y-8">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight text-foreground" style="view-transition-name: page-title">
+        Backend API
+      </h1>
+      <p class="mt-2 text-muted-foreground">
+        Inceptor ships an <strong>opt-in</strong> self-hosted backend in two
+        interchangeable archetypes — <code class="font-mono">server-node/</code>
+        (Hono + Zod) and <code class="font-mono">server-flask/</code>
+        (Flask + Pydantic) — exposing the identical <code class="font-mono">/api/*</code>
+        contract below. See
+        <a href={withBase('/docs/building/backend/')} class="text-primary hover:underline">the backend guide</a>
+        and ADR 0006.
+      </p>
+    </header>
+
+    <section
+      class:list={[
+        'rounded-lg border p-4 text-sm',
+        apiEnabled
+          ? 'border-emerald-500/40 bg-emerald-500/5'
+          : 'border-border bg-muted/40 text-muted-foreground',
+      ]}
+    >
+      {
+        apiEnabled ? (
+          <p>
+            A backend is wired: <code class="font-mono">{apiBase}</code>. Forms and
+            the GitHub islands route through it.
+            <a href={`${apiBase}/api/docs`} class="ml-1 text-primary hover:underline">Open Swagger UI →</a>
+          </p>
+        ) : (
+          <p>
+            <strong class="text-foreground">Static mode.</strong> No
+            <code class="font-mono">PUBLIC_API_BASE</code> is set, so forms run in
+            demo mode and the GitHub islands hit <code class="font-mono">api.github.com</code>
+            directly. Run a server (<code class="font-mono">docker compose --profile backend up</code>)
+            and set <code class="font-mono">PUBLIC_API_BASE</code> to activate it.
+          </p>
+        )
+      }
+    </section>
+
+    <section>
+      <h2 class="mb-3 text-lg font-semibold text-foreground">Endpoints</h2>
+      <ul class="divide-y divide-border rounded-lg border border-border">
+        {
+          endpoints.map((e) => (
+            <li class="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
+              <span class="flex shrink-0 items-baseline gap-2 font-mono text-sm">
+                <span class={`w-12 font-semibold ${methodColor[e.method] ?? ''}`}>{e.method}</span>
+                <span class="text-foreground">{e.path}</span>
+              </span>
+              <span class="text-sm text-muted-foreground">{e.desc}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground">
+      <a href={withBase('/demos/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Back to demos
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
