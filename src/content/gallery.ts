@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'navmenu' | 'inceptor';
+  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'navmenu' | 'extras' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -220,6 +220,16 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'pwa',
     island: 'ShowcasePWA',
   },
+  // Extras & data-viz — tree/timeline/bar-list/sparkline/gauge
+  {
+    slug: 'extras',
+    name: 'Extras & data-viz',
+    summary: 'Tree view, Timeline, Bar list, Sparkline, Gauge.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'extras',
+    island: 'ShowcaseExtras',
+  },
   // Inceptor
   {
     slug: 'error-boundary',
@@ -250,6 +260,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
   charts: 'KPIs & charts',
   motion: 'Motion',
   pwa: 'PWA',
+  extras: 'Extras & data-viz',
   inceptor: 'Inceptor reporting',
 };
 
@@ -266,5 +277,6 @@ export const categoryOrder: GalleryEntry['category'][] = [
   'charts',
   'motion',
   'pwa',
+  'extras',
   'inceptor',
 ];
