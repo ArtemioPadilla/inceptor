@@ -56,6 +56,9 @@ export const flags = {
 
   /** Show the install + update prompts on every page. */
   pwaPrompts: asBool(env.PUBLIC_FLAG_PWA_PROMPTS, true),
+
+  /** Show the first-load privacy disclosure toast (ethics — Epic 12). */
+  privacyToast: asBool(env.PUBLIC_FLAG_PRIVACY_TOAST, true),
 } as const;
 
 export type Flags = typeof flags;

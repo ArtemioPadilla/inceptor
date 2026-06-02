@@ -6,7 +6,9 @@ import OfflineBanner from '../components/islands/OfflineBanner';
 import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
 import UpdateToast from '../components/islands/UpdateToast';
+import PrivacyToast from '../components/islands/PrivacyToast';
 import { withBase } from '../lib/href';
+import { flags } from '../lib/flags';
 
 interface Props {
   title?: string;
@@ -114,5 +116,12 @@ const {
     -->
     <InstallButton client:idle />
     <UpdateToast client:idle />
+    <!--
+      PrivacyToast: first-load ethics disclosure (Epic 12). Tells users that
+      diagnostics stay local and only leave the device if they open an issue.
+      Shown once per browser, then suppressed via localStorage. Gated behind
+      a feature flag (on by default); client:idle so it never blocks paint.
+    -->
+    {flags.privacyToast && <PrivacyToast client:idle />}
   </body>
 </html>
