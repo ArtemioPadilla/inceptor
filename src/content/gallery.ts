@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'inceptor';
+  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'navmenu' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -119,6 +119,16 @@ export const galleryManifest: GalleryEntry[] = [
     status: 'stable',
     category: 'compound',
     island: 'ShowcaseForm',
+  },
+  // Navigation & menus — combobox/command/nav-menu/menubar/stepper
+  {
+    slug: 'navigation',
+    name: 'Navigation & menus',
+    summary: 'Combobox, Command palette (⌘K), Navigation menu, Menubar, Stepper.',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'navmenu',
+    island: 'ShowcaseNav',
   },
   // Overlays — anchored/portal popups on Base UI
   {
@@ -231,10 +241,11 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
   primitives: 'Primitives',
   forms: 'Form controls',
   advanced: 'Advanced inputs',
+  navmenu: 'Navigation & menus',
   compound: 'Compound components',
   overlays: 'Overlays',
   disclosure: 'Disclosure & layout',
-  feedback: 'Navigation & feedback',
+  feedback: 'Feedback & status',
   data: 'Data',
   charts: 'KPIs & charts',
   motion: 'Motion',
@@ -246,6 +257,7 @@ export const categoryOrder: GalleryEntry['category'][] = [
   'primitives',
   'forms',
   'advanced',
+  'navmenu',
   'compound',
   'overlays',
   'disclosure',

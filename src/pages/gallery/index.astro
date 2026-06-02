@@ -16,6 +16,7 @@ import ShowcaseOverlays from '../../components/islands/ShowcaseOverlays';
 import ShowcaseDisclosure from '../../components/islands/ShowcaseDisclosure';
 import ShowcaseFeedback from '../../components/islands/ShowcaseFeedback';
 import ShowcaseAdvanced from '../../components/islands/ShowcaseAdvanced';
+import ShowcaseNav from '../../components/islands/ShowcaseNav';
 import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
 import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
 import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
@@ -88,6 +89,7 @@ import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundar
                     {entry.island === 'ShowcaseDisclosure' && <ShowcaseDisclosure client:visible />}
                     {entry.island === 'ShowcaseFeedback' && <ShowcaseFeedback client:visible />}
                     {entry.island === 'ShowcaseAdvanced' && <ShowcaseAdvanced client:visible />}
+                    {entry.island === 'ShowcaseNav' && <ShowcaseNav client:visible />}
                     {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
                     {entry.island === 'ShowcaseDropdown' && <ShowcaseDropdown client:visible />}
                     {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
