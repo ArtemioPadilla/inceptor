@@ -67,6 +67,7 @@ User finds bug → FeedbackFAB → GitHub Issue → Claude /goal → PR → Merg
 - [Component catalog](./docs/component-catalog.md) — full inventory + coverage scorecard
 - [Roadmap](./ROADMAP.md) — post-integration follow-ups grouped into epics
 - [Claude Code context](./CLAUDE.md) — repo conventions, stack details, IDD workflow
+- [Contribution & component guide](./docs/COMPONENTS.md) — how to add a component
 - [docs/](./docs/) — principles, ethics, ADRs, component guide, deploy targets
 
 ## License

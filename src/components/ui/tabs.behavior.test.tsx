@@ -17,11 +17,11 @@ function Fixture() {
 }
 
 describe('Tabs (behavior)', () => {
-  it('shows the default panel and hides the others', () => {
+  it('shows the default panel and not the others', () => {
     render(<Fixture />);
     expect(screen.getByText('Account panel')).toBeVisible();
-    // Inactive Base UI panels stay mounted but hidden.
-    expect(screen.getByText('Password panel')).not.toBeVisible();
+    // Base UI unmounts inactive tab panels by default (no keepMounted).
+    expect(screen.queryByText('Password panel')).toBeNull();
   });
 
   it('marks the default trigger as selected', () => {
@@ -34,7 +34,7 @@ describe('Tabs (behavior)', () => {
     render(<Fixture />);
     fireEvent.click(screen.getByRole('tab', { name: 'Password' }));
     expect(screen.getByText('Password panel')).toBeVisible();
-    expect(screen.getByText('Account panel')).not.toBeVisible();
+    expect(screen.queryByText('Account panel')).toBeNull();
     expect(screen.getByRole('tab', { name: 'Password' })).toHaveAttribute(
       'aria-selected',
       'true',
