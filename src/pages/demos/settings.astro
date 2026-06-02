@@ -1,0 +1,26 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SettingsDemo from '../../components/islands/SettingsDemo';
+---
+
+<BaseLayout title="Settings demo — inceptor" description="A composed settings page: Tabs + Select, Switch, RadioGroup, Slider, Textarea, Avatar.">
+  <main class="mx-auto max-w-3xl px-4 py-12 space-y-6">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">Settings</h1>
+      <p class="mt-2 text-muted-foreground">
+        A realistic settings surface composing the form-control primitives —
+        Tabs, Select, Switch rows, RadioGroup, Slider, Textarea, Avatar and a
+        Save button — into one hydrated island with local React state.
+      </p>
+    </header>
+
+    <SettingsDemo client:visible />
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground">
+      <a href={withBase('/demos/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Back to demos
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
