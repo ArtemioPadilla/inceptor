@@ -32,10 +32,14 @@ Everything else (Recharts, Nano Stores, react-hook-form + Zod, lucide, vitest) l
 
 Primitives, form controls, advanced inputs, navigation, compound components (Dialog/Tabs/Toast/Form), overlays, disclosure, feedback, DataTable, KPIs, charts, and data-viz extras. Full inventory in [`docs/component-catalog.md`](./docs/component-catalog.md).
 
+### Optional self-hosted backend
+
+Two interchangeable archetypes — **`server-node/`** (Hono, reuses the frontend's Zod schemas) and **`server-flask/`** (Flask + Pydantic) — expose the same `/api/*` contract: contact/newsletter handlers, a token-backed GitHub proxy (lifts the 60 req/h cap), feedback→issue creation, and OpenAPI/Swagger. Entirely opt-in via `PUBLIC_API_BASE`; unset, the site stays fully static. See **[the backend guide](https://artemiop.com/inceptor/docs/building/backend/)** and [ADR 0006](./docs/decisions/0006-self-hosted-backend-archetypes.md).
+
 ### Explore it live
 
 - **[Gallery](https://artemiop.com/inceptor/gallery/)** — every component rendered live
-- **[Demos](https://artemiop.com/inceptor/demos/)** — dashboard + data-table in context
+- **[Demos](https://artemiop.com/inceptor/demos/)** — dashboard + data-table in context, plus the [backend API contract](https://artemiop.com/inceptor/demos/api/)
 - **[Docs](https://artemiop.com/inceptor/docs/)** — custom docs site with search
 - **[Blog](https://artemiop.com/inceptor/blog/)** — content-collection example
 

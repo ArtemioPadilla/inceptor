@@ -1,0 +1,57 @@
+# Self-hosted backend for Inceptor (ADR 0006). The backend is OPT-IN: it lives
+# behind the `backend` profile so a plain `docker compose up` does nothing, and
+# the static site keeps working with PUBLIC_API_BASE unset.
+#
+#   docker compose --profile backend       up        # both archetypes
+#   docker compose --profile backend-node  up        # just Hono   (:8787)
+#   docker compose --profile backend-flask up        # just Flask  (:8788)
+#
+# Set secrets (GITHUB_TOKEN, CORS_ORIGIN, REPO_SLUG) in server-node/.env or
+# server-flask/.env (copied from each .env.example). Then point the frontend at
+# the one you run: PUBLIC_API_BASE=http://localhost:8787 (node) or :8788 (flask).
+
+services:
+  backend-node:
+    build:
+      context: .
+      dockerfile: server-node/Dockerfile
+    profiles: [backend, backend-node]
+    env_file:
+      - path: server-node/.env
+        required: false
+    environment:
+      PORT: 8787
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:8787/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  backend-flask:
+    build:
+      context: ./server-flask
+    profiles: [backend, backend-flask]
+    env_file:
+      - path: server-flask/.env
+        required: false
+    environment:
+      PORT: 8787
+    ports:
+      - "8788:8787"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8787/api/health').status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3

@@ -26,11 +26,12 @@ describe('IssuesList', () => {
     expect(source).toMatch(/pull_request/);
   });
 
-  it('hits the GitHub REST endpoint for this repo', () => {
-    // The URL is built via the REPO constant in a template literal, so we
-    // verify both the base URL and the REPO constant rather than the full
-    // literal string.
-    expect(source).toMatch(/api\.github\.com\/repos\//);
+  it('reads issues for this repo via the api helper (backend proxy or GitHub)', () => {
+    // The concrete URL now lives in src/lib/api.ts (githubIssuesUrl), which
+    // routes through the backend proxy when PUBLIC_API_BASE is set and falls
+    // back to api.github.com otherwise. See src/lib/api.test.ts for the URL.
+    expect(source).toMatch(/githubIssuesUrl/);
+    expect(source).toMatch(/from ['"]@\/lib\/api['"]/);
     expect(source).toMatch(/ArtemioPadilla\/inceptor/);
   });
 

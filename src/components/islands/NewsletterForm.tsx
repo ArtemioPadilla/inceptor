@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { NewsletterSchema, type NewsletterValues } from '@/schemas/contact';
+import { formEndpoint } from '@/lib/api';
 import ErrorBoundary from './ErrorBoundary';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
@@ -33,7 +34,10 @@ function NewsletterFormInner() {
     defaultValues: { email: '', website: '' },
   });
 
-  const endpoint = (import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT as string | undefined) ?? '';
+  const endpoint = formEndpoint(
+    import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT as string | undefined,
+    '/api/newsletter',
+  );
 
   async function onSubmit(values: NewsletterValues) {
     if (!endpoint) {

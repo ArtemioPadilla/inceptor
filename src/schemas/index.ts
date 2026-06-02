@@ -17,3 +17,4 @@ export {
   NewsletterSchema,
   type NewsletterValues,
 } from './contact';
+export { FeedbackSchema, type FeedbackValues } from './feedback';
