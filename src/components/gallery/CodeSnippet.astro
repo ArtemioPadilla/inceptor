@@ -1,0 +1,64 @@
+---
+/**
+ * Themed code block with a copy-to-clipboard button.
+ *
+ * Renders via Astro's built-in <Code> component (Shiki-powered, no new
+ * dependency) with the `github-dark` theme. The copy button is a small,
+ * self-contained client <script> that reads the raw code off a data attribute
+ * and calls navigator.clipboard.writeText.
+ */
+import { Code } from 'astro:components';
+
+interface Props {
+  /** Raw source code to render and copy. */
+  code: string;
+  /** Shiki language id (e.g. 'tsx', 'astro', 'bash'). */
+  lang: string;
+}
+
+const { code, lang } = Astro.props;
+---
+
+<div class="group relative overflow-hidden rounded-lg border border-border bg-[#0d1117]">
+  <button
+    type="button"
+    class="copy-snippet absolute right-2 top-2 z-10 rounded-md border border-border/60 bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground opacity-0 transition hover:text-foreground focus:opacity-100 group-hover:opacity-100"
+    data-code={code}
+    aria-label="Copy code to clipboard"
+  >
+    Copy
+  </button>
+  <div class="overflow-x-auto p-4 text-[13px] [&_pre]:!bg-transparent">
+    <Code code={code} lang={lang as any} theme="github-dark" />
+  </div>
+</div>
+
+<script>
+  // Wire every copy button on the page. Idempotent: guards against double-binding.
+  function bindCopyButtons() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.copy-snippet');
+    buttons.forEach((btn) => {
+      if (btn.dataset.bound === 'true') return;
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', async () => {
+        const code = btn.dataset.code ?? '';
+        try {
+          await navigator.clipboard.writeText(code);
+          const original = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => {
+            btn.textContent = original;
+          }, 1500);
+        } catch {
+          btn.textContent = 'Failed';
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+          }, 1500);
+        }
+      });
+    });
+  }
+
+  bindCopyButtons();
+  document.addEventListener('astro:page-load', bindCopyButtons);
+</script>

@@ -2,6 +2,8 @@
 import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { galleryManifest, type GalleryEntry } from '../../content/gallery';
+import { galleryRecipes } from '../../content/gallery-recipes';
+import CodeSnippet from '../../components/gallery/CodeSnippet.astro';
 
 // Import every gallery island statically so Astro can wire hydration.
 // (Dynamic lookups via a registry don't work for `client:*` directives.)
@@ -38,6 +40,7 @@ interface Props {
 
 const { entry } = Astro.props;
 const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.source}`;
+const recipe = galleryRecipes[entry.slug];
 ---
 
 <BaseLayout title={`${entry.name} — Gallery`} description={entry.summary}>
@@ -144,15 +147,31 @@ const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.s
     </section>
 
     <section class="mt-12 rounded-lg border border-border bg-card p-6">
-      <h2 class="mb-2 text-sm font-semibold text-foreground">Recipes &amp; props</h2>
-      <p class="text-sm text-muted-foreground">
-        Per-component recipes, prop tables, and variant matrices land in a follow-up
-        (see <a href={withBase('/docs/history/roadmap/')} class="text-primary hover:underline">ROADMAP Epic 16</a>).
-        For now: open the source link above, or read the
-        <a href={withBase('/docs/building/adding-a-component/')} class="text-primary hover:underline">
-          contribution guide
-        </a>.
+      <h2 class="mb-1 text-sm font-semibold text-foreground">Recipes &amp; props</h2>
+      <p class="mb-4 text-sm text-muted-foreground">
+        A realistic usage snippet for this component. Imports come from
+        <code class="rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground border border-border">@/components/ui/…</code>.
+        See the
+        <a href={repoBlob} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
+          source
+        </a>
+        for the full API.
       </p>
+
+      {recipe ? (
+        <CodeSnippet code={recipe.code} lang={recipe.lang} />
+      ) : (
+        <p class="text-sm text-muted-foreground">
+          No snippet yet for this component — open the
+          <a href={repoBlob} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
+            source link
+          </a>
+          above, or read the
+          <a href={withBase('/docs/building/adding-a-component/')} class="text-primary hover:underline">
+            contribution guide
+          </a>.
+        </p>
+      )}
     </section>
   </main>
 </BaseLayout>
