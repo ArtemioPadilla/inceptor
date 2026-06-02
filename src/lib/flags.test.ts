@@ -25,6 +25,7 @@ describe('feature flags', () => {
         'docsSearch',
         'experimentalGallery',
         'feedbackFab',
+        'privacyToast',
         'pwaPrompts',
       ].sort(),
     );
