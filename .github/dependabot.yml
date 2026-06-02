@@ -6,6 +6,15 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # Astro 6 is peer-capped out by @vite-pwa/astro@1.2.0 (supports astro
+      # ^1–^5 only). Ignore the astro/@astrojs major bumps until the PWA plugin
+      # ships Astro 6 support — otherwise dependabot re-proposes a CI-failing
+      # group PR every release (see closed #74, #80, #87, ADR 0004).
+      - dependency-name: "astro"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@astrojs/mdx"
+        update-types: ["version-update:semver-major"]
     groups:
       astro:
         patterns:
