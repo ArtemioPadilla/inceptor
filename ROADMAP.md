@@ -236,11 +236,11 @@ a human or Dependabot PR bypasses all of it because CI runs only `check` +
 
 ### Docs / config drift (cheap, high-confusion)
 
-- [ ] **Kill the dual deploy workflow** — `cd.yml` (no-op `echo`) and `deploy.yml` both fire on push to `main`; `cd.yml` reports a misleading green deploy. Delete or `workflow_dispatch`-only. *(H/S)*
+- [x] **Kill the dual deploy workflow** — `cd.yml` is now `workflow_dispatch`-only (a copy-me template for other providers); `deploy.yml` is the sole push-to-`main` deploy, so no more misleading green "deploy" (#110)
 - [ ] **Reconcile `SETUP.md`** with `.env.example` (`cp .env.example .env`), `deploy.yml` (not `cd.yml`), and `FeedbackFAB` (`PUBLIC_REPO_SLUG` env, not source edit). *(M/S)*
-- [ ] **Pin Node** (`.nvmrc` + `engines`) + surface `npm run doctor` as Quick-Start step 0. *(M/S)*
+- [~] **Pin Node** — `.nvmrc` (22) + `engines.node >=22` added (#110); surfacing `npm run doctor` as Quick-Start step 0 still open
 - [ ] **Document the non-Claude-Code path** — `/goal` has no fallback in CONTRIBUTING; add a "two ways to ship" + `docs/start-here/first-feature.md`. *(M/M)*
-- [ ] CI triggers match real branch names (`phase-*/**`, `chore/**`, `fix/**`, `docs/**`); README `check` description; `npm run help` for the 24 scripts; post-deploy smoke-check (curl 200). *(L–M/S)*
+- [~] CI triggers now match real branch names (`main`, `phase-*/**`, `feat/**`, `fix/**`, `docs/**`, `chore/**`) (#110); README `check` description, `npm run help`, post-deploy smoke-check (curl 200) still open
 
 ## Epic 19 — Self-hosted backend archetypes — ✅ shipped (#109)
 

@@ -2,6 +2,9 @@
   "name": "inceptor",
   "type": "module",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist --output-subdir _pagefind",

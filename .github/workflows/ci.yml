@@ -2,7 +2,17 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, feature/*]
+    # Match the branch conventions this repo actually uses (CLAUDE.md):
+    # phase-N/…, plus Conventional-Commit-style feat/fix/docs/chore branches.
+    # The old `develop`/`feature/*` globs never matched, so pushes to working
+    # branches ran no CI until the PR was opened.
+    branches:
+      - main
+      - 'phase-*/**'
+      - 'feat/**'
+      - 'fix/**'
+      - 'docs/**'
+      - 'chore/**'
   pull_request:
     branches: [main]
 
