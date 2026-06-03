@@ -1,8 +1,13 @@
-name: CD — Deploy to production
+name: CD — Deploy to production (template)
 
+# MANUAL ONLY. The real production deploy is deploy.yml (GitHub Pages), which
+# fires on push to main. This workflow is a copy-me template for forks that
+# deploy elsewhere (Firebase / Vercel / Netlify / Cloudflare). It used to also
+# run on push to main, where its placeholder `echo` step reported a misleading
+# green "deploy" on every commit. It's now dispatch-only so it never races
+# deploy.yml or fakes a successful deploy. Wire your provider in the last step,
+# then add a push trigger back if this becomes your real deploy.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
