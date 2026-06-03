@@ -140,7 +140,11 @@ Advisory (`continue-on-error: true`) until baselines match Linux CI.
 - [x] `npm run a11y` (axe), `npm run lighthouse` (budgets), contrast + motion checks, `npm run ux:check` (#63, #64, #68)
 - [x] `npm run keyboard-nav` — Playwright focus-visible tab-walk (#100)
 - [x] Privacy toast on first load — closes the surveillance ethics gap (#100)
-- [ ] **CI gate on `ux:check` / `a11y` / `keyboard-nav`** — they exist but `ci.yml` runs only `check` + `build` *(DX study B1 — highest-risk gap)*
+- [~] **CI gate on `ux:check` / `a11y` / `keyboard-nav`** — `ux:check` is already gated (its tests run in `npm run test` → `npm run check`). `a11y` + `keyboard-nav` already *run* in CI via `visual.yml`'s `npx playwright test`, but **advisory** (`continue-on-error`). Flipping them to blocking is gated on fixing the real violations below — that's the remaining DX-study-B1 work, not a CI-wiring gap.
+  - [x] `/` (home) `link-in-text-block` fixed — in-text gallery link now underlined; `/` dark is axe-clean (#111)
+  - [ ] `/` (home) light-mode `color-contrast` — emerald `text-primary/70–80` on decorative eyebrows + step numbers (10 nodes); needs a palette/shade decision (emerald-700 or larger/bolder), not an autonomous redesign
+  - [ ] `/gallery/` — `aria-allowed-attr`, `button-name`, `label`, `aria-meter-name`, `aria-toggle-field-name` (demo instances missing labels) + `color-contrast`; `keyboard-nav` focus-indicator failures
+  - [ ] `/demos/dashboard/` — Recharts SVG labelling (see Epic 2 follow-up)
 
 ## Epic 13 — Sub-agent contract upgrades — ✅ closed (#63, #68, #100)
 
