@@ -7,7 +7,7 @@ description: Get a working local copy of the scaffold in under five minutes.
 
 - **Node.js** ≥ 22 (use `nvm` or `fnm`)
 - **npm** ≥ 10
-- **git**, **gh** (GitHub CLI) — gh is required for the `/goal` Inceptor workflow
+- **git**, **gh** (GitHub CLI) — gh is required for the Inceptor sub-agent workflow
 
 Run `npm run doctor` at any time to verify your environment.
 

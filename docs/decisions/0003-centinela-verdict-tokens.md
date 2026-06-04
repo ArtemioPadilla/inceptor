@@ -9,7 +9,7 @@ Date: 2026-06-01
 ## Context
 
 `centinela` validates `forja`'s work (build, type-check, tests, forbidden-import
-scan) and returns APPROVED or REJECTED. The native `/goal` orchestrator reads
+scan) and returns APPROVED or REJECTED. The orchestrating Claude Code session reads
 that verdict and decides what to do next: re-dispatch `forja`, escalate to a
 human, or stop because the failure is outside the repo's control.
 
@@ -57,11 +57,11 @@ than the whole message. APPROVED verdicts need no token.
 Rejected alternatives:
 
 - **Structured-only output (drop the prose)** — loses the human-readable
-  rejection that operators rely on during `/goal` runs.
+  rejection that operators rely on during a run.
 - **Exit codes / a side-channel file** — agents communicate via transcript text,
   not process state; a file would not survive the sub-agent boundary cleanly.
 - **A new label/field convention in the PR** — too slow; routing must happen
-  inside the `/goal` loop before any PR exists.
+  inside the orchestration loop before any PR exists.
 
 ## Consequences
 

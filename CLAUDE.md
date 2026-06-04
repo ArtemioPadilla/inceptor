@@ -81,13 +81,12 @@ the full UI stack now in place.
   `type:feat`, `type:docs`
 - **Milestones**: `v0.2 - Stack modernization` through `v1.0 - Inceptor-aware stack`
 
-## Workflow: native `/goal` + Inceptor sub-agents
+## Workflow: Claude Code orchestration + Inceptor sub-agents
 
-This repo uses Claude Code's **native** `/goal` command (Claude Code v2.1.139+)
-with three project-specific sub-agents under `.claude/agents/`. Native `/goal`
-sets a completion condition and keeps Claude working across turns until a small
-fast model confirms it's met. The sub-agents are the building blocks Claude uses
-inside that loop.
+This repo ships three project-specific sub-agents under `.claude/agents/`. There
+is **no** native `/goal` loop — the main Claude Code session is the orchestrator.
+In a normal conversation, Claude triages an issue and dispatches the sub-agents
+(via the Task tool) to plan, implement, and validate the work, then opens a PR.
 
 ### Sub-agents (invoked via the Task tool)
 
@@ -98,21 +97,20 @@ inside that loop.
 - **centinela** — validates forja's work (build, type-check, tests,
   forbidden-import scan) and returns APPROVED or REJECTED.
 
-### Example `/goal` conditions
+### How the orchestration runs
 
-```text
-/goal Ship every Phase 1 issue from INTEGRATION-PLAN.md: PRs open, centinela
-      APPROVED, working tree clean. Stop after 30 turns.
+The main session drives the loop, one issue at a time:
 
-/goal Land issue #N from INTEGRATION-PLAN.md. End state: PR open against main,
-      centinela APPROVED in this transcript, branch named per the plan.
+1. **prometeo** decomposes the issue or phase into an ordered plan; you approve it.
+2. **forja** implements a single issue on a feature branch with atomic commits.
+3. **centinela** validates and returns APPROVED or REJECTED. On REJECTED it emits
+   a routing token (`RETRY_FORJA`, `NEEDS_HUMAN`, or `BLOCKED_UPSTREAM`) the
+   session reads to re-dispatch forja, escalate to you, or stop.
+4. On APPROVED, the session pushes the branch and opens a PR that closes the issue.
 
-/goal Open PRs that close every Phase 0 issue from INTEGRATION-PLAN.md. Use
-      prometeo to plan, forja per issue, centinela to gate each PR.
-```
-
-Run `/goal` with no arguments to check status; `/goal clear` to cancel. See
-<https://code.claude.com/docs/en/goal> for the full reference.
+Repeat until the scope is shipped. A typical kickoff is just a plain request, for
+example: "Land issue #N from INTEGRATION-PLAN.md — PR open against `main`,
+centinela APPROVED, branch named per the plan."
 
 ## Critical warnings — read before touching code
 

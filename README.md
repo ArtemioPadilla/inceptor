@@ -1,6 +1,6 @@
 # Inceptor
 
-> An Astro 5 + React 19 starter where every feature ships through a GitHub issue: **issue → `/goal` → PR → merge → deploy.** Batteries-included UI, zero JS by default.
+> An Astro 5 + React 19 starter where every feature ships through a GitHub issue: **issue → Claude Code → PR → merge → deploy.** Batteries-included UI, zero JS by default.
 
 **[Live demo → artemiop.com/inceptor](https://artemiop.com/inceptor/)**
 
@@ -60,10 +60,10 @@ Inceptor ships static HTML + a service worker, so any static host works. The def
 
 ## How development works
 
-Every feature starts as a GitHub issue. Claude triages it, you kick off the native `/goal` loop — which orchestrates the `prometeo` → `forja` → `centinela` sub-agents to plan, implement, and validate the work — and it lands as a PR against `main` that auto-deploys on merge. The in-app `FeedbackFAB` closes the loop: real users file issues with stack trace, URL, and diagnostics pre-filled.
+Every feature starts as a GitHub issue. In a Claude Code session, Claude triages it and drives three project sub-agents — `prometeo` plans, `forja` implements, `centinela` validates — landing a PR against `main` that auto-deploys on merge. The in-app `FeedbackFAB` closes the loop: real users file issues with stack trace, URL, and diagnostics pre-filled.
 
 ```
-User finds bug → FeedbackFAB → GitHub Issue → Claude /goal → PR → Merge → Deploy
+User finds bug → FeedbackFAB → GitHub Issue → Claude Code → PR → Merge → Deploy
 ```
 
 ## Documentation

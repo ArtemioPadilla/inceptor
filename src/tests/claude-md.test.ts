@@ -14,8 +14,8 @@ describe('CLAUDE.md', () => {
     expect(md).toMatch(/astro.*5\./i);
   });
 
-  it('mentions native /goal (Claude Code v2.1.139+)', () => {
-    expect(md).toMatch(/native[^.]+\/goal|v2\.1\.139/);
+  it('documents the Claude Code orchestration workflow', () => {
+    expect(md.toLowerCase()).toMatch(/orchestrat/);
   });
 
   it('documents the compound-component gotcha', () => {
