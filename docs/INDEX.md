@@ -13,6 +13,8 @@ lands) will use the same structure.
 | Understand the workflow / methodology | [`docs/PRINCIPLES.md`](./PRINCIPLES.md) |
 | Look up the ethics checklist | [`docs/ETHICS.md`](./ETHICS.md) |
 | Add a new component | [`docs/COMPONENTS.md`](./COMPONENTS.md) |
+| Build auth + DB, an AI feature, or host a backend | [`docs/recipes/`](./recipes/) (Supabase, BYOK, hosting, CI migrations) |
+| Improve the DX (FinSight learnings) | [`docs/DX-IMPROVEMENT-PLAN.md`](./DX-IMPROVEMENT-PLAN.md) |
 | See the Inceptor workflow + sub-agents | [`CLAUDE.md`](../CLAUDE.md) — Workflow section |
 | Pick the next thing to ship | [`ROADMAP.md`](../ROADMAP.md) |
 | See what's already shipped | [`INTEGRATION-PLAN.md`](../INTEGRATION-PLAN.md) — historical record |
