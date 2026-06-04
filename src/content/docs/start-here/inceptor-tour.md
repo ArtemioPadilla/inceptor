@@ -17,16 +17,16 @@ The issue should answer four Shape Up questions:
 - **Solution sketch** — your current best guess
 - **Rabbit holes / no-gos** — what's out of scope
 
-## 2. Invoke `/goal`
+## 2. Hand it to Claude Code
 
-In Claude Code:
+In a Claude Code session, point Claude at the issue — a plain request is enough:
 
 ```text
-/goal Land issue #N from INTEGRATION-PLAN.md / ROADMAP.md / this issue.
-      End state: PR open, centinela APPROVED, tests green. Stop after 15 turns.
+Land issue #N from INTEGRATION-PLAN.md / ROADMAP.md / this issue.
+End state: PR open, centinela APPROVED, tests green.
 ```
 
-Three sub-agents run in sequence:
+Claude orchestrates three sub-agents in sequence:
 
 | Agent | Role |
 |---|---|

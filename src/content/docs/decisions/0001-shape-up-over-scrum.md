@@ -14,7 +14,7 @@ Date: 2026-05-28
 
 This scaffold's primary developer is one person, sometimes working with Claude
 Code sub-agents (`prometeo`, `forja`, `centinela`). The Inceptor workflow already in
-place — issue → PR → merge, orchestrated via native `/goal` — needs a cadence
+place — issue → PR → merge, orchestrated by the main Claude Code session — needs a cadence
 framework on top of it.
 
 Scrum requires team ceremonies (standups, sprint reviews, retros with peers)
@@ -40,7 +40,7 @@ Use Shape Up's cadence primitives:
 |---|---|
 | Pitch | A written issue spec — `INTEGRATION-PLAN.md` entries or `.github/ISSUE_TEMPLATE/` forms |
 | Appetite | Phase or milestone (fixed time, variable scope) |
-| Betting table | Monday ritual — pick the next pitch, invoke `/goal <scope>` |
+| Betting table | Monday ritual — pick the next pitch, hand the scope to Claude Code |
 | Cycle | The phase duration |
 | Cooldown | 2-day gap after each phase for docs, refactors, dep bumps, debt |
 

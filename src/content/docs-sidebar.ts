@@ -45,7 +45,7 @@ export const docsSidebar: DocsGroup[] = [
       { label: 'Shape Up cadence', slug: 'how-we-work/shape-up' },
       { label: 'TDD with trailers', slug: 'how-we-work/tdd' },
       { label: 'Spec-DD with Zod', slug: 'how-we-work/spec-dd' },
-      { label: 'The /goal workflow', slug: 'how-we-work/goal' },
+      { label: 'Orchestration', slug: 'how-we-work/orchestration' },
       { label: 'Sub-agents', slug: 'how-we-work/sub-agents' },
     ],
   },

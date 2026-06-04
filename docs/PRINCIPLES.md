@@ -20,7 +20,7 @@ team ceremonies of Scrum degenerate. Shape Up's primitives translate cleanly:
 |---|---|
 | Pitch | A written issue spec — problem, appetite, solution sketch, rabbit-holes, no-gos. Examples: `INTEGRATION-PLAN.md` entries; `.github/ISSUE_TEMPLATE/` forms |
 | Appetite | Phase or milestone — *fixed time, variable scope* |
-| Betting table | Monday ritual: pick the next pitch, invoke `/goal <scope>` |
+| Betting table | Monday ritual: pick the next pitch, hand the scope to Claude Code |
 | Cycle | The phase duration |
 | Cooldown | 2-day gap after each phase — no new features, only docs / refactors / dep bumps / debt-paying |
 
@@ -41,7 +41,7 @@ for the full rationale.
 
 1. Open [`ROADMAP.md`](../ROADMAP.md), pick a phase / milestone — that's the appetite
 2. Open or write the pitch as a GitHub issue (use `.github/ISSUE_TEMPLATE/`)
-3. Invoke `/goal <scope>` — prometeo plans, you approve, forja+centinela execute per issue
+3. Hand the scope to Claude Code — prometeo plans, you approve, forja+centinela execute per issue
 4. Friday afternoon: hill-chart update on `ROADMAP.md` (still figuring out vs executing)
 5. End of phase: cooldown — no new features, only debt-paying work
 
@@ -69,7 +69,7 @@ Not every change deserves a red→green dance. Three tiers, set via
 | `tdd-tier:exempt` | Copy fixes, comments, ADR additions, dep bumps with no behavior change | No new test required |
 
 `prometeo` proposes the tier in its plan output; the human accepts or edits
-the label before invoking `/goal`. `centinela` enforces against the labelled
+the label before the run starts. `centinela` enforces against the labelled
 tier, not against a global rule.
 
 ### 2.2 The trailer convention
@@ -132,7 +132,7 @@ derived (`z.infer<typeof X>`), never authored alongside the schema.
 ## 4. Persuasive design — ethical by default
 
 This project ships persuasive technology. The FeedbackFAB is a *reduction-tech
-trigger*; `/goal` is a *tunneling sequence*; ErrorBoundary fallbacks are
+trigger*; the sub-agent loop is a *tunneling sequence*; ErrorBoundary fallbacks are
 *social-actor consolations*. We've been doing captology without naming it.
 
 The full framework — grounded in BJ Fogg's *Persuasive Technology* (2003) plus

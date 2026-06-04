@@ -22,7 +22,7 @@ Every persuasive feature is classified by what role the computer plays:
 |---|---|---|
 | **Tool** | Extends a user capability | FeedbackFAB reduces the ability cost of filing a bug report |
 | **Medium** | Presents experience | ErrorBoundary narrates failure to the user |
-| **Social actor** | Takes on persona / role | ThemeToggle's `aria-pressed` implies awareness; `/goal` plans on your behalf |
+| **Social actor** | Takes on persona / role | ThemeToggle's `aria-pressed` implies awareness; the sub-agent loop plans on your behalf |
 
 `prometeo` classifies each `type:feat` issue by triad corner in its plan output
 so `forja` sees the matching ethical risks before writing code.
@@ -40,7 +40,7 @@ We were doing captology without realising it:
   [`ROADMAP.md`](../ROADMAP.md) Epic 12 (privacy toast).
 - **ErrorBoundary fallback** = Social-Actor consolation + Reduction. It speaks
   ("Something went wrong in this island") and offers one-click recovery.
-- **`/goal` orchestrator** = **Tunneling** technology (Fogg Ch. 3). Funnels you
+- **The sub-agent orchestrator** = **Tunneling** technology (Fogg Ch. 3). Funnels you
   through *issue → branch → PR → merge* with the dependency chain pre-computed.
   Carries ethical concern #4 (asymmetric control: you can stop, but can't take a
   path the tunnel doesn't allow).

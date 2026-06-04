@@ -213,7 +213,7 @@ choice.
 
 Three subagents studied onboarding, the daily authoring loop, and tooling/CI.
 **Cross-cutting finding:** the quality bar (ux:check, a11y, forbidden-imports,
-ethics, visual) is enforced only by the `centinela` sub-agent inside `/goal` —
+ethics, visual) is enforced only by the `centinela` sub-agent during a Claude Code run —
 a human or Dependabot PR bypasses all of it because CI runs only `check` +
 `build`. Ordered by impact/effort.
 
@@ -243,7 +243,7 @@ a human or Dependabot PR bypasses all of it because CI runs only `check` +
 - [x] **Kill the dual deploy workflow** — `cd.yml` is now `workflow_dispatch`-only (a copy-me template for other providers); `deploy.yml` is the sole push-to-`main` deploy, so no more misleading green "deploy" (#110)
 - [ ] **Reconcile `SETUP.md`** with `.env.example` (`cp .env.example .env`), `deploy.yml` (not `cd.yml`), and `FeedbackFAB` (`PUBLIC_REPO_SLUG` env, not source edit). *(M/S)*
 - [~] **Pin Node** — `.nvmrc` (22) + `engines.node >=22` added (#110); surfacing `npm run doctor` as Quick-Start step 0 still open
-- [ ] **Document the non-Claude-Code path** — `/goal` has no fallback in CONTRIBUTING; add a "two ways to ship" + `docs/start-here/first-feature.md`. *(M/M)*
+- [ ] **Document the non-Claude-Code path** — the sub-agent workflow has no fallback in CONTRIBUTING; add a "two ways to ship" + `docs/start-here/first-feature.md`. *(M/M)*
 - [~] CI triggers now match real branch names (`main`, `phase-*/**`, `feat/**`, `fix/**`, `docs/**`, `chore/**`) (#110); README `check` description, `npm run help`, post-deploy smoke-check (curl 200) still open
 
 ## Epic 19 — Self-hosted backend archetypes — ✅ shipped (#109)

@@ -121,8 +121,8 @@ FinSight inventó BYOK + server stateless + mock en tests.
 
 ## Epic G — Issues como guías
 
-**Problema:** los issues detallados (con desglose de tareas) hacen que `/goal`
-ejecute mejor; no hay template para ese formato.
+**Problema:** los issues detallados (con desglose de tareas) hacen que los
+sub-agentes ejecuten mejor; no hay template para ese formato.
 
 ### Historia G1 — Template de "historia" ✅ (Ola 1)
 - [x] `.github/ISSUE_TEMPLATE/story.yml` con: historia, criterios, enfoque, archivos, tareas (checkboxes), DoD, TDD tier

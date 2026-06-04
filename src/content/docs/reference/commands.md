@@ -25,7 +25,7 @@ description: Every npm script and shell helper, in one table.
 | `npm run new-issue` | `gh issue create` wrapper with branch-inferred labels |
 | `npm run docs` | Open `docs/INDEX.md` |
 
-## Sub-agents (invoked by `/goal` in Claude Code)
+## Sub-agents (dispatched by the main Claude Code session)
 
 | Agent | When |
 |---|---|

@@ -49,7 +49,7 @@ workflows.
 
 GitHub's "Verified" badge requires either a GPG-signed commit or a commit
 made via the GitHub UI / `gh` CLI (which signs with GitHub's own key). The
-`/goal` sub-agents commit through git, so set up `gpgsign = true` in
+The Inceptor sub-agents commit through git, so set up `gpgsign = true` in
 `~/.gitconfig` once and every Claude commit auto-signs.
 
 ## What you give up
