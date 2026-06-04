@@ -8,7 +8,9 @@ Inceptor está optimizado para **mantener el repo-scaffold**, no para
 Convención: **Epic → Historia → Tarea**. Marca `[x]` al completar; cada Historia
 referencia su PR al cerrarse. Olas de entrega al final.
 
-> Estado: documento creado. Implementación en curso (ver "Olas").
+> Estado: **implementado**. Ola 1 (E/D/G, PR #113), Ola 2 (B/C/F, PR #114) y
+> Ola 3 (A, este PR) entregadas. Pendientes menores marcados `[ ]`/`[~]` dentro
+> de cada Historia (p. ej. archetype `supabase` en el init).
 
 ---
 
@@ -18,22 +20,23 @@ referencia su PR al cerrarse. Olas de entrega al final.
 galería/showcase/blog/demos, recortar `ui/` de ~60→~18, renombrar, limpiar
 branding). Frágil y deja restos.
 
-### Historia A1 — Script de init que genera un proyecto mínimo
-- [ ] `scripts/init.mjs` (+ `npm run init`) que copia a un destino un subconjunto *core*
-- [ ] Flags: `--name`, `--archetype <static|backend-node|backend-flask|supabase>`, `--out <dir>`
-- [ ] Excluye galería, showcase, blog, demos, `INTEGRATION-PLAN.md`, historia
-- [ ] Incluye set *core* de `ui/` (~12) + `lib/` + `stores/theme` + layout + landing mínima
-- [ ] Deja el árbol con `npm run check` verde out-of-the-box
+### Historia A1 — Script de init que genera un proyecto mínimo ✅ (Ola 3)
+- [x] `scripts/init.mjs` (+ `npm run init`) copia a un destino un subconjunto *core*
+- [x] Flags: `--name`, `--archetype <static|backend-node|backend-flask>`, `--out`, `--repo`
+- [x] Excluye galería, showcase, blog, demos, historia (solo el core)
+- [x] Set *core* de `ui/` (18) + `lib/` + `stores/theme` + islas infra + layout + landing
+- [x] **Verificado**: el proyecto generado pasa `npm install && npm run check` (1 página, tests verdes)
+- [ ] *(follow-up)* archetype `supabase` en el init (la receta ya existe: `docs/recipes/auth-supabase.md`)
 
-### Historia A2 — Parametrizar nombre / slug / base (de-brand)
-- [ ] Reemplazar nombre de proyecto, `package.json` name, `PUBLIC_REPO_SLUG`, `ASTRO_BASE`
-- [ ] Cero referencias "Inceptor" en el proyecto generado
-- [ ] README/CLAUDE/ROADMAP plantilla con placeholders rellenados
+### Historia A2 — Parametrizar nombre / slug / base (de-brand) ✅ (Ola 3)
+- [x] Reemplaza nombre, `package.json` name, `PUBLIC_REPO_SLUG`, `ASTRO_BASE`, slug del deploy
+- [x] **Cero referencias "Inceptor"** en el proyecto generado (verificado por grep)
+- [x] README mínimo generado con el nombre del proyecto
 
-### Historia A3 — Kit `ui/` *core + add*
-- [ ] Definir el set *core* mínimo (button, input, label, form, card, table, dialog, callout, skeleton, badge, separator, spinner)
-- [ ] `npm run new-component` añade desde Base UI on-demand (alinear con Epic 18)
-- [ ] Documentar "empieza lean, añade cuando lo necesites"
+### Historia A3 — Kit `ui/` *core + add* ✅ (Ola 3)
+- [x] Set *core* (button, input, label, textarea, form, card, alert, callout, skeleton, spinner, badge, separator, table, data-table, select, dialog, toast, dropdown-menu)
+- [~] `npm run new-component` on-demand → alineado con Epic 18 (scaffolder)
+- [x] El init documenta "empieza lean" en el README generado
 
 ---
 
