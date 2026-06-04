@@ -42,16 +42,20 @@ branding). Frágil y deja restos.
 **Problema:** todo producto real necesita auth + datos; Inceptor no lo trae.
 En FinSight se construyó desde cero.
 
-### Historia B1 — Recipe doc + código de referencia
-- [ ] `docs/recipes/auth-supabase.md` (copy-paste) con el flujo completo
-- [ ] `src/lib/supabase.ts` guardado (no rompe build sin env)
-- [ ] `src/stores/auth.ts` (sesión cross-island con Nano Stores)
-- [ ] Islas `LoginForm` / `RegisterForm` / `AuthNav` (react-hook-form + zod)
+### Historia B1 — Recipe doc + código de referencia ✅ (Ola 2)
+- [x] `docs/recipes/auth-supabase.md` (copy-paste) con el flujo completo
+- [x] Código de `supabase.ts` guardado incluido en el recipe
+- [x] Código de `stores/auth.ts` (sesión cross-island) incluido
+- [x] Código de islas `LoginForm` / `RegisterForm` / `AuthNav` incluido
 
-### Historia B2 — Patrón de datos + RLS
-- [ ] Migración ejemplo con RLS (`auth.uid() = user_id`, `default auth.uid()`)
-- [ ] Documentar el patrón **"frontend escribe con la sesión + RLS, sin service key"**
-- [ ] ADR plantilla de la decisión (Supabase + stateless backend)
+> Nota: se entrega como **recipe** (código en el doc), no como código vivo en el
+> demo — meter Supabase al demo forzaría una dep + opinión. El init (Epic A) lo
+> instala on-demand por archetype.
+
+### Historia B2 — Patrón de datos + RLS ✅ (Ola 2)
+- [x] Migración ejemplo con RLS (`auth.uid() = user_id`, `default auth.uid()`)
+- [x] Patrón **"frontend escribe con la sesión + RLS, sin service key"** documentado
+- [x] ADR de la arquitectura (ver ADR 0006 + recipe)
 
 ---
 
@@ -60,15 +64,15 @@ En FinSight se construyó desde cero.
 **Problema:** apps con IA son cada vez más comunes; no hay patrón en Inceptor.
 FinSight inventó BYOK + server stateless + mock en tests.
 
-### Historia C1 — Recipe BYOK
-- [ ] `docs/recipes/ai-byok.md` — patrón BYOK (key del usuario → `sessionStorage` → header → uso transitorio)
-- [ ] `src/stores/apiKey.ts` + isla `ApiKeyField` de referencia
-- [ ] Helper `callClaude` aislado (mockeable) + patrón de test (monkeypatch)
+### Historia C1 — Recipe BYOK ✅ (Ola 2)
+- [x] `docs/recipes/ai-byok.md` — patrón BYOK (key → `sessionStorage` → header → uso transitorio)
+- [x] Código de `stores/apiKey.ts` + `ApiKeyField` incluido
+- [x] Helper `call_claude` aislado (mockeable) + patrón de test (monkeypatch) incluido
 
-### Historia C2 — Guía de hosting del backend de IA
-- [ ] `docs/recipes/ai-backend-hosting.md` — local / Render / Cloud Run
-- [ ] Nota explícita: *Supabase Edge Functions = Deno, no Python*
-- [ ] Tabla de decisión (requisito de Python vs cero-hosting)
+### Historia C2 — Guía de hosting del backend de IA ✅ (Ola 2)
+- [x] `docs/recipes/ai-backend-hosting.md` — local / Render / Cloud Run
+- [x] Nota explícita: *Supabase Edge Functions = Deno, no Python*
+- [x] Tabla de decisión (requisito de Python vs cero-hosting)
 
 ---
 
@@ -103,12 +107,12 @@ FinSight inventó BYOK + server stateless + mock en tests.
 
 **Problema:** `deploy.yml` no inyecta env públicas ni hay workflow de migraciones.
 
-### Historia F1 — Inyección de env públicas en deploy
-- [ ] Documentar/plantilla: inyectar `PUBLIC_*` desde *Actions Variables* en `deploy.yml`
+### Historia F1 — Inyección de env públicas en deploy ✅ (Ola 2)
+- [x] Plantilla documentada: inyectar `PUBLIC_*` desde *Actions Variables* en `deploy.yml`
 
-### Historia F2 — Workflow de migraciones (template)
-- [ ] `docs/recipes/supabase-migrations-ci.md` + plantilla `supabase.yml` (`db push`)
-- [ ] Guía de qué secrets pone el usuario (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`)
+### Historia F2 — Workflow de migraciones (template) ✅ (Ola 2)
+- [x] `docs/recipes/supabase-migrations-ci.md` + plantilla `supabase.yml` (`db push`)
+- [x] Guía de secrets del usuario (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`)
 
 ---
 
