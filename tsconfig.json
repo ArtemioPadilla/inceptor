@@ -7,6 +7,8 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
+    // For TypeScript 6. A fork on TS 5.x must remove this line (5.x only
+    // accepts "5.0") — `create-inceptor-app` handles it per archetype.
     "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["./src/*"]

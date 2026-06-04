@@ -26,10 +26,22 @@ trimming).
 
 Validation failures return `422 { error: "validation_failed", errors: [{ path, message }] }`.
 
-## Run it
+## Run it — one command
+
+Desde la raíz del repo:
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+npm run server:flask                          # crea venv (Python 3.11–3.13) + instala + corre
+docker compose --profile backend-flask up     # o vía Docker (no depende de tu Python)
+```
+
+> Necesita **Python 3.11–3.13** (3.14 aún no trae wheels de `pydantic-core`).
+> Si tu `python3` es 3.14, usa la vía Docker.
+
+### Manual
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env             # set GITHUB_TOKEN, CORS_ORIGIN, REPO_SLUG
 flask --app app run --port 8787  # dev — or: python app.py

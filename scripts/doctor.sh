@@ -77,6 +77,14 @@ else
   fail "astro.config.mjs missing"
 fi
 
+# src/env.d.ts — easy to forget on a selective port; its absence makes
+# `import.meta.env` fail type-check with a cryptic ts(2339) error.
+if [ -f src/env.d.ts ]; then
+  ok "src/env.d.ts present"
+else
+  fail "src/env.d.ts missing — add '/// <reference types=\"astro/client\" />'"
+fi
+
 # ANTHROPIC_API_KEY (optional but helpful for the Claude triage workflow)
 if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
   ok "ANTHROPIC_API_KEY is set"

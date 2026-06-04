@@ -7,6 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "server:flask": "bash scripts/dev-flask.sh",
+    "server:node": "npm --prefix server-node install && npm --prefix server-node run dev",
     "build": "astro build && pagefind --site dist --output-subdir _pagefind",
     "build:no-search": "astro build",
     "preview": "astro preview",
