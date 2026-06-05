@@ -187,8 +187,50 @@ banner), it must trace back to these four lines. If it can't, it's off-message.
 - The exact `enable governance` / `enable tdd-tier` ergonomics (CLI subcommand
   vs. doc-driven manual step) — depends on how far `create-inceptor-app` grows.
 - Whether `TEACHING.md` is a doc, a branch, or a separate template.
-- Positioning of the relationship between this template and FinSight as the
-  reference implementation (its own strategy thread).
+
+---
+
+## 7. Inceptor ↔ FinSight (the reference implementation)
+
+FinSight AI (the bank-statement reader) is **Inceptor's L3 "Teach it" layer made
+real** — a production product built *on* the methodology, used as the worked
+example. The relationship is deliberate and one-directional:
+
+- **FinSight is downstream.** It consumes the template's way of working
+  (sub-agent loop, Shape Up, TDD tiers, ethics checklist) and proves it survives
+  contact with a real product, a real deadline, and real users.
+- **Inceptor is upstream.** It owns the *generic* substrate. Anything in FinSight
+  that is not product-specific is a candidate to **extract upstream** into the
+  template.
+
+### The extraction rule
+
+When something is built in FinSight, ask: *is this about how we work, or about
+bank statements?*
+
+| Extract upstream to Inceptor | Stays in FinSight |
+|---|---|
+| sub-agent / workflow improvements | PDF parsing, transaction schemas |
+| DX tooling (`doctor`, `monday`, `ship`) | Supabase + Edge Functions wiring |
+| ethics / governance mechanics | CNBV / INAI domain rules |
+| generic UI primitives + gallery entries | finance dashboards, categorization UI |
+| recipes (auth, BYOK AI, CI/CD) | the specific BYOK provider choices |
+
+The DX-improvement plan and the Ola 1–3 recipe work (PRs #113–#115) already ran
+this loop — learnings from FinSight became generic template assets. That is the
+intended cadence, not a one-off.
+
+### The constellation
+
+When the archetype constellation lands (`backend`, `decentralized`, `onion`),
+each archetype **inherits `PRINCIPLES.md`** and overrides only stack/deploy
+specifics in its own `archetype.md`. FinSight is the first such instance in all
+but name — a product archetype. Inceptor stays the single source of *how we
+work*; archetypes and products carry only what is genuinely theirs.
+
+**Decision:** keep Inceptor product-agnostic; treat FinSight as the canonical
+downstream proof; extract by the rule above, never couple upstream to a product's
+domain.
 
 ---
 

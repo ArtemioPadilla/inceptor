@@ -264,6 +264,35 @@ behavior. Two interchangeable runtimes share one `/api/*` contract. ADR 0006.
 
 ---
 
+## Epic 20 — First-run experience (from POSITIONING §4)
+
+Make `create-inceptor-app`'s first 60 seconds prove the differentiator instead
+of hiding it. The positioning decision is fixed in
+[`docs/POSITIONING.md`](./docs/POSITIONING.md) §4: **lean by default,
+differentiator *shown* not gated, depth *earned* via just-in-time disclosure —
+no upfront picker.** This epic turns that decision into shipped surface.
+
+- [ ] **Seeded example issue** — `create-inceptor-app` scaffolds one pre-written
+  GitHub issue (or local `examples/first-issue.md`) the loop can run against, so
+  a new user watches issue → prometeo → forja → centinela → PR without authoring
+  anything.
+- [ ] **`/how-it-works` walkthrough** — a page (or fold into `/showcase`) that
+  shows the sub-agent loop running on the seed; the live differentiator demo.
+  *(Open question in POSITIONING §6: route name vs. `/showcase`.)*
+- [ ] **FeedbackFAB live from second one** — confirm the FAB renders on the
+  scaffolded app's first run with no config; it's the cheapest user→issue demo.
+- [ ] **Governance dormant-but-visible** — TDD tiers / ethics checklist /
+  `risk:high` present and documented but off by default; a README one-liner
+  points at the enable path (not off-and-hidden).
+- [ ] **Just-in-time disclosure hooks** — surface each deeper layer when it
+  becomes relevant (`enable tdd-tier` after first bug; ethics + ADR flow on first
+  `risk:high`; a `TEACHING.md` door for coursework). *(Ergonomics open in
+  POSITIONING §6: CLI subcommand vs. doc-driven manual step.)*
+- [ ] **No upfront picker** — explicitly *not* building a "lean/governed/teaching"
+  init prompt; recorded here so it isn't re-proposed.
+
+---
+
 ## Status legend
 
 - `[ ]` open · `[~]` partial (detail in the line) · `[x]` done (carries the PR #)
