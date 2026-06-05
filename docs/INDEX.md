@@ -10,6 +10,7 @@ lands) will use the same structure.
 |---|---|
 | Understand the stack at a glance | [`CLAUDE.md`](../CLAUDE.md) — Stack section |
 | See installed package versions | [`CLAUDE.md`](../CLAUDE.md) — Stack table |
+| Understand how we position Inceptor (category, wedge, audience) | [`docs/POSITIONING.md`](./POSITIONING.md) |
 | Understand the workflow / methodology | [`docs/PRINCIPLES.md`](./PRINCIPLES.md) |
 | Look up the ethics checklist | [`docs/ETHICS.md`](./ETHICS.md) |
 | Add a new component | [`docs/COMPONENTS.md`](./COMPONENTS.md) |
