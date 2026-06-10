@@ -8,7 +8,7 @@ type BlogEntry = CollectionEntry<'blog'>;
 
 // Early redirect when the blog is disabled via feature flag.
 if (!flags.blog) {
-  return Astro.redirect('/', 308);
+  return Astro.redirect(withBase('/'), 308);
 }
 
 const posts = (await getCollection('blog'))

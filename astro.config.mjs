@@ -87,7 +87,7 @@ export default defineConfig({
         // Precache all static assets produced by the Astro build
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
         // Fall back to index for any navigation that doesn't match a static file
-        navigateFallback: '/',
+        navigateFallback: BASE,
         // Never fall back for API routes — they must not serve the SPA shell
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [

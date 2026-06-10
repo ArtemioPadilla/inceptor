@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://inceptor.example/sitemap-index.xml
+
+Sitemap: https://artemiop.com/inceptor/sitemap-index.xml

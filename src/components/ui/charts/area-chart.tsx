@@ -71,6 +71,7 @@ export function AreaChart<T extends Record<string, unknown>>({
           {series.map((key, i) => (
             <Area
               key={key}
+              isAnimationActive={false}
               type="monotone"
               dataKey={key as never}
               stroke={chartColor(i)}

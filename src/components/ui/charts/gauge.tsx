@@ -30,7 +30,7 @@ export function Gauge({ value, max = 100, height = 180, className, colorIndex = 
             endAngle={-270}
           >
             <PolarAngleAxis type="number" domain={[0, max]} tick={false} />
-            <RadialBar dataKey="value" cornerRadius={999} fill={chartColor(colorIndex)} background={{ fill: 'var(--secondary)' }} />
+            <RadialBar dataKey="value" isAnimationActive={false} cornerRadius={999} fill={chartColor(colorIndex)} background={{ fill: 'var(--secondary)' }} />
           </RadialBarChart>
         </ResponsiveContainer>
       )}

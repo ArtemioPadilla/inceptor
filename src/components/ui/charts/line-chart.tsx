@@ -62,6 +62,7 @@ export function LineChart<T extends Record<string, unknown>>({
           {series.map((key, i) => (
             <Line
               key={key}
+              isAnimationActive={false}
               type="monotone"
               dataKey={key as never}
               stroke={chartColor(i)}
