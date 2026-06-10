@@ -10,17 +10,36 @@ import PrivacyToast from '../components/islands/PrivacyToast';
 import { withBase } from '../lib/href';
 import { flags } from '../lib/flags';
 
+interface AlternateLink {
+  /** BCP-47 locale (e.g. 'en', 'es') or 'x-default' */
+  hreflang: string;
+  /** Absolute URL for that locale's equivalent page */
+  href: string;
+}
+
 interface Props {
   title?: string;
   description?: string;
   lang?: 'es' | 'en';
+  /** Hreflang alternates. When provided, emitted as <link rel="alternate">.
+   *  Pass at least en + es + x-default for bilingual pages.
+   *  Pages that don't pass this prop get no hreflang tags (safe default). */
+  alternates?: AlternateLink[];
 }
 
 const {
   title = 'My App',
   description = 'Built with inceptor',
   lang = 'en',
+  alternates,
 } = Astro.props;
+
+// Canonical URL — derived from Astro.site + Astro.url.pathname so it always
+// reflects the live origin and the current subpath (e.g. /inceptor/gallery/).
+// Falls back gracefully when Astro.site is not set (local dev without --site).
+const canonicalUrl = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).toString()
+  : null;
 ---
 
 <!doctype html>
@@ -65,6 +84,18 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    {/* color-scheme: tells the browser's chrome (scrollbars, form controls,
+        etc.) which mode it is in, matching the CSS color-scheme on :root/.dark.
+        This prevents unstyled light scrollbars from showing in dark mode. */}
+    <meta name="color-scheme" content="light dark" />
+    {/* Canonical URL prevents duplicate-content penalties when the page is
+        accessible under multiple paths (e.g. trailing-slash variants). */}
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {/* Hreflang alternates — only emitted when the caller provides them,
+        so pages that have no i18n equivalent don't emit bogus tags. */}
+    {alternates && alternates.map((alt) => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
     {/* Type system: Fraunces (display) + Hanken Grotesk (body) + JetBrains Mono.
         preconnect + display=swap so text paints immediately in the fallback. */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -91,6 +122,16 @@ const {
     <meta name="twitter:image" content={new URL(withBase('/og-image.png'), Astro.site ?? 'https://artemiop.com').toString()} />
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased" style="view-transition-name: body-bg">
+    {/* Skip-to-content link — WCAG 2.4.1 requirement. Visually hidden until
+        focused (sr-only focus:not-sr-only). Targets #main-content which is
+        added to the <main> element on pages within the file boundary.
+        On pages that lack the id, the anchor still works (just no scroll). */}
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[999] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground focus:shadow-lg focus:outline-none"
+    >
+      Skip to content
+    </a>
     <SiteHeader />
     <slot />
     <FeedbackFAB lang={lang} />
