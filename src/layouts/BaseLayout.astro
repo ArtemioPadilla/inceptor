@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import SiteHeader from '../components/common/SiteHeader.astro';
+import SiteFooter from '../components/common/SiteFooter.astro';
 import OfflineBanner from '../components/islands/OfflineBanner';
 import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
@@ -134,6 +135,7 @@ const canonicalUrl = Astro.site
     </a>
     <SiteHeader />
     <slot />
+    <SiteFooter />
     <FeedbackFAB lang={lang} />
     <!--
       OfflineBanner is mounted with client:idle so the online/offline event
