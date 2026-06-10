@@ -8,30 +8,35 @@ const demos = [
     name: 'Dashboard',
     summary:
       'KPIs + charts + DataTable composed on a single page, fetching live GitHub data via TanStack Query.',
+    hint: 'Watch the skeletons resolve into live data; sort the Recent issues table.',
   },
   {
     href: '/demos/data/',
     name: 'Data island',
     summary:
       'GitHub issues fetcher with loading, error, and empty states. Cache persisted to IndexedDB.',
+    hint: 'Reload the page — the cache hydrates instantly from IndexedDB before the refetch lands.',
   },
   {
     href: '/demos/data/large/',
     name: '50,000-row table',
     summary:
       'DataTable scaled to 50k deterministic rows via TanStack Virtual. Sort, filter, URL state sync.',
+    hint: 'Type in the filter and sort a column — input latency stays under 50 ms.',
   },
   {
     href: '/demos/settings/',
     name: 'Settings page',
     summary:
       'Tabbed settings UI composing Select, Switch rows, RadioGroup, Slider, Textarea, Avatar and a Save button with local state.',
+    hint: 'Flip controls and hit Save; state is local and the toast self-dismisses.',
   },
   {
     href: '/demos/api/',
     name: 'Backend API',
     summary:
       'The opt-in self-hosted backend contract (Node/Hono + Flask/Pydantic): contact/newsletter handlers, a token-backed GitHub proxy, feedback→issue, and OpenAPI/Swagger.',
+    hint: 'Static by default — set PUBLIC_API_BASE and the same forms go through the proxy.',
   },
 ];
 ---
@@ -44,7 +49,7 @@ const demos = [
       </h1>
       <p class="mt-2 text-muted-foreground">
         Composed real-feeling pages. Looking for individual primitives?
-        Visit <a href={withBase('/gallery/')} class="text-primary hover:underline">/gallery</a>.
+        Visit <a href={withBase('/gallery/')} class="text-primary underline underline-offset-2 hover:text-primary/80">/gallery</a>.
       </p>
     </header>
 
@@ -60,6 +65,11 @@ const demos = [
                 {demo.name}
               </h2>
               <p class="mt-2 text-sm text-muted-foreground">{demo.summary}</p>
+              {demo.hint && (
+                <p class="mt-3 font-mono text-[0.7rem] uppercase tracking-wide text-primary/90">
+                  try: <span class="normal-case tracking-normal text-muted-foreground">{demo.hint}</span>
+                </p>
+              )}
             </a>
           </li>
         ))

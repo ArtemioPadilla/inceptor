@@ -3,12 +3,16 @@
  * the actual color is resolved by the browser at paint time — flips
  * automatically when .dark is applied to <html>.
  */
+// Ordered for maximum hue distance between ADJACENT series (audit §4.4):
+// emerald → blue → amber → violet → teal. The tokens themselves are
+// unchanged; only the assignment order differs so two-series charts don't
+// land on the near-identical emerald/teal pair.
 export const CHART_COLORS = [
-  'var(--chart-1)',
-  'var(--chart-2)',
-  'var(--chart-3)',
-  'var(--chart-4)',
-  'var(--chart-5)',
+  'var(--chart-1)', // emerald (163)
+  'var(--chart-3)', // blue (255)
+  'var(--chart-4)', // amber (70)
+  'var(--chart-5)', // violet (300)
+  'var(--chart-2)', // teal (195)
 ] as const;
 
 export type ChartColor = (typeof CHART_COLORS)[number];
