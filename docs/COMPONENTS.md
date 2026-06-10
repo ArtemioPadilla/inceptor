@@ -594,6 +594,72 @@ its fields. The prohibition is specifically on Context used to share state
 
 ---
 
+## 11. Data-fetching states: the dashboard exemplar
+
+`src/components/islands/DashboardIsland.tsx` is the canonical reference for how
+to handle all three non-happy-path states in a data-fetching island.
+
+### The three states
+
+| State | Condition | What to render |
+|---|---|---|
+| **Loading** | `isLoading === true` | `<Skeleton>` placeholders — `<KpiSkeleton>`, `<ChartSkeleton>`, `<TableSkeleton>` — that match the layout of the real content so there is no layout shift on hydration. |
+| **Error** | `error !== null` | A structured error card with a **Retry** button. For GitHub rate-limit errors (HTTP 403 / 429) render a dedicated `<RateLimitErrorCard>` that explains the 60 req/h unauthenticated cap, shows "resets in ~N min" when the `X-RateLimit-Reset` header was captured, and links to the backend proxy option (`PUBLIC_API_BASE`, docs/building/backend). |
+| **Empty** | Successful load, zero items | A positive / celebratory message — never the same copy as the loading placeholder. For the open-issues KPI when count is 0: a "🎉 inbox zero" sublabel rendered in emerald. For charts with no data: "No issues yet — all clear!" |
+
+### Structured errors
+
+To propagate HTTP metadata (status code, rate-limit reset epoch) from the
+`queryFn` to the error display component, the island throws a typed error class
+instead of a bare `Error`:
+
+```ts
+class GitHubApiError extends Error {
+  readonly status: number;
+  readonly rateLimitReset: number | undefined; // Unix epoch seconds
+
+  constructor(status: number, rateLimitReset: number | undefined) {
+    super(`GitHub API ${status}`);
+    this.status = status;
+    this.rateLimitReset = rateLimitReset;
+  }
+}
+```
+
+The `queryFn` parses `X-RateLimit-Reset` from the response headers and attaches
+it to the error before throwing. The error UI then computes "resets in ~N min"
+at **render time** (not at throw time) so the countdown reflects elapsed time.
+
+```ts
+// Inside queryFn:
+const resetHeader = res.headers.get('X-RateLimit-Reset');
+const rateLimitReset = resetHeader ? parseInt(resetHeader, 10) : undefined;
+throw new GitHubApiError(res.status, rateLimitReset);
+
+// In the UI component:
+const minsUntilReset = error.rateLimitReset !== undefined
+  ? Math.max(1, Math.ceil((error.rateLimitReset * 1000 - Date.now()) / 60_000))
+  : null;
+```
+
+### File pointers
+
+- Island: `src/components/islands/DashboardIsland.tsx`
+- Page: `src/pages/demos/dashboard.astro`
+- Tests: `src/tests/wave4-dashboard-states.test.ts`
+
+### Applying the pattern elsewhere
+
+Any island that fetches remote data should follow the same three-state model:
+
+1. **Loading** — skeleton that mirrors the final layout.
+2. **Error** — structured card with a retry action. Distinguish error subtypes
+   (rate-limit, auth, network, server) so the user receives actionable guidance.
+3. **Empty** — celebratory or neutral copy that is clearly distinct from loading.
+   Never show the loading placeholder copy in the empty state.
+
+---
+
 ## Checklist for new components
 
 Use this before opening a PR:
