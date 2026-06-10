@@ -169,6 +169,9 @@ write('tsconfig.json', JSON.stringify({
   compilerOptions: {
     target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler',
     strict: true, skipLibCheck: true, jsx: 'react-jsx', baseUrl: '.',
+    // TS6 errors on the deprecated baseUrl unless this is present (same as
+    // the template's own tsconfig).
+    ignoreDeprecations: '6.0',
     paths: { '@/*': ['./src/*'] },
   },
   include: ['src/**/*'],
@@ -267,14 +270,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npm run build
         env:
           ASTRO_BASE: \${{ secrets.ASTRO_BASE || '/${slug}' }}
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with: { path: ./dist }
   deploy:
     needs: build
@@ -282,8 +285,20 @@ jobs:
     environment: { name: github-pages, url: \${{ steps.deployment.outputs.page_url }} }
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5
 `);
+
+// Issue forms ARE the Inceptor workflow's front door (issue → Claude → PR):
+// a generated project without them can't run the loop. Copy them de-branded.
+for (const tpl of [
+  'config.yml',
+  'bug_report.yml',
+  'feature_request.yml',
+  'question.yml',
+  'story.yml',
+]) {
+  copy(`.github/ISSUE_TEMPLATE/${tpl}`);
+}
 
 // --- archetype backend (excluye artefactos locales) ---
 const SKIP = new Set(['.venv', 'node_modules', '__pycache__', '.pytest_cache', 'dist', '.env']);

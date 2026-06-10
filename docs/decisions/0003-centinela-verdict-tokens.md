@@ -1,5 +1,11 @@
 # 0003 — Centinela verdict tokens for orchestrator routing
 
+> **Numbering note (June 2026 audit §4.5):** two distinct decisions share the
+> number 0003 — this one and the superseded Starlight ADR — because the
+> Starlight record was written and superseded within the same cycle and the
+> number was reused by mistake. Both slugs are kept for URL stability; new
+> ADRs continue from 0007.
+
 ## Status
 
 Accepted

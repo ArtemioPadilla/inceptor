@@ -3,6 +3,12 @@ title: "0003 — Astro Starlight for the docs site"
 description: Architecture Decision Record.
 ---
 
+> **Numbering note (June 2026 audit §4.5):** two distinct decisions share the
+> number 0003 — this one and the superseded Starlight ADR — because the
+> Starlight record was written and superseded within the same cycle and the
+> number was reused by mistake. Both slugs are kept for URL stability; new
+> ADRs continue from 0007.
+
 ## Status
 
 Superseded by [0004](./0004-custom-docs-route) — Starlight was never shipped; a
