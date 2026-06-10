@@ -17,11 +17,23 @@ import IssuesList from '../../components/islands/IssuesList';
 
     <IssuesList client:visible />
 
-    <footer class="border-t border-border pt-6 text-sm text-muted-foreground">
-      Looking for a larger-scale demo?
-      <a href={withBase('/demos/data/large/')} class="ml-1 underline underline-offset-4 hover:text-foreground">
-        View the 50k-row virtualization demo →
-      </a>
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground space-y-2">
+      <p>
+        Looking for a larger-scale demo?
+        <a href={withBase('/demos/data/large/')} class="ml-1 underline underline-offset-4 hover:text-foreground">
+          View the 50k-row virtualization demo →
+        </a>
+      </p>
+      <p>
+        <a
+          href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/pages/demos/data.astro"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline underline-offset-4 hover:text-foreground"
+        >
+          View source on GitHub ↗
+        </a>
+      </p>
     </footer>
   </main>
 </BaseLayout>
