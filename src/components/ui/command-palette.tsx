@@ -65,6 +65,7 @@ function CommandPalette({
             {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
             <input
               autoFocus
+              aria-label="Search commands"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={placeholder}
@@ -72,7 +73,7 @@ function CommandPalette({
             />
             <Kbd>esc</Kbd>
           </div>
-          <ul className="max-h-80 overflow-y-auto p-1">
+          <ul aria-label="Commands" className="max-h-80 overflow-y-auto p-1">
             {filtered.length === 0 ? (
               <li className="px-3 py-6 text-center text-sm text-muted-foreground">No results.</li>
             ) : (
