@@ -119,7 +119,11 @@ def test_contract_matches_node_golden():
         os.path.dirname(__file__), "..", "..", "server-node", "openapi.golden.json"
     )
     if not os.path.exists(golden_path):
-        pytest.skip("golden contract not generated")
+        pytest.fail(
+            "golden contract missing — run `npm run gen:openapi` in server-node/ "
+            "and commit openapi.golden.json (this test is the only cross-archetype "
+            "parity guard; a silent skip defeats it)"
+        )
     with open(golden_path) as f:
         golden = json.load(f)
     doc = openapi_doc()
