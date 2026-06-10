@@ -23,15 +23,15 @@ const AccordionTrigger = React.forwardRef<
     <BaseAccordion.Trigger
       ref={ref}
       className={cn(
-        'flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all',
+        'group flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all',
         'hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        '[&[data-panel-open]>svg]:rotate-180',
         className,
       )}
       {...props}
     >
       {children}
-      <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+      {/* data-panel-open is set on the Trigger by Base UI; group-data-[panel-open] reads it */}
+      <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[panel-open]:rotate-180" />
     </BaseAccordion.Trigger>
   </BaseAccordion.Header>
 ));

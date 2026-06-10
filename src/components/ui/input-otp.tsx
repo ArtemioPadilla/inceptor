@@ -35,6 +35,9 @@ function InputOTP({ value, onValueChange, length = 6, className }: InputOTPProps
           maxLength={1}
           value={c}
           aria-label={`Digit ${i + 1}`}
+          // First cell advertises one-time-code so password managers / SMS
+          // autofill can inject the full OTP; remaining cells suppress autofill.
+          autoComplete={i === 0 ? 'one-time-code' : 'off'}
           className="h-11 w-10 rounded-md border border-input bg-background text-center text-lg font-medium tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           onChange={(e) => setChar(i, e.target.value)}
           onPaste={(e) => {

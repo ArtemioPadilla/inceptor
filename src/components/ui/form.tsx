@@ -61,13 +61,15 @@ function FormField<
 
 function useFormField() {
   const fieldContext = React.useContext(FormFieldContext);
-  const { getFieldState, formState } = useFormContext();
 
-  const fieldState = getFieldState(fieldContext.name, formState);
-
-  if (!fieldContext) {
+  // Guard BEFORE calling getFieldState — if fieldContext.name is undefined
+  // (context was never provided), getFieldState would throw or produce garbage.
+  if (!fieldContext.name) {
     throw new Error('useFormField must be used within <FormField>');
   }
+
+  const { getFieldState, formState } = useFormContext();
+  const fieldState = getFieldState(fieldContext.name, formState);
 
   return {
     name: fieldContext.name,

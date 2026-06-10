@@ -38,7 +38,10 @@ export const Tracker = React.forwardRef<HTMLDivElement, TrackerProps>(
       {data.map((block) => (
         <div
           key={block.key}
+          // title keeps hover tooltip for mouse users; role+aria-label for AT users.
           title={block.tooltip}
+          role="img"
+          aria-label={block.tooltip}
           className={cn(
             'h-8 flex-1 rounded-sm',
             colorMap[block.color],

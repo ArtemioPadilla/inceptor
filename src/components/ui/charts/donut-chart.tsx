@@ -22,12 +22,14 @@ export interface DonutChartProps {
   className?: string;
   /** Inner radius as a percentage of the outer radius. Defaults to 60. */
   innerRadius?: number;
+  /** Accessible label for the chart region. Defaults to 'donut chart'. */
+  ariaLabel?: string;
 }
 
-export function DonutChart({ data, height = 280, className, innerRadius = 60 }: DonutChartProps) {
+export function DonutChart({ data, height = 280, className, innerRadius = 60, ariaLabel = 'donut chart' }: DonutChartProps) {
   const mounted = useMounted();
   return (
-    <div className={cn('w-full', className)} style={{ height }}>
+    <div role="img" aria-label={ariaLabel} className={cn('w-full', className)} style={{ height }}>
       {mounted && (
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>

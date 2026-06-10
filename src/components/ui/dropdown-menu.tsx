@@ -42,7 +42,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
 DropdownMenuSubTrigger.displayName = 'DropdownMenuSubTrigger';
 
 const DropdownMenuSubContent = React.forwardRef<
-  React.ComponentRef<typeof Menu.Positioner>,
+  React.ComponentRef<typeof Menu.Popup>,
   React.ComponentPropsWithoutRef<typeof Menu.Popup> & {
     positionerProps?: React.ComponentPropsWithoutRef<typeof Menu.Positioner>;
   }
