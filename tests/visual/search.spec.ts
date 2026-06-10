@@ -27,8 +27,16 @@ test('docs search returns results for a known term', async ({ page }) => {
 
 test('global ⌘K palette opens and lists nav commands', async ({ page }) => {
   await page.goto('/gallery/');
+  // GlobalSearch hydrates client:idle — Astro drops the `ssr` attribute once
+  // the island is interactive. Pressing ⌘K before that is a silent no-op on
+  // slow CI runners (the flake that shipped with the first version of this
+  // test), so gate the keypress on hydration.
+  await page.waitForSelector(
+    'astro-island[component-url*="GlobalSearch"]:not([ssr])',
+    { state: 'attached', timeout: 15_000 },
+  );
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
+  await expect(dialog).toBeVisible({ timeout: 10_000 });
   await expect(dialog.getByText('Gallery', { exact: false }).first()).toBeVisible();
 });
