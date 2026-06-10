@@ -1,0 +1,66 @@
+---
+/**
+ * TimelineStage — one step in the How-It-Works vertical timeline.
+ *
+ * Each stage gets a mono kicker label (ISSUE / PLAN / COMMITS / VERDICT),
+ * a connector line to the next stage, and a styled card body via the default slot.
+ * Purely static — zero JS.
+ */
+interface Props {
+  /** Mono-uppercase label: ISSUE | PLAN | COMMITS | VERDICT */
+  label: 'ISSUE' | 'PLAN' | 'COMMITS' | 'VERDICT';
+  /** One-liner heading shown below the kicker */
+  heading: string;
+  /** Whether to render the vertical connector below the node (omit on last stage) */
+  connector?: boolean;
+}
+
+const { label, heading, connector = true } = Astro.props;
+
+// Each stage gets a distinct left-border accent colour to aid visual scanning.
+const accentMap: Record<Props['label'], string> = {
+  ISSUE:   'border-l-amber-500',
+  PLAN:    'border-l-blue-500',
+  COMMITS: 'border-l-violet-500',
+  VERDICT: 'border-l-emerald-500',
+};
+const kicerColorMap: Record<Props['label'], string> = {
+  ISSUE:   'text-amber-500',
+  PLAN:    'text-blue-500',
+  COMMITS: 'text-violet-500',
+  VERDICT: 'text-emerald-500',
+};
+const dotColorMap: Record<Props['label'], string> = {
+  ISSUE:   'bg-amber-500',
+  PLAN:    'bg-blue-500',
+  COMMITS: 'bg-violet-500',
+  VERDICT: 'bg-emerald-500',
+};
+
+const accentClass   = accentMap[label];
+const kicerClass    = kicerColorMap[label];
+const dotClass      = dotColorMap[label];
+---
+
+<div class="relative flex gap-6">
+  <!-- timeline node + optional connector -->
+  <div class="flex flex-col items-center">
+    <div class={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${dotClass} ring-2 ring-background`}></div>
+    {connector && (
+      <div class="mt-1 w-px grow bg-border"></div>
+    )}
+  </div>
+
+  <!-- stage card -->
+  <div class={`mb-10 flex-1 rounded-xl border border-border bg-card p-6 shadow-sm border-l-4 ${accentClass}`}>
+    <p class={`font-mono text-[0.68rem] font-semibold uppercase tracking-[0.2em] ${kicerClass}`}>
+      {label}
+    </p>
+    <h3 class="mt-1.5 font-display text-xl font-semibold text-foreground">
+      {heading}
+    </h3>
+    <div class="mt-4">
+      <slot />
+    </div>
+  </div>
+</div>
