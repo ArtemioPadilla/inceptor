@@ -3,14 +3,32 @@ import { withBase } from '@/lib/href';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../content/gallery';
 
-// Stats — kept accurate to the codebase, computed from data where possible.
-// `galleryManifest` groups 44 underlying components into showcase entries, so
-// the headline "components" count is asserted (44) while the gallery link
-// below derives its own figure from the manifest length.
+// ── Honest build-time stats ────────────────────────────────────────────────
+// Pages: count every .astro / .md / .mdx file under src/pages/.
+// import.meta.glob is resolved at build time by Vite — the count always
+// reflects the actual route files at the moment the build ran. Note: this
+// counts files, not emitted HTML routes; dynamic routes ([...slug]) count as
+// one file but may emit many pages. The label says "pages built" which is
+// accurate at the file level.
+const pageFiles = import.meta.glob('./\*\*/\*.{astro,md,mdx}');
+const pageCount = Object.keys(pageFiles).length;
+
+// Test files: count every *.test.* file under src/tests/ and any co-located
+// tests elsewhere in src/. The label says "test files" which is the honest
+// unit — not test cases, which fluctuate per file.
+const testFiles = import.meta.glob('../\*\*/\*.test.{ts,tsx,js,jsx}');
+const testFileCount = Object.keys(testFiles).length;
+
+// componentCount stays as a declared constant — it reflects the number of
+// component primitives under src/components/ui/ which we own (44 files as of
+// this commit). Updated when new components ship.
 const componentCount = 44;
+
 const stats = [
-  { value: '60', label: 'pages prebuilt' },
-  { value: '439', label: 'tests green' },
+  // pageCount = files in src/pages/**; see comment above for caveats.
+  { value: String(pageCount), label: 'pages built' },
+  // testFileCount = *.test.{ts,tsx} files in src/**
+  { value: String(testFileCount), label: 'test files' },
   { value: String(componentCount), label: 'components' },
   { value: '0 KB', label: 'JS by default' },
 ];
@@ -40,9 +58,18 @@ const flow = [
     body: 'The issue closes itself. Visual regression snapshots both <span class="font-mono text-[0.8em]">/gallery</span> and <span class="font-mono text-[0.8em]">/demos</span>.',
   },
 ];
+
+// Hreflang alternates for EN home — links to the ES equivalent and sets the
+// x-default. See BaseLayout for the prop contract.
+const site = 'https://artemiop.com';
+const alternates = [
+  { hreflang: 'en', href: `${site}/inceptor/` },
+  { hreflang: 'es', href: `${site}/inceptor/es/` },
+  { hreflang: 'x-default', href: `${site}/inceptor/` },
+];
 ---
 
-<BaseLayout title="Inceptor — issue-driven web scaffold" lang="en">
+<BaseLayout title="Inceptor — issue-driven web scaffold" lang="en" alternates={alternates}>
   <!-- ───────────────────────── HERO ───────────────────────── -->
   <section class="relative overflow-hidden grain">
     <!-- atmosphere -->
@@ -69,13 +96,24 @@ const flow = [
           at <span class="italic text-primary">full speed.</span>
         </h1>
 
+        {/* Methodology-first subcopy: the loop (issue → PR → merge) and
+            governance mechanical are the differentiators. Stack goes last,
+            demoted to a quiet one-liner. See docs/POSITIONING.md §1. */}
         <p class="rise mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg" style="animation-delay:.16s">
-          A zero-cost, static-first scaffold with interactive islands — Astro 5, React 19,
-          Tailwind v4, shadcn/Base UI, TanStack, Tremor Raw, Motion and PWA — wired to a
-          principled workflow: Shape Up cadence, TDD, Zod-driven specs and a built-in ethics gate.
+          A governed, agent-orchestrated way of working: every feature travels
+          the same loop — <span class="text-foreground font-medium">issue → Claude triages → PR → merge</span>.
+          Quality and ethics are enforced by the repo, not by discipline.
         </p>
 
-        <div class="rise mt-9 flex flex-wrap items-center gap-3" style="animation-delay:.24s">
+        {/* npm create command — the primary L0 door per POSITIONING.md §3.
+            Plain <code> block; no JS copy button needed for this read-only snippet. */}
+        <div class="rise mt-5" style="animation-delay:.20s">
+          <code class="inline-block rounded-lg border border-border bg-muted px-4 py-2.5 font-mono text-sm text-foreground select-all">
+            npm create inceptor-app
+          </code>
+        </div>
+
+        <div class="rise mt-8 flex flex-wrap items-center gap-3" style="animation-delay:.24s">
           <a
             href={withBase('/docs/start-here/quick-start/')}
             class="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -99,6 +137,9 @@ const flow = [
           <a href={withBase('/blog/')} class="transition-colors hover:text-primary">/blog</a>
           <span class="text-border">·</span>
           <a href="https://github.com/ArtemioPadilla/inceptor" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-primary">github ↗</a>
+          <span class="text-border">·</span>
+          {/* Stack is table stakes — mentioned once, quietly, at the end. */}
+          <span class="text-muted-foreground/60">Astro 5 · React 19 · Tailwind v4 · Base UI</span>
         </div>
       </div>
 
@@ -154,9 +195,53 @@ const flow = [
     </div>
   </section>
 
-  <main class="mx-auto max-w-6xl px-5">
-    <!-- ─────────────── WHAT'S INSIDE ─────────────── -->
+  {/* id="main-content" targets the skip-to-content link in BaseLayout */}
+  <main id="main-content" class="mx-auto max-w-6xl px-5">
+
+    <!-- ─────────────── HOW IT HAPPENS (moved above "What's inside") ─────────────── -->
+    {/* Per POSITIONING.md §1: lead with the methodology — the loop is the
+        differentiator. "What's inside" (the kit) follows as proof material. */}
     <section class="py-20 lg:py-24">
+      <div class="relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-12">
+        <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 glow-emerald opacity-50 blur-2xl"></div>
+        <div class="relative">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The loop</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            How a feature ships
+          </h2>
+          <ol class="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+            {flow.map((step, i) => (
+              <li class="flex gap-4">
+                <span class="select-none font-display text-4xl font-semibold leading-none text-primary/70">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 class="font-semibold text-foreground" set:html={step.title} />
+                  <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground" set:html={step.body} />
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div class="mt-10 flex flex-wrap gap-4">
+            <a href={withBase('/docs/start-here/inceptor-tour/')} class="inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary/80">
+              Read the 60-second tour →
+            </a>
+            <a href={withBase('/docs/how-we-work/inceptor/')} class="text-muted-foreground transition-colors hover:text-foreground">
+              Full workflow doc
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-10 text-center text-sm text-muted-foreground">
+        See a bug? Hit the
+        <span class="font-medium text-primary">chat bubble</span>
+        bottom-right — it files a GitHub issue with diagnostics pre-filled.
+      </p>
+    </section>
+
+    <!-- ─────────────── WHAT'S INSIDE ─────────────── -->
+    <section class="pb-20 lg:pb-24">
       <div class="mb-10 flex items-end justify-between gap-4">
         <div>
           <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The kit</p>
@@ -204,44 +289,5 @@ const flow = [
       )}
     </section>
 
-    <!-- ─────────────── HOW IT HAPPENS ─────────────── -->
-    <section class="pb-20 lg:pb-24">
-      <div class="relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-12">
-        <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 glow-emerald opacity-50 blur-2xl"></div>
-        <div class="relative">
-          <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The loop</p>
-          <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            How a feature ships
-          </h2>
-          <ol class="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
-            {flow.map((step, i) => (
-              <li class="flex gap-4">
-                <span class="select-none font-display text-4xl font-semibold leading-none text-primary/70">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div>
-                  <h3 class="font-semibold text-foreground" set:html={step.title} />
-                  <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground" set:html={step.body} />
-                </div>
-              </li>
-            ))}
-          </ol>
-          <div class="mt-10 flex flex-wrap gap-4">
-            <a href={withBase('/docs/start-here/inceptor-tour/')} class="inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary/80">
-              Read the 60-second tour →
-            </a>
-            <a href={withBase('/docs/how-we-work/inceptor/')} class="text-muted-foreground transition-colors hover:text-foreground">
-              Full workflow doc
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <p class="mt-10 text-center text-sm text-muted-foreground">
-        See a bug? Hit the
-        <span class="font-medium text-primary">chat bubble</span>
-        bottom-right — it files a GitHub issue with diagnostics pre-filled.
-      </p>
-    </section>
   </main>
 </BaseLayout>
