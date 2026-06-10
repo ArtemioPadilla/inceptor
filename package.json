@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
-    "@astrojs/react": "^5.0.6",
+    "@astrojs/react": "^5.0.7",
     "@base-ui-components/react": "^1.0.0-rc.0",
     "@hookform/resolvers": "^5.4.0",
     "@nanostores/react": "^1.1.0",
