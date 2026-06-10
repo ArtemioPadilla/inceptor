@@ -5,16 +5,21 @@ import { cn } from '@/lib/utils';
 
 // Minimal Slot implementation: merges props onto a single React child element,
 // replacing the Radix Slot to keep this component Radix-free.
+// React 19 allows ref as a regular prop, so we accept it explicitly and pass
+// it through cloneElement so the asChild path also forwards ref correctly.
 function Slot({
   children,
+  ref,
   ...slotProps
-}: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
+}: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode; ref?: React.Ref<HTMLElement> }) {
   if (React.isValidElement(children)) {
     return React.cloneElement(children, {
       ...slotProps,
       // Child props win for event handlers; className is merged.
       // Cast required: children.props is typed as {} which TS won't spread directly (TS2698).
       ...(children.props as Record<string, unknown>),
+      // Forward the ref so the parent's ref reaches the actual DOM element.
+      ref,
       className: cn(
         (slotProps as { className?: string }).className,
         (children.props as { className?: string }).className,
@@ -64,6 +69,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     if (asChild) {
       return (
         <Slot
+          ref={ref as React.Ref<HTMLElement>}
           className={cn(buttonVariants({ variant, size, className }))}
           {...(props as React.HTMLAttributes<HTMLElement>)}
         />
