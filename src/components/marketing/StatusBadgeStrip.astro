@@ -1,0 +1,70 @@
+---
+/**
+ * StatusBadgeStrip — live CI/Deploy/License/Workflow shields.
+ *
+ * Renders a quiet row of GitHub Actions and shields.io badge images.
+ * Each <img> carries fixed width/height to eliminate CLS, loading="lazy"
+ * so they don't block first paint, and meaningful alt text for screen
+ * readers. GitHub badges adapt to light/dark mode natively; shields.io
+ * badges use style=flat-square to stay consistent across modes.
+ *
+ * Zero JS — pure static HTML.
+ */
+
+const REPO_SLUG = 'ArtemioPadilla/inceptor';
+const GH_ACTIONS = `https://github.com/${REPO_SLUG}/actions/workflows`;
+const GH_ACTIONS_RUNS = `https://github.com/${REPO_SLUG}/actions`;
+
+const badges = [
+  {
+    label: 'CI',
+    alt: 'CI workflow status',
+    src: `${GH_ACTIONS}/ci.yml/badge.svg`,
+    href: `${GH_ACTIONS}/ci.yml`,
+  },
+  {
+    label: 'Deploy',
+    alt: 'Deploy workflow status',
+    src: `${GH_ACTIONS}/deploy.yml/badge.svg`,
+    href: `${GH_ACTIONS}/deploy.yml`,
+  },
+  {
+    label: 'License',
+    alt: 'License: MIT',
+    src: 'https://img.shields.io/badge/license-MIT-emerald?style=flat-square',
+    href: `https://github.com/${REPO_SLUG}/blob/main/LICENSE`,
+  },
+  {
+    label: 'Workflow',
+    alt: 'GitHub Actions workflow badge',
+    src: `https://img.shields.io/github/actions/workflow/status/${REPO_SLUG}/ci.yml?style=flat-square&label=CI%20checks`,
+    href: GH_ACTIONS_RUNS,
+  },
+] as const;
+---
+
+<!--
+  Badge strip: quiet row of live status signals.
+  Fixed img dimensions prevent CLS; loading="lazy" defers the
+  network fetch until the row enters the viewport.
+-->
+<div class="flex flex-wrap items-center gap-3 py-4">
+  {badges.map((b) => (
+    <a
+      href={b.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded"
+      aria-label={`${b.label} — ${b.alt}`}
+    >
+      <img
+        src={b.src}
+        alt={b.alt}
+        width="120"
+        height="20"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+  ))}
+</div>

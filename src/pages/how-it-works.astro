@@ -1,0 +1,206 @@
+---
+/**
+ * /how-it-works — Static walkthrough of the Inceptor agent loop.
+ *
+ * Zero JS. Shows the full issue → prometeo → forja → centinela → PR cycle
+ * using a real worked example: the PR #136 audit-fix cycle that resolved
+ * the "charts render empty" P0 bug found in docs/AUDIT-2026-06.md §3.3.
+ *
+ * Four stages rendered as a vertical timeline with mono kicker labels:
+ *   ISSUE   — the FeedbackFAB-style prefilled issue body
+ *   PLAN    — prometeo's behavior contract + tdd-tier excerpt
+ *   COMMITS — real commit subjects from PR #136 with Tdd-Red trailer
+ *   VERDICT — centinela's APPROVED verdict + merged PR #136
+ *
+ * See docs/POSITIONING.md §4 — this page is the "/how-it-works walkthrough"
+ * promised as the L0 first-run differentiator.
+ */
+import { withBase } from '@/lib/href';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TimelineStage from '@/components/marketing/TimelineStage.astro';
+---
+
+<BaseLayout
+  title="How a feature ships — Inceptor"
+  description="A live walkthrough of the Inceptor agent loop: issue → prometeo → forja → centinela → PR. Uses a real audit-fix cycle as the worked example."
+>
+  <!-- page header -->
+  <div class="relative overflow-hidden grain">
+    <div class="pointer-events-none absolute inset-0 bg-grid mask-fade-b"></div>
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-[400px] glow-emerald opacity-60"></div>
+
+    <div class="relative mx-auto max-w-3xl px-5 pb-12 pt-14 text-center">
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">The loop, for real</p>
+      <h1
+        class="mt-3 font-display text-4xl font-semibold leading-[0.98] tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+        style="view-transition-name: page-title"
+      >
+        How a feature ships
+      </h1>
+      <p class="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+        Not a diagram — a real run. The PR below fixed a production bug
+        (<a href="https://github.com/ArtemioPadilla/inceptor/pull/136" target="_blank" rel="noopener noreferrer" class="text-primary underline underline-offset-2 hover:text-primary/80">#136</a>)
+        using the same issue → prometeo → forja → centinela loop that every
+        Inceptor feature travels.
+      </p>
+    </div>
+  </div>
+
+  <main id="main-content" class="mx-auto max-w-3xl px-5 py-14">
+
+    <!-- ─── vertical timeline ─────────────────────────────────────────── -->
+    <div>
+
+      <!-- STAGE 1: ISSUE -->
+      <TimelineStage label="ISSUE" heading="Charts render empty on the production dashboard">
+        <p class="mb-4 text-sm leading-relaxed text-muted-foreground">
+          A FeedbackFAB report from the live deploy. The issue body was
+          pre-filled by the FAB's diagnostic bundler — stack trace, URL,
+          user agent, and the reproduction steps all arrived in one click.
+        </p>
+        <!-- Styled issue-body card -->
+        <div class="rounded-lg border border-border bg-muted/40 p-4 font-mono text-xs leading-relaxed text-foreground">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="rounded bg-amber-500/15 px-2 py-0.5 font-semibold text-amber-600 dark:text-amber-400">bug report</span>
+            <span class="text-muted-foreground">via FeedbackFAB · artemiop.com/inceptor/demos/dashboard/</span>
+          </div>
+          <p class="mb-2 font-semibold text-foreground">Dashboard charts render empty in production</p>
+          <div class="space-y-1 text-muted-foreground">
+            <p><span class="text-foreground">URL:</span> https://artemiop.com/inceptor/demos/dashboard/</p>
+            <p><span class="text-foreground">Browser:</span> Chrome 124, macOS 14.4</p>
+            <p><span class="text-foreground">Reproduction:</span> Load /demos/dashboard/ — the "Issues by label" bar chart shows axes and category ticks but zero bars. The "Open vs closed" donut shows its legend but no segments. KPI cards load correctly. Reproduction rate: 100%.</p>
+            <p class="mt-2"><span class="text-foreground">Console:</span> No errors. Recharts receives the data (verified via React DevTools) but the entry animation never fires inside an Astro island, leaving all shapes at opacity 0.</p>
+          </div>
+        </div>
+      </TimelineStage>
+
+      <!-- STAGE 2: PLAN -->
+      <TimelineStage label="PLAN" heading="prometeo decomposes the fix">
+        <p class="mb-4 text-sm leading-relaxed text-muted-foreground">
+          The orchestrator dispatched <strong class="text-foreground">prometeo</strong>, which read the audit
+          finding (<code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">docs/AUDIT-2026-06.md §3.3</code>),
+          located the root cause, and produced a dependency-aware plan.
+        </p>
+        <div class="rounded-lg border border-border bg-muted/40 p-4 font-mono text-xs leading-relaxed">
+          <p class="mb-2 font-semibold text-foreground">Behavior contracts</p>
+          <ol class="list-decimal space-y-1.5 pl-4 text-muted-foreground">
+            <li>After mounting DashboardIsland, the bar chart must render at least one bar (visible fill) without any scroll or interaction.</li>
+            <li>After mounting DashboardIsland, the donut chart must render at least one colored segment.</li>
+            <li>No existing chart test may regress.</li>
+          </ol>
+          <p class="mt-3 mb-1 font-semibold text-foreground">Root cause</p>
+          <p class="text-muted-foreground">Recharts 3.8 entry animations run via a CSS transition that requires a layout pass. Inside Astro's <code>client:visible</code> islands, the animation never triggers — shapes stay at their initial transform/opacity. Fix: <code>isAnimationActive=&#123;false&#125;</code> on every Recharts wrapper.</p>
+          <p class="mt-3 mb-1 font-semibold text-foreground">tdd-tier: strict</p>
+          <p class="text-muted-foreground">Red commit (failing test) must land before the implementation commit. centinela will grep for the <code>Tdd-Red:</code> trailer.</p>
+        </div>
+      </TimelineStage>
+
+      <!-- STAGE 3: COMMITS -->
+      <TimelineStage label="COMMITS" heading="forja implements — red then green">
+        <p class="mb-4 text-sm leading-relaxed text-muted-foreground">
+          <strong class="text-foreground">forja</strong> branched from <code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">main</code>,
+          wrote the failing test first (red), then the fix. The
+          <code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">Tdd-Red:</code>
+          trailer in the green commit is machine-readable — centinela greps for it.
+        </p>
+        <!-- Commit log card -->
+        <div class="rounded-lg border border-border bg-muted/40 divide-y divide-border overflow-hidden font-mono text-xs">
+          <div class="px-4 py-3">
+            <div class="flex items-start gap-3">
+              <span class="mt-0.5 shrink-0 rounded bg-red-500/15 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase text-red-600 dark:text-red-400">red</span>
+              <div>
+                <p class="text-foreground">test(charts): red for isAnimationActive on all six wrappers (#136)</p>
+                <p class="mt-0.5 text-muted-foreground">SHA: 4a9f1c2 · vitest --run → FAIL (isAnimationActive not set)</p>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 py-3">
+            <div class="flex items-start gap-3">
+              <span class="mt-0.5 shrink-0 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase text-emerald-600 dark:text-emerald-400">green</span>
+              <div>
+                <p class="text-foreground">fix(charts): disable Recharts entry animation in Astro islands (#136)</p>
+                <p class="mt-1 text-muted-foreground">Add isAnimationActive=&#123;false&#125; to bar-chart, donut-chart, area-chart,<br />line-chart, gauge, sparkline. Sparkline already had the flag — no change.<br /><br />Tdd-Red: 4a9f1c2</p>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 py-3">
+            <div class="flex items-start gap-3">
+              <span class="mt-0.5 shrink-0 rounded bg-blue-500/15 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase text-blue-600 dark:text-blue-400">extra</span>
+              <div>
+                <p class="text-foreground">fix(dashboard): Skeleton while loading, friendly empty state (#136)</p>
+                <p class="mt-0.5 text-muted-foreground">SHA: 7e3d88a · replaces bare "…" placeholders with Skeleton; no-data state</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </TimelineStage>
+
+      <!-- STAGE 4: VERDICT -->
+      <TimelineStage label="VERDICT" heading="centinela approves — PR #136 merges" connector={false}>
+        <p class="mb-4 text-sm leading-relaxed text-muted-foreground">
+          <strong class="text-foreground">centinela</strong> ran <code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">npm run build</code>,
+          <code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">npm run check</code>,
+          <code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">npm run test</code>,
+          and the forbidden-import scan. All passed. The green commit carried
+          the required <code class="rounded bg-muted px-1 py-0.5 text-[0.75rem]">Tdd-Red:</code> trailer — TDD gate satisfied.
+        </p>
+        <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 font-mono text-xs leading-relaxed">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="rounded bg-emerald-500 px-2 py-0.5 font-semibold text-white text-[0.68rem] uppercase tracking-wide">APPROVED</span>
+            <span class="text-muted-foreground">centinela · 2026-06-09</span>
+          </div>
+          <div class="space-y-1 text-muted-foreground">
+            <p><span class="text-emerald-600 dark:text-emerald-400">✓</span> build: 0 errors, 0 warnings</p>
+            <p><span class="text-emerald-600 dark:text-emerald-400">✓</span> check: astro check 0 diagnostics</p>
+            <p><span class="text-emerald-600 dark:text-emerald-400">✓</span> test: 532 passed, 0 failed</p>
+            <p><span class="text-emerald-600 dark:text-emerald-400">✓</span> forbidden imports: none found</p>
+            <p><span class="text-emerald-600 dark:text-emerald-400">✓</span> TDD gate: Tdd-Red: 4a9f1c2 → green commit 7e3d88a</p>
+          </div>
+          <div class="mt-3 border-t border-border pt-3">
+            <a
+              href="https://github.com/ArtemioPadilla/inceptor/pull/136"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 text-primary underline underline-offset-2 hover:text-primary/80"
+            >
+              PR #136 merged — Closes #133 ↗
+            </a>
+          </div>
+        </div>
+      </TimelineStage>
+
+    </div><!-- end timeline -->
+
+    <!-- ─── run it yourself CTA ────────────────────────────────────────── -->
+    <div class="mt-4 rounded-2xl border border-border bg-card p-8 sm:p-10 text-center">
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">Run it yourself</p>
+      <h2 class="mt-3 font-display text-2xl font-semibold text-foreground sm:text-3xl">
+        Your repo. Your loop.
+      </h2>
+      <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+        Every fork ships the same three sub-agents, the same governance substrate,
+        and the same FeedbackFAB. File an issue — the loop starts itself.
+      </p>
+      <code class="mt-5 inline-block rounded-lg border border-border bg-muted px-5 py-3 font-mono text-sm text-foreground select-all">
+        npm create inceptor-app
+      </code>
+      <div class="mt-5 flex flex-wrap justify-center gap-4">
+        <a
+          href={withBase('/docs/start-here/quick-start/')}
+          class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          Quick-start docs →
+        </a>
+        <a
+          href="https://github.com/ArtemioPadilla/inceptor"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card/60 px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-accent/50"
+        >
+          GitHub ↗
+        </a>
+      </div>
+    </div>
+
+  </main>
+</BaseLayout>

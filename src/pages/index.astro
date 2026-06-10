@@ -2,6 +2,7 @@
 import { withBase } from '@/lib/href';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../content/gallery';
+import StatusBadgeStrip from '@/components/marketing/StatusBadgeStrip.astro';
 
 // ── Honest build-time stats ────────────────────────────────────────────────
 // Pages: count every .astro / .md / .mdx file under src/pages/.
@@ -192,6 +193,14 @@ const alternates = [
           </div>
         ))}
       </dl>
+
+      {/* Status badge strip — live CI/Deploy/License shields.
+          Positioned below the stat grid so it reads as "the metrics are live"
+          rather than competing with the stat cards above.
+          See src/components/marketing/StatusBadgeStrip.astro for CLS notes. */}
+      <div class="rise mt-4 flex justify-center" style="animation-delay:.42s">
+        <StatusBadgeStrip />
+      </div>
     </div>
   </section>
 
@@ -225,6 +234,15 @@ const alternates = [
           <div class="mt-10 flex flex-wrap gap-4">
             <a href={withBase('/docs/start-here/inceptor-tour/')} class="inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary/80">
               Read the 60-second tour →
+            </a>
+            {/* Prominent link to the live walkthrough page — see docs/AUDIT-2026-06.md §7 item 2
+                and docs/POSITIONING.md §4. The loop section is the teaser; /how-it-works
+                is the full worked example with a real PR. */}
+            <a
+              href={withBase('/how-it-works/')}
+              class="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 font-semibold text-primary transition-colors hover:border-primary/50 hover:bg-primary/10"
+            >
+              See a real run →
             </a>
             <a href={withBase('/docs/how-we-work/inceptor/')} class="text-muted-foreground transition-colors hover:text-foreground">
               Full workflow doc
