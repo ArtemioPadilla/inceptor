@@ -85,7 +85,9 @@ function ContactFormInner() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+      {/* `relative` is required so the absolute-positioned honeypot stays
+          within this stacking context and never causes horizontal scroll. */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="relative space-y-4 max-w-md">
         <FormField
           control={form.control}
           name="name"
