@@ -20,6 +20,14 @@ const { title, description, slug } = Astro.props;
 const idx = docsOrder.findIndex((p) => p.slug === slug);
 const prev = idx > 0 ? docsOrder[idx - 1] : null;
 const next = idx >= 0 && idx < docsOrder.length - 1 ? docsOrder[idx + 1] : null;
+
+// "Edit this page" points at the canonical source file on GitHub.
+// slug is the content-collection entry id (e.g. "ethics-ux/checklist"),
+// which maps 1-to-1 to src/content/docs/<slug>.md.
+// The index doc uses an empty slug and lives at src/content/docs/index.mdx.
+const editFileExt = slug === '' ? 'mdx' : 'md';
+const editFilePath = slug === '' ? 'index' : slug;
+const editUrl = `https://github.com/ArtemioPadilla/inceptor/edit/main/src/content/docs/${editFilePath}.${editFileExt}`;
 ---
 
 <BaseLayout title={`${title} — Docs`} description={description}>
@@ -48,6 +56,35 @@ const next = idx >= 0 && idx < docsOrder.length - 1 ? docsOrder[idx + 1] : null;
 
         <div class="docs-content">
           <slot />
+        </div>
+
+        <!-- Edit this page — discreet footer link so contributors can fix docs fast -->
+        <div class="mt-10 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/>
+            <path d="m21.5 2.5-9.5 9.5"/>
+            <path d="M15 2h7v7"/>
+          </svg>
+          <a
+            href={editUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-primary hover:underline transition-colors"
+            aria-label={`Edit "${title}" on GitHub`}
+          >
+            Edit this page on GitHub
+          </a>
         </div>
 
         {(prev || next) && (
