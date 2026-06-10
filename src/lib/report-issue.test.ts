@@ -25,9 +25,11 @@ describe('buildIssueUrl', () => {
     expect(url).not.toContain('labels=');
   });
 
-  it('points at the correct repo', () => {
+  it('has the correct URL shape (owner/repo agnostic for forks)', () => {
+    // Assert the URL structure rather than a hardcoded repo slug so that forks
+    // that set PUBLIC_REPO_SLUG still pass CI. The slug is validated separately.
     const url = buildIssueUrl({ title: 'x' });
-    expect(url).toContain('ArtemioPadilla/inceptor');
+    expect(url).toMatch(/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/issues\/new/);
   });
 });
 
