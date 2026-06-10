@@ -68,7 +68,10 @@ function SettingsInner() {
   const [saved, setSaved] = React.useState(false);
   // Track the timeout id so we can clear it on re-click or unmount,
   // preventing a setState call on an already-unmounted component.
-  const saveTimerRef = React.useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  // Use `number` explicitly: window.setTimeout returns a browser numeric timer id.
+  // ReturnType<typeof window.setTimeout> would resolve to NodeJS.Timeout in
+  // environments where @types/node is installed (it overrides the global).
+  const saveTimerRef = React.useRef<number | null>(null);
 
   // Clear the pending timer on unmount.
   React.useEffect(() => {
