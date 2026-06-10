@@ -32,7 +32,7 @@ const isActive = (href: string) => here.includes(href);
         <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 3" opacity="0.55"></circle>
         <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
       </svg>
-      Inceptor
+      <span class="hidden sm:inline">Inceptor</span>
     </a>
 
     <div class="ml-auto flex items-center gap-0.5 font-mono text-xs sm:gap-1 sm:text-sm">
@@ -42,7 +42,7 @@ const isActive = (href: string) => here.includes(href);
             href={withBase(n.href)}
             aria-current={isActive(n.href) ? 'page' : undefined}
             class:list={[
-              'rounded-md px-2 py-1 transition-colors hover:text-primary',
+              'rounded-md px-1.5 py-1 transition-colors hover:text-primary sm:px-2',
               isActive(n.href) ? 'text-primary' : 'text-muted-foreground',
             ]}
           >

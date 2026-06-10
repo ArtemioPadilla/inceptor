@@ -405,7 +405,10 @@ const tr = {
     var modal   = document.getElementById('secid-report-modal');
     if (!btn || !modal) return;
 
-    var repo       = modal.dataset.repo || '';
+    // Guard: only a plausible owner/repo slug may reach the GitHub URL below
+    // (audit §5.2 — dataset values are DOM-tamperable).
+    var repoRaw    = modal.dataset.repo || '';
+    var repo       = /^[\w.-]+\/[\w.-]+$/.test(repoRaw) ? repoRaw : '';
     var lang       = modal.dataset.lang || 'es';
     var buildSha   = modal.dataset.buildSha || 'dev';
     var appVersion = modal.dataset.appVersion || 'dev';
@@ -578,6 +581,7 @@ const tr = {
           body: body.slice(0, 6500),
           labels: labelMap[type] || 'bug',
         });
+        if (!repo) return; // invalid/tampered slug — never open a malformed GitHub URL
         window.open('https://github.com/' + repo + '/issues/new?' + params.toString(), '_blank', 'noopener,noreferrer');
         closeModal();
       });
