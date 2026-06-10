@@ -1,0 +1,122 @@
+---
+/**
+ * SiteFooter — rendered by BaseLayout so every page carries it.
+ *
+ * Matches the existing design language:
+ *   - border-t border-border
+ *   - muted text with font-mono accents (same as SiteHeader)
+ *   - withBase() for all internal links
+ *
+ * Sections:
+ *   - Nav recap (Gallery / Demos / Docs / Blog / Contact)
+ *   - GitHub link
+ *   - MIT license note
+ *   - "Built with Inceptor" link (viral loop / backlink)
+ *   - EN ⇄ ES language switcher
+ */
+import { withBase } from '@/lib/href';
+
+const nav = [
+  { href: '/gallery/', label: 'Gallery' },
+  { href: '/demos/', label: 'Demos' },
+  { href: '/docs/', label: 'Docs' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border bg-background">
+  <div class="mx-auto max-w-6xl px-5 py-10">
+    <div class="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+
+      <!-- brand + tagline -->
+      <div class="flex flex-col gap-3">
+        <a
+          href={withBase('/')}
+          class="group flex items-center gap-2 font-display text-base font-semibold tracking-tight text-foreground transition-colors hover:text-primary"
+          aria-label="Inceptor — home"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="text-primary">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 3" opacity="0.55"></circle>
+            <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+          </svg>
+          Inceptor
+        </a>
+        <p class="max-w-[18rem] font-mono text-[0.7rem] leading-relaxed text-muted-foreground">
+          Governance that's mechanical, not aspirational.
+        </p>
+      </div>
+
+      <!-- nav recap -->
+      <nav aria-label="Footer navigation">
+        <p class="mb-2 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-primary/70">Explore</p>
+        <ul class="flex flex-wrap gap-x-5 gap-y-1.5">
+          {nav.map((n) => (
+            <li>
+              <a
+                href={withBase(n.href)}
+                class="font-mono text-xs text-muted-foreground transition-colors hover:text-primary"
+              >
+                {n.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- language switcher -->
+      <div>
+        <p class="mb-2 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-primary/70">Language</p>
+        <div class="flex items-center gap-1 font-mono text-xs">
+          <a
+            href={withBase('/')}
+            class="rounded px-2 py-0.5 text-foreground transition-colors hover:text-primary"
+            hreflang="en"
+            lang="en"
+          >
+            EN
+          </a>
+          <span class="text-border" aria-hidden="true">/</span>
+          <a
+            href={withBase('/es/')}
+            class="rounded px-2 py-0.5 text-muted-foreground transition-colors hover:text-primary"
+            hreflang="es"
+            lang="es"
+          >
+            ES
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- bottom bar -->
+    <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-6">
+      <p class="font-mono text-[0.68rem] text-muted-foreground">
+        &copy; {year} MIT License
+      </p>
+      <div class="flex items-center gap-4 font-mono text-[0.68rem] text-muted-foreground">
+        <a
+          href="https://github.com/ArtemioPadilla/inceptor"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="transition-colors hover:text-primary"
+        >
+          GitHub ↗
+        </a>
+        {/* "Built with Inceptor" — the template's organic distribution loop.
+            Every fork that keeps this footer creates a backlink. */}
+        <a
+          href="https://github.com/ArtemioPadilla/inceptor"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="transition-colors hover:text-primary"
+        >
+          Built with <span class="text-primary">Inceptor</span> ↗
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

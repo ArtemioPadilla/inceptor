@@ -120,7 +120,11 @@ const tr = {
   </button>
 </div>
 
-<!-- Modal dialog -->
+<!-- Modal dialog — anchored bottom-right near the FAB so the spatial
+     relationship between the trigger and the panel is preserved.
+     `margin: 0` resets the browser default (centered), then position:fixed
+     bottom/right pin it to the correct corner.
+     max-h + overflow-auto ensure it stays scrollable on small viewports. -->
 <dialog
   id="secid-report-modal"
   data-repo={repoSlug}
@@ -138,9 +142,10 @@ const tr = {
   data-l-diagnostics-none={tr.diagnostics_none}
   data-l-copy={tr.copy_diagnostics}
   data-l-copied={tr.copied}
-  class="rounded-xl backdrop:bg-black/60 p-0 w-[min(92vw,540px)] max-h-[88vh] overflow-hidden
+  class="rounded-xl backdrop:bg-black/60 p-0 w-[min(92vw,540px)] max-h-[80vh] overflow-hidden
          bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100
-         shadow-2xl border border-gray-200 dark:border-gray-700"
+         shadow-2xl border border-gray-200 dark:border-gray-700
+         fixed bottom-20 right-5 m-0"
 >
   <form method="dialog" class="flex flex-col max-h-[88vh]">
     <!-- Header -->
