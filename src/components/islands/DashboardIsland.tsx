@@ -30,12 +30,45 @@ interface GitHubIssue {
   pull_request?: { url: string };
 }
 
+/**
+ * Structured error thrown by the queryFn when the GitHub API returns a
+ * non-2xx status. We attach `status` and `rateLimitReset` so the error
+ * display component can render actionable copy instead of a raw message.
+ *
+ * We avoid using an `interface` here because this type never crosses a
+ * network / storage / worker boundary — it stays in-memory within the island.
+ */
+class GitHubApiError extends Error {
+  readonly status: number;
+  /** Unix epoch seconds from X-RateLimit-Reset, or undefined if header absent. */
+  readonly rateLimitReset: number | undefined;
+
+  constructor(status: number, rateLimitReset: number | undefined) {
+    super(`GitHub API ${status}`);
+    this.name = 'GitHubApiError';
+    this.status = status;
+    this.rateLimitReset = rateLimitReset;
+  }
+}
+
+/** Compute "resets in ~N min" from a Unix epoch seconds timestamp. */
+function resetMinutes(epochSeconds: number): number {
+  const diffMs = epochSeconds * 1000 - Date.now();
+  return Math.max(1, Math.ceil(diffMs / 60_000));
+}
+
 function useGitHubIssues(state: 'open' | 'closed') {
   return useQuery<GitHubIssue[]>({
     queryKey: ['issues', REPO, state],
     queryFn: async () => {
       const res = await fetch(githubIssuesUrl(REPO, state, 100));
-      if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+      if (!res.ok) {
+        // Parse the rate-limit reset epoch from the header when present.
+        // The header value is a Unix timestamp in seconds (string).
+        const resetHeader = res.headers.get('X-RateLimit-Reset');
+        const rateLimitReset = resetHeader ? parseInt(resetHeader, 10) : undefined;
+        throw new GitHubApiError(res.status, rateLimitReset);
+      }
       return res.json() as Promise<GitHubIssue[]>;
     },
     // opt-in persistence: this query will be hydrated from idb-keyval on next
@@ -72,24 +105,111 @@ function KpiSkeleton() {
   );
 }
 
+/**
+ * Dedicated error card for rate-limit errors (HTTP 403 / 429).
+ *
+ * GitHub's unauthenticated API is capped at 60 requests per hour per IP.
+ * This card explains the situation and surfaces the reset time when the
+ * X-RateLimit-Reset header was available.
+ */
+function RateLimitErrorCard({
+  error,
+  onRetry,
+}: {
+  error: GitHubApiError;
+  onRetry: () => void;
+}) {
+  // Compute reset minutes at render time, not at throw time, so the countdown
+  // reflects how long the user has already been on the page.
+  const minsUntilReset =
+    error.rateLimitReset !== undefined ? resetMinutes(error.rateLimitReset) : null;
+
+  return (
+    <div
+      role="alert"
+      className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-5 space-y-3"
+    >
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 text-amber-500" aria-hidden="true">⚠</span>
+        <div className="flex-1 space-y-1">
+          <p className="font-semibold text-foreground">GitHub rate limit reached</p>
+          <p className="text-sm text-muted-foreground">
+            The GitHub API allows{' '}
+            <strong className="text-foreground">60 requests per hour</strong> for
+            unauthenticated clients. This page has exhausted that quota.
+            {minsUntilReset !== null && (
+              <span>
+                {' '}
+                The limit resets in approximately{' '}
+                <strong className="text-foreground">~{minsUntilReset} min</strong>.
+              </span>
+            )}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            To remove the cap, configure a{' '}
+            <code className="font-mono">PUBLIC_API_BASE</code> backend proxy — see{' '}
+            <a
+              href="/docs/building/backend/"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              the backend guide
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
+/** Generic error fallback for non-rate-limit failures. */
+function GenericErrorCard({
+  error,
+  onRetry,
+}: {
+  error: Error;
+  onRetry: () => void;
+}) {
+  return (
+    <Callout variant="error" title="Could not load issues">
+      <p>{error.message}</p>
+      {/* Invalidating with a partial key refreshes both open + closed queries. */}
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-3 inline-flex items-center rounded-md border border-destructive/40 bg-destructive/20 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+      >
+        Retry
+      </button>
+    </Callout>
+  );
+}
+
 function DashboardInner() {
   const queryClient = useQueryClient();
   const { data: openItems, isLoading: openLoading, error: openError } = useGitHubIssues('open');
   const { data: closedItems, isLoading: closedLoading } = useGitHubIssues('closed');
 
+  const handleRetry = () => {
+    queryClient.invalidateQueries({ queryKey: ['issues', REPO] });
+  };
+
   if (openError) {
-    return (
-      <Callout variant="error" title="Could not load issues">
-        <p>{(openError as Error).message}</p>
-        {/* Invalidating with a partial key refreshes both open + closed queries. */}
-        <button
-          type="button"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ['issues', REPO] })}
-          className="mt-3 inline-flex items-center rounded-md border border-destructive/40 bg-destructive/20 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
-        >
-          Retry
-        </button>
-      </Callout>
+    const isRateLimit =
+      openError instanceof GitHubApiError &&
+      (openError.status === 403 || openError.status === 429);
+
+    return isRateLimit ? (
+      <RateLimitErrorCard error={openError as GitHubApiError} onRetry={handleRetry} />
+    ) : (
+      <GenericErrorCard error={openError as Error} onRetry={handleRetry} />
     );
   }
 
@@ -203,6 +323,14 @@ function DashboardInner() {
           ) : (
             <>
               <Metric value={openIssues.length} label="Open issues" />
+              {/* Celebratory inbox-zero sublabel when there are no open issues
+                  after a successful load. Distinct from the loading state
+                  (skeleton) and from a genuine error. */}
+              {openIssues.length === 0 && (
+                <span className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  🎉 inbox zero
+                </span>
+              )}
               <Sparkline
                 className="mt-3"
                 height={36}
