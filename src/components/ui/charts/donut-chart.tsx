@@ -40,6 +40,7 @@ export function DonutChart({ data, height = 280, className, innerRadius = 60 }: 
             innerRadius={innerRadius}
             outerRadius="80%"
             paddingAngle={2}
+            isAnimationActive={false}
           >
             {data.map((_, i) => (
               <Cell key={i} fill={chartColor(i)} />

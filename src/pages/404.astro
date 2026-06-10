@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/href';
+
+// Astro emits this as dist/404.html, which GitHub Pages serves for any
+// unknown path under the project site — replacing the default GitHub 404
+// that gave visitors no way back.
+const destinations = [
+  { href: withBase('/'), label: 'Home', hint: 'the front door' },
+  { href: withBase('/gallery/'), label: 'Gallery', hint: 'all components, rendered live' },
+  { href: withBase('/demos/'), label: 'Demos', hint: 'composed real-feeling pages' },
+  { href: withBase('/docs/'), label: 'Docs', hint: 'methodology, stack, building' },
+  { href: withBase('/blog/'), label: 'Blog', hint: 'changelog & notes' },
+];
+---
+
+<BaseLayout
+  title="Page not found"
+  description="That page doesn't exist. Here's everything that does."
+  lang="en"
+>
+  <main id="main-content" class="mx-auto flex max-w-3xl flex-col px-4 py-24">
+    <p class="font-mono text-sm uppercase tracking-widest text-primary">404</p>
+    <h1 class="mt-3 font-display text-4xl font-semibold tracking-tight text-foreground">
+      Page not found
+    </h1>
+    <p class="mt-4 max-w-prose text-muted-foreground">
+      The URL doesn't match any built page — it may have moved during a route
+      restructure, or there's a typo in the link. If a link on this site
+      brought you here, that's a bug worth filing: hit the chat bubble in the
+      corner and the issue arrives with diagnostics pre-filled.
+    </p>
+
+    <nav aria-label="Main destinations" class="mt-10">
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {destinations.map((d) => (
+          <li>
+            <a
+              href={d.href}
+              class="flex items-baseline justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-primary/50 hover:bg-accent"
+            >
+              <span class="font-medium text-foreground">{d.label}</span>
+              <span class="text-xs text-muted-foreground">{d.hint}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </main>
+</BaseLayout>

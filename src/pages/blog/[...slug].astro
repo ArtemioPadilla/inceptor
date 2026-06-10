@@ -22,7 +22,7 @@ const { entry } = Astro.props;
 
 // Early redirect when the blog is disabled.
 if (!flags.blog) {
-  return Astro.redirect('/', 308);
+  return Astro.redirect(withBase('/'), 308);
 }
 
 const { Content } = await render(entry);

@@ -60,7 +60,7 @@ export function BarChart<T extends Record<string, unknown>>({
             cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
           />
           {series.map((key, i) => (
-            <Bar key={key} dataKey={key as never} fill={chartColor(i)} radius={[4, 4, 0, 0]} />
+            <Bar key={key} dataKey={key as never} fill={chartColor(i)} radius={[4, 4, 0, 0]} isAnimationActive={false} />
           ))}
         </RechartsBarChart>
       </ResponsiveContainer>
