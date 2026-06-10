@@ -221,7 +221,7 @@ const alternates = [
           <ol class="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
             {flow.map((step, i) => (
               <li class="flex gap-4">
-                <span class="select-none font-display text-4xl font-semibold leading-none text-primary/70">
+                <span class="select-none font-display text-4xl font-semibold leading-none text-primary">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
@@ -282,7 +282,7 @@ const alternates = [
                   class="group relative flex h-full flex-col p-6 transition-colors hover:bg-accent/40"
                 >
                   <span class="absolute inset-x-0 top-0 h-px scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100"></span>
-                  <p class="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-primary/80">
+                  <p class="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-primary">
                     {categoryLabels[cat]}
                   </p>
                   <h3 class="mt-2 text-lg font-semibold text-foreground">

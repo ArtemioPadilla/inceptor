@@ -59,14 +59,14 @@ function AdvancedInner() {
           <ToolbarButton><AlignLeftIcon /> Left</ToolbarButton>
           <ToolbarButton><AlignCenterIcon /> Center</ToolbarButton>
           <ToolbarSeparator />
-          <ToolbarButton><BoldIcon /></ToolbarButton>
-          <ToolbarButton><ItalicIcon /></ToolbarButton>
+          <ToolbarButton aria-label="Bold"><BoldIcon /></ToolbarButton>
+          <ToolbarButton aria-label="Italic"><ItalicIcon /></ToolbarButton>
         </Toolbar>
       </section>
 
       <section className="space-y-2">
         <Label>Number field</Label>
-        <NumberField defaultValue={3} min={0} max={99} />
+        <NumberField aria-label="Number field" defaultValue={3} min={0} max={99} />
       </section>
 
       <section className="space-y-2">

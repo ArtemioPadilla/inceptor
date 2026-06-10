@@ -128,20 +128,37 @@ for (const route of routes) {
 
         if (!focusable) continue;
 
-        // Drive real focus and read the resolved computed style.
+        // Drive real focus and read the resolved computed style. WCAG 2.4.7
+        // accepts a focus indicator rendered by a container as well (the
+        // `focus-within` pattern, e.g. TagInput's wrapper ring), so when the
+        // element itself shows nothing we also inspect up to two ancestors.
         const indicator = await el.evaluate((node) => {
           const e = node as HTMLElement;
           e.focus();
           if (document.activeElement !== e) {
             return { focused: false, outlineWidth: '0px', boxShadow: 'none' };
           }
-          const s = getComputedStyle(e);
-          return {
-            focused: true,
-            outlineWidth: s.outlineWidth,
-            outlineStyle: s.outlineStyle,
-            boxShadow: s.boxShadow,
+          const read = (t: Element) => {
+            const s = getComputedStyle(t);
+            return {
+              outlineWidth: s.outlineWidth,
+              outlineStyle: s.outlineStyle,
+              boxShadow: s.boxShadow,
+            };
           };
+          const visible = (v: ReturnType<typeof read>) =>
+            (v.outlineWidth !== '0px' && v.outlineStyle !== 'none') ||
+            (v.boxShadow !== 'none' && v.boxShadow !== '');
+          let best = read(e);
+          let ancestor: Element | null = e.parentElement;
+          for (let hops = 0; hops < 2 && ancestor && !visible(best); hops++) {
+            if (ancestor.matches(':focus-within')) {
+              const v = read(ancestor);
+              if (visible(v)) best = v;
+            }
+            ancestor = ancestor.parentElement;
+          }
+          return { focused: true, ...best };
         });
 
         // If the element refused focus (e.g. an <a> without href), skip it.

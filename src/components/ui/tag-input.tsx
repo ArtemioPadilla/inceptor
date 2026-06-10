@@ -45,6 +45,7 @@ function TagInput({ value, onValueChange, placeholder, className }: TagInputProp
         </span>
       ))}
       <input
+        aria-label="Add item"
         value={draft}
         placeholder={value.length === 0 ? placeholder : undefined}
         className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
