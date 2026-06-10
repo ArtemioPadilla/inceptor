@@ -20,6 +20,8 @@ export interface BarChartProps<T extends Record<string, unknown>> {
   series: (keyof T & string)[];
   height?: number;
   className?: string;
+  /** Accessible label for the chart region. Defaults to 'bar chart'. */
+  ariaLabel?: string;
 }
 
 export function BarChart<T extends Record<string, unknown>>({
@@ -28,10 +30,11 @@ export function BarChart<T extends Record<string, unknown>>({
   series,
   height = 300,
   className,
+  ariaLabel = 'bar chart',
 }: BarChartProps<T>) {
   const mounted = useMounted();
   return (
-    <div className={cn('w-full', className)} style={{ height }}>
+    <div role="img" aria-label={ariaLabel} className={cn('w-full', className)} style={{ height }}>
       {mounted && (
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>

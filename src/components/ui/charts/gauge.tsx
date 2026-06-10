@@ -12,14 +12,16 @@ export interface GaugeProps {
   className?: string;
   colorIndex?: number;
   label?: React.ReactNode;
+  /** Accessible label for the chart region. Defaults to 'gauge chart'. */
+  ariaLabel?: string;
 }
 
 // Gauge — a single-value radial dial (e.g. score, completion).
-export function Gauge({ value, max = 100, height = 180, className, colorIndex = 0, label }: GaugeProps) {
+export function Gauge({ value, max = 100, height = 180, className, colorIndex = 0, label, ariaLabel = 'gauge chart' }: GaugeProps) {
   const mounted = useMounted();
   const pct = Math.round((value / max) * 100);
   return (
-    <div className={cn('relative w-full', className)} style={{ height }}>
+    <div role="img" aria-label={ariaLabel} className={cn('relative w-full', className)} style={{ height }}>
       {mounted && (
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
