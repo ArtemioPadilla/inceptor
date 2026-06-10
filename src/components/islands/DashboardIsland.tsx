@@ -5,6 +5,7 @@ import ErrorBoundary from './ErrorBoundary';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { Metric } from '@/components/ui/metric';
 import { Callout } from '@/components/ui/callout';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart, DonutChart } from '@/components/ui/charts';
 import { Sparkline } from '@/components/ui/charts/sparkline';
 import { Gauge } from '@/components/ui/charts/gauge';
@@ -42,6 +43,33 @@ function useGitHubIssues(state: 'open' | 'closed') {
     meta: { persist: true },
     staleTime: 60_000,
   });
+}
+
+/** Skeleton row group for the table loading state — three placeholder rows. */
+function TableSkeleton() {
+  return (
+    <div className="space-y-2 py-2" aria-label="Loading recent issues">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Skeleton key={i} className="h-9 w-full" />
+      ))}
+    </div>
+  );
+}
+
+/** Skeleton block for chart loading state. */
+function ChartSkeleton({ height = 260 }: { height?: number }) {
+  return <Skeleton className="w-full rounded-lg" style={{ height }} />;
+}
+
+/** Skeleton for a KPI metric + sparkline */
+function KpiSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-8 w-20" />
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="mt-3 h-9 w-full" />
+    </div>
+  );
 }
 
 function DashboardInner() {
@@ -161,36 +189,58 @@ function DashboardInner() {
 
   const loading = openLoading || closedLoading;
 
+  // Empty state check — only shown after a successful load (not while loading).
+  // Both counts being 0 means the repo genuinely has no issues yet.
+  const bothEmpty = !loading && openIssues.length === 0 && closedIssuesCount === 0;
+
   return (
     <div className="space-y-8">
-      {/* KPIs */}
+      {/* KPIs — Skeleton while loading, real values after */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Key metrics">
         <KpiCard>
-          <Metric value={loading ? '…' : openIssues.length} label="Open issues" />
-          <Sparkline
-            className="mt-3"
-            height={36}
-            colorIndex={0}
-            data={loading ? emptyTrend : trendFor(openIssues.length)}
-          />
+          {loading ? (
+            <KpiSkeleton />
+          ) : (
+            <>
+              <Metric value={openIssues.length} label="Open issues" />
+              <Sparkline
+                className="mt-3"
+                height={36}
+                colorIndex={0}
+                data={trendFor(openIssues.length)}
+              />
+            </>
+          )}
         </KpiCard>
         <KpiCard>
-          <Metric value={loading ? '…' : openPRs.length} label="Open PRs" />
-          <Sparkline
-            className="mt-3"
-            height={36}
-            colorIndex={1}
-            data={loading ? emptyTrend : trendFor(openPRs.length)}
-          />
+          {loading ? (
+            <KpiSkeleton />
+          ) : (
+            <>
+              <Metric value={openPRs.length} label="Open PRs" />
+              <Sparkline
+                className="mt-3"
+                height={36}
+                colorIndex={1}
+                data={trendFor(openPRs.length)}
+              />
+            </>
+          )}
         </KpiCard>
         <KpiCard>
-          <Metric value={loading ? '…' : authors.size} label="Unique authors" />
-          <Sparkline
-            className="mt-3"
-            height={36}
-            colorIndex={2}
-            data={loading ? emptyTrend : trendFor(authors.size)}
-          />
+          {loading ? (
+            <KpiSkeleton />
+          ) : (
+            <>
+              <Metric value={authors.size} label="Unique authors" />
+              <Sparkline
+                className="mt-3"
+                height={36}
+                colorIndex={2}
+                data={loading ? emptyTrend : trendFor(authors.size)}
+              />
+            </>
+          )}
         </KpiCard>
       </section>
 
@@ -201,7 +251,10 @@ function DashboardInner() {
             Issues by label (top 8)
           </h3>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <ChartSkeleton height={260} />
+          ) : byLabel.length === 0 ? (
+            // Genuine empty state after successful load
+            <p className="py-8 text-center text-sm text-muted-foreground">No labelled issues yet.</p>
           ) : (
             <BarChart data={byLabel} index="name" series={['count']} height={260} />
           )}
@@ -209,7 +262,12 @@ function DashboardInner() {
         <KpiCard>
           <h3 className="mb-3 text-sm font-medium text-muted-foreground">Open vs closed</h3>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <ChartSkeleton height={260} />
+          ) : bothEmpty ? (
+            // Both open and closed are 0 — genuine empty, show a friendly message
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No issues yet — all clear!
+            </p>
           ) : (
             <DonutChart data={stateData} height={260} />
           )}
@@ -226,7 +284,9 @@ function DashboardInner() {
             Issue close rate
           </h3>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <ChartSkeleton height={180} />
+          ) : bothEmpty ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">No data yet.</p>
           ) : (
             <Gauge value={closeRate} max={100} height={180} label="closed" />
           )}
@@ -236,7 +296,7 @@ function DashboardInner() {
             Issues by label (top 5)
           </h3>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <ChartSkeleton height={180} />
           ) : topLabels.length > 0 ? (
             <BarList data={topLabels} />
           ) : (
@@ -245,15 +305,22 @@ function DashboardInner() {
         </KpiCard>
       </section>
 
-      {/* Table */}
+      {/* Table — Skeleton rows while loading, real table once data arrives.
+          We intentionally do NOT render the DataTable while loading because
+          the table's own empty state ("No results") would show while 0 rows
+          are available, conflating loading with empty. */}
       <section aria-label="Recent issues">
         <h3 className="mb-3 text-sm font-medium text-muted-foreground">Recent issues</h3>
-        <DataTable<GitHubIssue, unknown>
-          columns={columns}
-          data={recent}
-          height="360px"
-          estimateRowSize={36}
-        />
+        {loading ? (
+          <TableSkeleton />
+        ) : (
+          <DataTable<GitHubIssue, unknown>
+            columns={columns}
+            data={recent}
+            height="360px"
+            estimateRowSize={36}
+          />
+        )}
       </section>
     </div>
   );
