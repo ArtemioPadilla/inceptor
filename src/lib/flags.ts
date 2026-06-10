@@ -59,6 +59,18 @@ export const flags = {
 
   /** Show the first-load privacy disclosure toast (ethics — Epic 12). */
   privacyToast: asBool(env.PUBLIC_FLAG_PRIVACY_TOAST, true),
+
+  /**
+   * Enable analytics (Plausible / Umami). Uses asBool so '1'/'on'/'yes' also
+   * work, consistent with all other flags. analytics.ts reads this flag.
+   */
+  analytics: asBool(env.PUBLIC_FLAG_ANALYTICS, false),
+
+  /**
+   * Enable Sentry error reporting. Uses asBool for consistent truthy handling.
+   * sentry.ts reads this flag.
+   */
+  sentry: asBool(env.PUBLIC_FLAG_SENTRY, false),
 } as const;
 
 export type Flags = typeof flags;
