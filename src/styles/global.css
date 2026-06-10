@@ -29,6 +29,10 @@
      even when nested under `html.dark`. No duplication — one source of truth. */
   :root,
   .light {
+    /* Tells native controls (selects, scrollbars, inputs) to render in
+       light mode when under this scope. Prevents dark scrollbars from
+       appearing in light mode and vice-versa. */
+    color-scheme: light;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
@@ -46,6 +50,7 @@
     --accent: oklch(0.96 0.02 163);
     --accent-foreground: oklch(0.3 0.06 163);
     --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.6 0.13 163);
@@ -67,6 +72,8 @@
   }
 
   .dark {
+    /* Tells native controls to render in dark mode under .dark scopes. */
+    color-scheme: dark;
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
@@ -84,6 +91,7 @@
     --accent: oklch(0.28 0.04 165);
     --accent-foreground: oklch(0.92 0.05 165);
     --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.985 0 0);
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.78 0.155 164);
@@ -119,6 +127,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
