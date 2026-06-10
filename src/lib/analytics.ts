@@ -26,7 +26,9 @@ const PROVIDER = ((import.meta.env.PUBLIC_ANALYTICS_PROVIDER as string | undefin
 const DOMAIN = (import.meta.env.PUBLIC_ANALYTICS_DOMAIN as string | undefined) ?? '';
 const SCRIPT_OVERRIDE =
   (import.meta.env.PUBLIC_ANALYTICS_SCRIPT_URL as string | undefined) ?? '';
-const ENABLED = (import.meta.env.PUBLIC_FLAG_ANALYTICS as string | undefined) === 'true';
+// Use flags.analytics (asBool) so '1'/'on'/'yes' also enable analytics,
+// consistent with every other flag in this codebase.
+const ENABLED = flags.analytics;
 
 declare global {
   interface Window {

@@ -66,11 +66,33 @@ function SettingsInner() {
   const [reduceMotion, setReduceMotion] = React.useState(false);
 
   const [saved, setSaved] = React.useState(false);
+  // Track the timeout id so we can clear it on re-click or unmount,
+  // preventing a setState call on an already-unmounted component.
+  // Use `number` explicitly: window.setTimeout returns a browser numeric timer id.
+  // ReturnType<typeof window.setTimeout> would resolve to NodeJS.Timeout in
+  // environments where @types/node is installed (it overrides the global).
+  const saveTimerRef = React.useRef<number | null>(null);
+
+  // Clear the pending timer on unmount.
+  React.useEffect(() => {
+    return () => {
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, []);
 
   function handleSave() {
     // Local-only demo: no network. Flash a confirmation.
+    // Clear any in-flight timer before starting a new one (re-click guard).
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current);
+    }
     setSaved(true);
-    window.setTimeout(() => setSaved(false), 2000);
+    saveTimerRef.current = window.setTimeout(() => {
+      saveTimerRef.current = null;
+      setSaved(false);
+    }, 2000);
   }
 
   return (

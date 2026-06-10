@@ -7,8 +7,14 @@ interface ErrorBoundaryProps {
   /**
    * Render-prop fallback. Receives the caught error + pre-filled GitHub issue
    * URL so callers can customise the recovery UI.
+   *
+   * NOTE: `reportUrl` may be null on the very first render after a throw, because
+   * `getDerivedStateFromError` (synchronous) sets `error` but `componentDidCatch`
+   * (async-safe) sets `reportUrl` in a subsequent setState. The caller's fallback
+   * is invoked once with `null` first, then again once the URL resolves. Handle
+   * the null case: show a minimal fallback or loading state until it resolves.
    */
-  fallback?: (error: Error, reportUrl: string) => React.ReactNode;
+  fallback?: (error: Error, reportUrl: string | null) => React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -24,6 +30,12 @@ interface ErrorBoundaryState {
  * Must be a class component — React's error boundary API (getDerivedStateFromError
  * + componentDidCatch) is intentionally not available as a hook.
  *
+ * Race-condition contract:
+ *   - `getDerivedStateFromError` runs synchronously and sets `error`.
+ *   - `componentDidCatch` runs async-safe and sets `reportUrl` via setState.
+ *   - The fallback renders as soon as `error` is set (no crashing child re-render).
+ *   - The "Report on GitHub" link appears once `reportUrl` resolves.
+ *
  * Usage:
  *   <ErrorBoundary name="IssuesList">
  *     <IssuesListInner />
@@ -36,12 +48,14 @@ export default class ErrorBoundary extends React.Component<
   state: ErrorBoundaryState = { error: null, reportUrl: null };
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    // Update state so the next render shows the fallback UI.
+    // Update state so the next render shows the fallback UI immediately.
+    // reportUrl is NOT set here because it requires an async setState call
+    // (componentDidCatch). We render the fallback with reportUrl=null first.
     return { error };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // Build a report URL eagerly so the fallback can offer it immediately.
+    // Build a report URL eagerly so the fallback can offer it once ready.
     // We derive a "component path" from the boundary name and the first line of
     // the React component stack (which React 19 produces in development).
     const stackFirstLine = info.componentStack?.split('\n')[1]?.trim() ?? '';
@@ -54,18 +68,24 @@ export default class ErrorBoundary extends React.Component<
       body: buildErrorReportBody({ error, componentPath, hydrationMismatch: false }),
       labels: ['bug'],
     });
+    // This second setState triggers a re-render, adding the GitHub link.
     this.setState({ reportUrl: url });
   }
 
   render() {
     const { error, reportUrl } = this.state;
 
-    if (error && reportUrl) {
+    // Render the fallback as soon as error is set — do NOT wait for reportUrl.
+    // This prevents falling through to `children` and re-rendering the crashing
+    // child during the async gap between getDerivedStateFromError and componentDidCatch.
+    if (error !== null) {
       if (this.props.fallback) {
+        // Pass reportUrl even if null; caller decides how to handle the gap.
         return this.props.fallback(error, reportUrl);
       }
 
-      // Default fallback: accessible alert with a "Report on GitHub" link.
+      // Default fallback: accessible alert that upgrades to include the
+      // "Report on GitHub" link once reportUrl resolves.
       return (
         <div
           role="alert"
@@ -77,14 +97,16 @@ export default class ErrorBoundary extends React.Component<
               {error.name}: {error.message}
             </code>
           </p>
-          <a
-            href={reportUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center rounded-md border border-destructive/40 bg-destructive/20 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/30"
-          >
-            Report on GitHub &rarr;
-          </a>
+          {reportUrl && (
+            <a
+              href={reportUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center rounded-md border border-destructive/40 bg-destructive/20 px-3 py-1 text-xs font-medium text-destructive hover:bg-destructive/30"
+            >
+              Report on GitHub &rarr;
+            </a>
+          )}
         </div>
       );
     }

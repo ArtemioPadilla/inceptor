@@ -19,7 +19,9 @@
 import { flags } from './flags';
 
 const SENTRY_DSN = (import.meta.env.PUBLIC_SENTRY_DSN as string | undefined) ?? '';
-const SENTRY_ENABLED = (import.meta.env.PUBLIC_FLAG_SENTRY as string | undefined) === 'true';
+// Use flags.sentry (asBool) so '1'/'on'/'yes' also enable Sentry,
+// consistent with every other flag in this codebase.
+const SENTRY_ENABLED = flags.sentry;
 
 let initialized = false;
 let sentryModule: unknown = null;

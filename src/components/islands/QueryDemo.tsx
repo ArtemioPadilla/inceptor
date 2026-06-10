@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { repoStatsUrl } from '@/lib/api';
 import QueryProvider from './QueryProvider';
 import ErrorBoundary from './ErrorBoundary';
+
+/** Canonical repo slug. Reads PUBLIC_REPO_SLUG when set (fork-friendly). */
+const REPO = (import.meta.env.PUBLIC_REPO_SLUG as string | undefined) ?? 'ArtemioPadilla/inceptor';
 
 interface RepoInfo {
   description: string | null;
@@ -13,9 +17,9 @@ function RepoStatsInner() {
   const { data, isLoading, error } = useQuery<RepoInfo>({
     queryKey: ['repo', 'inceptor'],
     queryFn: async () => {
-      const res = await fetch(
-        'https://api.github.com/repos/ArtemioPadilla/inceptor',
-      );
+      // Route through repoStatsUrl() so a self-hosted backend proxy is used
+      // when PUBLIC_API_BASE is set, avoiding GitHub's 60 req/h unauthenticated cap.
+      const res = await fetch(repoStatsUrl(REPO));
       if (!res.ok) throw new Error(`GitHub API ${res.status}`);
       return res.json() as Promise<RepoInfo>;
     },
@@ -48,7 +52,9 @@ function RepoStatsInner() {
  */
 function QueryDemoInner() {
   return (
-    <QueryProvider>
+    // Dedicated idbKey avoids cache-key collisions with other islands that also
+    // use the default "tanstack-query-cache" key.
+    <QueryProvider idbKey="tanstack-query-cache-demo">
       <RepoStatsInner />
     </QueryProvider>
   );

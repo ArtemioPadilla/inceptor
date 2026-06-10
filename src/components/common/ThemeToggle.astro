@@ -56,19 +56,44 @@
   // (src/stores/theme.ts). This script only wires the button to the store.
   import { $theme, toggleTheme } from '@/stores/theme';
 
-  const btn = document.getElementById('theme-toggle');
-  if (btn) {
-    // Reflect the store value in aria-pressed so AT users get correct state.
-    const sync = (t: 'light' | 'dark') =>
-      btn.setAttribute('aria-pressed', String(t === 'dark'));
+  function initToggle() {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+
+    /**
+     * Sync aria-pressed and aria-label to the current theme value.
+     * - aria-pressed: true when dark mode is active (the button is "on").
+     * - aria-label: describes the action the button will perform (next state),
+     *   not the current state, so screen-reader users hear what will happen.
+     */
+    const sync = (t: 'light' | 'dark') => {
+      const isDark = t === 'dark';
+      btn.setAttribute('aria-pressed', String(isDark));
+      btn.setAttribute(
+        'aria-label',
+        isDark ? 'Switch to light theme' : 'Switch to dark theme',
+      );
+    };
 
     // Initial sync — the store's onMount may not have fired yet, so read
     // the atom directly (it falls back to the class the inline script set).
     sync($theme.get());
 
-    // Keep aria-pressed in sync with any future store changes (e.g. cross-tab).
-    $theme.subscribe(sync);
+    // Keep aria-pressed + aria-label in sync with any future store changes
+    // (e.g. cross-tab sync, programmatic theme changes).
+    const unsub = $theme.subscribe(sync);
 
     btn.addEventListener('click', () => toggleTheme());
+
+    // Astro View Transitions re-run inline scripts but the old DOM element is
+    // swapped out. Unsubscribe before the swap to avoid ghost subscriptions
+    // accumulating across navigations (memory leak + stale closures).
+    document.addEventListener('astro:before-swap', () => unsub(), { once: true });
   }
+
+  // Run on initial load.
+  initToggle();
+
+  // Re-run after each View Transition navigation so the new button gets wired.
+  document.addEventListener('astro:after-swap', initToggle);
 </script>
