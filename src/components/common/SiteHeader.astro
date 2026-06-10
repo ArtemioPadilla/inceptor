@@ -57,6 +57,23 @@ const isActive = (href: string) => here.includes(href);
       >
         GitHub ↗
       </a>
+      {/* EN/ES toggle — links between the two locales. Minimal and consistent
+          with nav link styling. The footer has a more prominent version. */}
+      <span class="hidden items-center gap-0 sm:flex" aria-label="Switch language">
+        <a
+          href={withBase('/')}
+          hreflang="en"
+          lang="en"
+          class="rounded px-1.5 py-1 text-muted-foreground transition-colors hover:text-primary"
+        >EN</a>
+        <span class="text-border text-[0.6rem]" aria-hidden="true">/</span>
+        <a
+          href={withBase('/es/')}
+          hreflang="es"
+          lang="es"
+          class="rounded px-1.5 py-1 text-muted-foreground transition-colors hover:text-primary"
+        >ES</a>
+      </span>
       <span class="ml-1"><ThemeToggle /></span>
     </div>
   </nav>
