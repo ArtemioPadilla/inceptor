@@ -178,6 +178,23 @@ export function DataTable<TData, TValue>({
     overscan: 10,
   });
 
+  // Force a re-measure after mount so the virtualizer knows the real container
+  // height. Without this, jsdom/browsers may report 0 clientHeight at mount and
+  // render 0 virtual items until the user scrolls.
+  React.useEffect(() => {
+    rowVirtualizer.measure();
+  }, [rowVirtualizer]);
+
+  // Attach a ResizeObserver so the virtualizer re-measures whenever the
+  // scroll-container's dimensions change (e.g. responsive layout shifts).
+  React.useEffect(() => {
+    const el = parentRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => rowVirtualizer.measure());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [rowVirtualizer]);
+
   const virtualItems = rowVirtualizer.getVirtualItems();
   const totalSize = rowVirtualizer.getTotalSize();
 
@@ -185,6 +202,11 @@ export function DataTable<TData, TValue>({
   const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
   const paddingBottom =
     virtualItems.length > 0 ? totalSize - virtualItems[virtualItems.length - 1].end : 0;
+
+  // True empty-state: data has been filtered to zero rows.
+  // We must NOT show this while virtualItems are momentarily 0 during initial
+  // measurement — so we gate on the actual model row count, not the virtual window.
+  const isDataEmpty = rows.length === 0;
 
   return (
     <div className="space-y-3">
@@ -248,53 +270,59 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="sticky top-0 z-10 bg-background">
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                    className="relative select-none whitespace-nowrap"
-                  >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={cn(
-                          'flex items-center',
-                          header.column.getCanSort() &&
-                            'cursor-pointer hover:text-foreground',
-                        )}
-                        onClick={
-                          header.column.getCanSort()
-                            ? header.column.getToggleSortingHandler()
-                            : undefined
-                        }
-                        aria-sort={
-                          header.column.getIsSorted() === 'asc'
-                            ? 'ascending'
-                            : header.column.getIsSorted() === 'desc'
-                              ? 'descending'
-                              : 'none'
-                        }
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && (
-                          <SortIcon direction={header.column.getIsSorted()} />
-                        )}
-                      </div>
-                    )}
-                    {/* Column resize handle — drag to resize column width */}
-                    {header.column.getCanResize() && (
-                      <div
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
-                        className={cn(
-                          'absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none',
-                          'bg-border opacity-0 hover:opacity-100',
-                          header.column.getIsResizing() && 'bg-primary opacity-100',
-                        )}
-                        aria-hidden="true"
-                      />
-                    )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  // aria-sort belongs on the <th> element (TableHead), not on an inner div.
+                  const sortDir = header.column.getIsSorted();
+                  const ariaSortValue: React.AriaAttributes['aria-sort'] = sortDir === 'asc'
+                    ? 'ascending'
+                    : sortDir === 'desc'
+                      ? 'descending'
+                      : 'none';
+                  return (
+                    <TableHead
+                      key={header.id}
+                      style={{ width: header.getSize() }}
+                      className="relative select-none whitespace-nowrap"
+                      aria-sort={header.column.getCanSort() ? ariaSortValue : undefined}
+                    >
+                      {header.isPlaceholder ? null : (
+                        // Sortable headers use a real <button> for keyboard accessibility.
+                        // The button is full-width and visually unstyled (appearance:none)
+                        // so it looks identical to the previous div; focus ring added.
+                        header.column.getCanSort() ? (
+                          <button
+                            type="button"
+                            className={cn(
+                              'flex w-full items-center cursor-pointer hover:text-foreground',
+                              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
+                            )}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            <SortIcon direction={sortDir} />
+                          </button>
+                        ) : (
+                          <div className="flex items-center">
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </div>
+                        )
+                      )}
+                      {/* Column resize handle — drag to resize column width */}
+                      {header.column.getCanResize() && (
+                        <div
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={cn(
+                            'absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none',
+                            'bg-border opacity-0 hover:opacity-100',
+                            header.column.getIsResizing() && 'bg-primary opacity-100',
+                          )}
+                          aria-hidden="true"
+                        />
+                      )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -305,7 +333,7 @@ export function DataTable<TData, TValue>({
                 <td style={{ height: paddingTop }} />
               </tr>
             )}
-            {virtualItems.length === 0 ? (
+            {isDataEmpty ? (
               <tr>
                 <td
                   colSpan={columns.length}
