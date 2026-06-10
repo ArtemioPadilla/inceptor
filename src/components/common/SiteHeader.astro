@@ -6,6 +6,7 @@
  */
 import ThemeToggle from './ThemeToggle.astro';
 import { withBase } from '@/lib/href';
+import GlobalSearch from '@/components/islands/GlobalSearch';
 
 const nav = [
   { href: '/gallery/', label: 'Gallery' },
@@ -74,6 +75,10 @@ const isActive = (href: string) => here.includes(href);
           class="rounded px-1.5 py-1 text-muted-foreground transition-colors hover:text-primary"
         >ES</a>
       </span>
+      {/* GlobalSearch — mounted client:idle so it's available site-wide without
+          blocking first paint. Renders a magnifier trigger button + the ⌘K
+          dialog in one island (compound-component constraint). */}
+      <GlobalSearch client:idle />
       <span class="ml-1"><ThemeToggle /></span>
     </div>
   </nav>
