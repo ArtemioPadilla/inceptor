@@ -43,7 +43,7 @@ const isActive = (href: string) => here.includes(href);
             aria-current={isActive(n.href) ? 'page' : undefined}
             class:list={[
               'rounded-md px-1.5 py-1 transition-colors hover:text-primary sm:px-2',
-              isActive(n.href) ? 'text-primary' : 'text-muted-foreground',
+              isActive(n.href) ? 'text-primary underline decoration-2 underline-offset-[0.6em]' : 'text-muted-foreground',
             ]}
           >
             {n.label}
