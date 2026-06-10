@@ -1,9 +1,11 @@
 ---
+import { fileURLToPath } from 'node:url';
 import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { galleryManifest, type GalleryEntry } from '../../content/gallery';
 import { galleryRecipes } from '../../content/gallery-recipes';
 import CodeSnippet from '../../components/gallery/CodeSnippet.astro';
+import { extractPropsForSource } from '../../lib/component-docs';
 
 // Import every gallery island statically so Astro can wire hydration.
 // (Dynamic lookups via a registry don't work for `client:*` directives.)
@@ -41,6 +43,12 @@ interface Props {
 const { entry } = Astro.props;
 const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.source}`;
 const recipe = galleryRecipes[entry.slug];
+
+// Build-time props extraction via the TypeScript compiler API.
+// `repoRoot` is resolved from this file's location (src/pages/gallery/ → three
+// levels up). extractPropsForSource never throws — returns [] on any error.
+const repoRoot = fileURLToPath(new URL('../../..', import.meta.url));
+const propsTables = extractPropsForSource(entry.source, repoRoot);
 ---
 
 <BaseLayout title={`${entry.name} — Gallery`} description={entry.summary}>
@@ -173,5 +181,65 @@ const recipe = galleryRecipes[entry.slug];
         </p>
       )}
     </section>
+
+    {propsTables.length > 0 && (
+      <section class="mt-8 space-y-8" id="props-api">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Props API
+        </h2>
+
+        {propsTables.map((table) => (
+          <div class="rounded-lg border border-border overflow-hidden">
+            <div class="border-b border-border bg-muted/40 px-4 py-2">
+              <code class="text-sm font-semibold text-foreground">{table.interfaceName}</code>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-border bg-muted/20">
+                    <th class="px-4 py-2 text-left font-medium text-muted-foreground w-36">Prop</th>
+                    <th class="px-4 py-2 text-left font-medium text-muted-foreground w-48">Type</th>
+                    <th class="px-4 py-2 text-left font-medium text-muted-foreground w-28">Default</th>
+                    <th class="px-4 py-2 text-left font-medium text-muted-foreground">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {table.props.map((prop, i) => (
+                    <tr class:list={['border-b border-border last:border-0', i % 2 === 1 && 'bg-muted/10']}>
+                      <td class="px-4 py-2 align-top">
+                        <code class="font-mono text-foreground text-[13px]">{prop.name}</code>
+                        {prop.optional && (
+                          <span class="ml-1 text-[10px] text-muted-foreground">opt</span>
+                        )}
+                      </td>
+                      <td class="px-4 py-2 align-top">
+                        <code
+                          class="font-mono text-[12px] text-primary break-all"
+                          title={prop.fullType !== prop.type ? prop.fullType : undefined}
+                        >
+                          {prop.type}
+                        </code>
+                      </td>
+                      <td class="px-4 py-2 align-top">
+                        {prop.defaultValue ? (
+                          <code class="font-mono text-[12px] text-muted-foreground">
+                            {prop.defaultValue}
+                          </code>
+                        ) : (
+                          <span class="text-muted-foreground/50">—</span>
+                        )}
+                      </td>
+                      <td class="px-4 py-2 align-top text-muted-foreground text-[13px]">
+                        {prop.description || <span class="text-muted-foreground/40">—</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+      </section>
+    )}
   </main>
 </BaseLayout>

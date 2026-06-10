@@ -66,6 +66,61 @@ describe('gallery/[component].astro', () => {
   });
 });
 
+describe('gallery/[component].astro — props API section (#139)', () => {
+  it('imports extractPropsForSource from component-docs', () => {
+    expect(component).toMatch(/extractPropsForSource/);
+    expect(component).toContain('component-docs');
+  });
+
+  it('derives repoRoot via fileURLToPath + import.meta.url (build-time only)', () => {
+    // The extractor call is in the Astro frontmatter — confirmed by checking the
+    // pattern used to resolve the repository root directory.
+    expect(component).toContain('fileURLToPath');
+    expect(component).toContain('import.meta.url');
+    expect(component).toMatch(/repoRoot/);
+  });
+
+  it('renders the Props API section conditionally (only when propsTables.length > 0)', () => {
+    // The section must be gated so components with no extractable Props interfaces
+    // (e.g., directory sources that yield 0 rows) do not render an empty table block.
+    expect(component).toMatch(/propsTables\.length\s*>\s*0/);
+  });
+
+  it('renders a table with Name / Type / Default / Description columns', () => {
+    expect(component).toContain('Prop');
+    expect(component).toContain('Type');
+    expect(component).toContain('Default');
+    expect(component).toContain('Description');
+  });
+
+  it('includes the props-api section id for anchor navigation', () => {
+    expect(component).toContain('id="props-api"');
+  });
+
+  it('shows full type in title attribute for truncated types', () => {
+    // Long type unions are truncated to MAX_TYPE_LEN (60 chars); the full type
+    // is available in the `title` attribute so users can hover to see it.
+    expect(component).toContain('prop.fullType');
+    expect(component).toContain('title=');
+  });
+
+  it('marks optional props with an opt label', () => {
+    expect(component).toContain('prop.optional');
+    expect(component).toContain('opt');
+  });
+
+  it('does not use client:* directives on the props section (build-time only)', () => {
+    // The entire Props API extraction runs in the Astro frontmatter at build time.
+    // The resulting HTML is static — no islands needed.
+    // We already have the test that checks client:load is absent, but we also
+    // want to confirm no client:visible was accidentally added inside the props section.
+    // The component source uses client:visible only for Showcase islands (before props section).
+    const propsIdx = component.indexOf('Props API');
+    const clientAfterProps = component.slice(propsIdx).match(/client:(visible|load|idle)/);
+    expect(clientAfterProps).toBeNull();
+  });
+});
+
 describe('gallery manifest', () => {
   it('declares the GalleryEntry interface', () => {
     expect(manifestSrc).toMatch(/interface\s+GalleryEntry/);
