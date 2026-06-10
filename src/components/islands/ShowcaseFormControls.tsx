@@ -42,7 +42,7 @@ function FormControlsInner() {
           value={plan}
           onValueChange={(v) => setPlan(v as string)}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-label="Plan">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -59,10 +59,10 @@ function FormControlsInner() {
         <Label>Billing</Label>
         <RadioGroup value={tier} onValueChange={(v) => setTier(v as string)}>
           <label className="flex items-center gap-2 text-sm">
-            <RadioGroupItem value="monthly" /> Monthly
+            <RadioGroupItem value="monthly" aria-label="Monthly" /> Monthly
           </label>
           <label className="flex items-center gap-2 text-sm">
-            <RadioGroupItem value="yearly" /> Yearly (2 months free)
+            <RadioGroupItem value="yearly" aria-label="Yearly, two months free" /> Yearly (2 months free)
           </label>
         </RadioGroup>
       </div>
@@ -70,12 +70,12 @@ function FormControlsInner() {
       {/* Switch */}
       <label className="flex items-center justify-between gap-4">
         <span className="text-sm font-medium">Email notifications</span>
-        <Switch checked={notify} onCheckedChange={setNotify} />
+        <Switch checked={notify} onCheckedChange={setNotify} aria-label="Email notifications" />
       </label>
 
       {/* Checkbox */}
       <label className="flex items-center gap-2 text-sm">
-        <Checkbox checked={terms} onCheckedChange={(v) => setTerms(v === true)} />
+        <Checkbox checked={terms} onCheckedChange={(v) => setTerms(v === true)} aria-label="I accept the terms and conditions" />
         I accept the terms and conditions
       </label>
 
@@ -85,7 +85,7 @@ function FormControlsInner() {
           <Label>Volume</Label>
           <span className="font-mono text-xs text-muted-foreground">{volume}</span>
         </div>
-        <Slider value={volume} onValueChange={(v) => setVolume(Array.isArray(v) ? v[0] : v)} />
+        <Slider aria-label="Volume" value={volume} onValueChange={(v) => setVolume(Array.isArray(v) ? v[0] : v)} />
       </div>
 
       {/* Textarea */}

@@ -41,6 +41,7 @@ const NavigationMenuTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       'inline-flex h-9 items-center gap-1 rounded-md px-3 text-sm font-medium outline-none transition-colors',
+      'focus-visible:ring-2 focus-visible:ring-ring',
       'hover:bg-accent hover:text-accent-foreground data-[popup-open]:bg-accent',
       className,
     )}
@@ -67,7 +68,7 @@ const NavigationMenuLink = React.forwardRef<
   <BaseNavigationMenu.Link
     ref={ref}
     className={cn(
-      'block rounded-md px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground',
+      'block rounded-md px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring',
       className,
     )}
     {...props}

@@ -26,12 +26,23 @@ echo "▶ Pulling $IMAGE (one-time download, ~600 MB)…"
 docker pull "$IMAGE"
 
 echo "▶ Running snapshot pass inside container…"
+# Two hard-won details:
+#  - HOME/npm_config_cache must be writable inside the container or npm ci
+#    dies on '/.npm' permissions (and the failure is easy to miss).
+#  - node_modules must be an anonymous volume, NOT the host's macOS tree:
+#    npm ci replacing a bind-mounted node_modules races on virtiofs (esbuild
+#    install.js ENOENT mid-swap). The container installs its own Linux tree;
+#    only tests/__screenshots__ lands back on the host.
+# On Docker Desktop (macOS) bind-mount writes map to the host user; on native
+# Linux add `-u "$(id -u):$(id -g)"` back and pre-create the volume ownership.
 docker run --rm \
   -v "$PWD":/work \
+  -v /work/node_modules \
   -w /work \
-  -u "$(id -u):$(id -g)" \
+  -e HOME=/tmp \
+  -e npm_config_cache=/tmp/.npm \
   "$IMAGE" \
-  bash -c "npm ci && npm run build && npx playwright test --update-snapshots"
+  bash -c "npm ci --no-audit --no-fund && npm run build && npx playwright test --update-snapshots"
 
 echo
 echo "✓ Baselines refreshed. Next steps:"

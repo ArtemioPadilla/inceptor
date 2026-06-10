@@ -327,7 +327,7 @@ function DashboardInner() {
                   after a successful load. Distinct from the loading state
                   (skeleton) and from a genuine error. */}
               {openIssues.length === 0 && (
-                <span className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-300 font-medium">
                   🎉 inbox zero
                 </span>
               )}

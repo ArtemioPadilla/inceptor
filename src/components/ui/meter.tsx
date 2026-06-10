@@ -13,7 +13,14 @@ interface MeterProps extends React.ComponentPropsWithoutRef<typeof BaseMeter.Roo
 
 const Meter = React.forwardRef<React.ComponentRef<typeof BaseMeter.Root>, MeterProps>(
   ({ className, label, showValue = true, ...props }, ref) => (
-    <BaseMeter.Root ref={ref} className={cn('w-full', className)} {...props}>
+    <BaseMeter.Root
+      ref={ref}
+      className={cn('w-full', className)}
+      // role="meter" requires an accessible name; fall back to the visible
+      // label text (or a generic one) when the consumer doesn't provide one.
+      aria-label={props['aria-label'] ?? (typeof label === 'string' ? label : 'measured value')}
+      {...props}
+    >
       {(label || showValue) && (
         <div className="mb-1 flex items-center justify-between text-xs">
           {label ? <BaseMeter.Label className="text-foreground">{label}</BaseMeter.Label> : <span />}

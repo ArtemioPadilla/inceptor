@@ -27,7 +27,7 @@ const MenubarTrigger = React.forwardRef<
   <Menu.Trigger
     ref={ref}
     className={cn(
-      'inline-flex h-8 cursor-pointer select-none items-center rounded px-3 text-sm font-medium outline-none',
+      'inline-flex h-8 cursor-pointer select-none items-center rounded px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring',
       'hover:bg-accent hover:text-accent-foreground data-[popup-open]:bg-accent data-[popup-open]:text-accent-foreground',
       className,
     )}

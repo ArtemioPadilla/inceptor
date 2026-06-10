@@ -35,7 +35,7 @@ function TreeView({ data, defaultExpanded = [], className }: TreeViewProps) {
             type="button"
             onClick={() => hasChildren && toggle(node.id)}
             className={cn(
-              'flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent',
+              'flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
             )}
             style={{ paddingLeft: `${depth * 16 + 8}px` }}
           >

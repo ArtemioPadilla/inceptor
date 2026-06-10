@@ -41,7 +41,7 @@
     --popover-foreground: oklch(0.145 0 0);
     /* Brand: emerald is the primary action color (deep enough for white text
        to clear WCAG AA 4.5:1 — see src/tests/ux-contrast.test.ts). */
-    --primary: oklch(0.52 0.123 163);
+    --primary: oklch(0.50 0.123 163);
     --primary-foreground: oklch(0.99 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -91,7 +91,7 @@
     --accent: oklch(0.28 0.04 165);
     --accent-foreground: oklch(0.92 0.05 165);
     --destructive: oklch(0.704 0.191 22.216);
-    --destructive-foreground: oklch(0.985 0 0);
+    --destructive-foreground: oklch(0.145 0.02 25);
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.78 0.155 164);

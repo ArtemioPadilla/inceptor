@@ -15,7 +15,7 @@ const NumberField = React.forwardRef<
       <BaseNumberField.Decrement className="grid h-full w-9 place-items-center rounded-l-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-50">
         <MinusIcon className="h-4 w-4" />
       </BaseNumberField.Decrement>
-      <BaseNumberField.Input className="h-full w-16 border-x border-input bg-transparent text-center text-sm tabular-nums focus-visible:outline-none" />
+      <BaseNumberField.Input className="h-full w-16 border-x border-input bg-transparent text-center text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       <BaseNumberField.Increment className="grid h-full w-9 place-items-center rounded-r-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-50">
         <PlusIcon className="h-4 w-4" />
       </BaseNumberField.Increment>
