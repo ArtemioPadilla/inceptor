@@ -3,6 +3,7 @@ import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import SiteHeader from '../components/common/SiteHeader.astro';
 import SiteFooter from '../components/common/SiteFooter.astro';
+import { SITE } from '../lib/site-meta';
 import OfflineBanner from '../components/islands/OfflineBanner';
 import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
@@ -26,13 +27,21 @@ interface Props {
    *  Pass at least en + es + x-default for bilingual pages.
    *  Pages that don't pass this prop get no hreflang tags (safe default). */
   alternates?: AlternateLink[];
+  /** JSON-LD blocks (schema.org). Each object is emitted as its own
+   *  <script type="application/ld+json"> — the structured identity agents
+   *  and search engines read. See src/lib/site-meta.ts for the source values. */
+  jsonLd?: Record<string, unknown>[];
 }
 
 const {
   title = 'My App',
-  description = 'Built with inceptor',
+  // Default to the site's real positioning line (src/lib/site-meta.ts) —
+  // pages that forget to pass a description must not introduce the site as
+  // boilerplate filler (this default is also what /llms.txt leads with).
+  description = SITE.description,
   lang = 'en',
   alternates,
+  jsonLd = [],
 } = Astro.props;
 
 // Canonical URL — derived from Astro.site + Astro.url.pathname so it always
@@ -121,6 +130,14 @@ const canonicalUrl = Astro.site
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(withBase('/og-image.png'), Astro.site ?? 'https://artemiop.com').toString()} />
+    {/* Agent-first index of the site (llmstxt.org convention). Generated at
+        build from the content collections — see src/pages/llms.txt.ts. */}
+    <link rel="alternate" type="text/plain" title="llms.txt" href={withBase('/llms.txt')} />
+    {/* JSON-LD structured data — the identity agents/search engines parse.
+        Blocks are provided per page; values come from src/lib/site-meta.ts. */}
+    {jsonLd.map((block) => (
+      <script type="application/ld+json" set:html={JSON.stringify(block)} />
+    ))}
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased" style="view-transition-name: body-bg">
     {/* Skip-to-content link — WCAG 2.4.1 requirement. Visually hidden until
