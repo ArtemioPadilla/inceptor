@@ -3,6 +3,7 @@ import { withBase } from '@/lib/href';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../content/gallery';
 import StatusBadgeStrip from '@/components/marketing/StatusBadgeStrip.astro';
+import { SITE, REPO_URL } from '@/lib/site-meta';
 
 // ── Honest build-time stats ────────────────────────────────────────────────
 // Pages: count every .astro / .md / .mdx file under src/pages/.
@@ -68,9 +69,36 @@ const alternates = [
   { hreflang: 'es', href: `${site}/inceptor/es/` },
   { hreflang: 'x-default', href: `${site}/inceptor/` },
 ];
+// JSON-LD identity blocks (agents/search engines). Values single-sourced
+// from src/lib/site-meta.ts — re-brand there when instantiating.
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.name,
+    description: SITE.description,
+    url: new URL(import.meta.env.BASE_URL, Astro.site ?? 'https://artemiop.com').toString(),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    name: SITE.name,
+    description: SITE.description,
+    codeRepository: REPO_URL,
+    license: `https://spdx.org/licenses/${SITE.license}`,
+    programmingLanguage: [...SITE.programmingLanguages],
+    runtimePlatform: 'Astro 5 / React 19',
+  },
+];
 ---
 
-<BaseLayout title="Inceptor — issue-driven web scaffold" lang="en" alternates={alternates}>
+<BaseLayout
+  title="Inceptor — issue-driven web scaffold"
+  description={SITE.description}
+  lang="en"
+  alternates={alternates}
+  jsonLd={jsonLd}
+>
   <!-- ───────────────────────── HERO ───────────────────────── -->
   <section class="relative overflow-hidden grain">
     <!-- atmosphere -->

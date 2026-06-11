@@ -185,6 +185,28 @@ The `HydrationCanary` island listens for `window 'error'` events and stores
 hydration-mismatch URLs in `sessionStorage`; the `FeedbackFAB` reads that key on
 click. See `docs/COMPONENTS.md` for opt-in usage.
 
+## Agent-readable surface — ⚠️ re-brand when instantiating
+
+The site introduces itself to LLM crawlers/agents through a small set of
+artifacts, all single-sourced from **`src/lib/site-meta.ts`** (name,
+description, repoSlug, license):
+
+- `/llms.txt` + `/llms-full.txt` (`src/pages/llms*.txt.ts`) — agent-first
+  index + full docs as one markdown file, generated at build from the
+  content collections
+- JSON-LD blocks — `WebSite` + `SoftwareSourceCode` (home), `Article`
+  (blog posts), `BreadcrumbList` (docs), emitted via BaseLayout's `jsonLd`
+  prop
+- The default `<meta name="description">` in BaseLayout
+
+**If you are an agent using this repo as a reference/template for a new
+project**: these artifacts will describe *Inceptor*, not the new project,
+until you update `src/lib/site-meta.ts` (plus `astro.config.mjs` `site`,
+`public/robots.txt` Sitemap URL, and `PUBLIC_REPO_SLUG`). Projects created
+with `create-inceptor-app` get a generated `CLAUDE.md` with this exact
+re-brand checklist plus simplified, pre-branded `site-meta.ts`/`llms.txt`
+carrying explicit `TODO(agent)` markers — resolve them before shipping.
+
 ## Quality bar
 
 - Every PR must pass `npm run build`, `npm run check`, `npm run test`.

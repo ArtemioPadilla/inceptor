@@ -3,6 +3,7 @@ import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { flags } from '../../lib/flags';
+import { SITE, REPO_URL } from '../../lib/site-meta';
 
 type BlogEntry = CollectionEntry<'blog'>;
 
@@ -26,9 +27,21 @@ if (!flags.blog) {
 }
 
 const { Content } = await render(entry);
+// Article structured data — agents/search engines (values: site-meta.ts).
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: entry.data.title,
+    description: entry.data.description,
+    datePublished: new Date(entry.data.pubDate).toISOString(),
+    author: { '@type': 'Organization', name: SITE.name, url: REPO_URL },
+    keywords: (entry.data.tags ?? []).join(', '),
+  },
+];
 ---
 
-<BaseLayout title={`${entry.data.title} — Blog`} description={entry.data.description}>
+<BaseLayout title={`${entry.data.title} — Blog`} description={entry.data.description} jsonLd={jsonLd}>
   <main class="mx-auto max-w-3xl px-4 py-12">
     <nav class="mb-6 text-sm">
       <a href={withBase('/blog/')} class="text-muted-foreground hover:text-foreground">← Blog</a>

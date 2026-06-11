@@ -116,6 +116,11 @@ const year = new Date().getFullYear();
         >
           Built with <span class="text-primary">Inceptor</span> ↗
         </a>
+        {/* Agent-first index (llmstxt.org) — humans rarely click it, but
+            surfacing it advertises that the site is machine-readable. */}
+        <a href={withBase('/llms.txt')} class="transition-colors hover:text-primary">
+          llms.txt
+        </a>
       </div>
     </div>
   </div>
