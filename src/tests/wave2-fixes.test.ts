@@ -148,20 +148,17 @@ describe('audit wave 2 — trust & polish', () => {
     });
   });
 
-  // ── 5. FeedbackFAB — panel anchored bottom/right ─────────────────────────
-  describe('FeedbackFAB dialog anchoring', () => {
-    it('dialog has fixed bottom-right positioning classes', () => {
+  // ── 5. FeedbackFAB — panel centered (native <dialog> top-layer) ──────────
+  describe('FeedbackFAB dialog centering', () => {
+    it('dialog relies on native top-layer centering (m-auto), not corner pinning', () => {
       const fab = read('src/components/common/FeedbackFAB.astro');
-      // Must contain fixed + bottom-* + right-* to keep the panel near the FAB
-      expect(fab).toMatch(/fixed/);
-      expect(fab).toMatch(/bottom-\d+/);
-      expect(fab).toMatch(/right-\d+/);
-    });
-
-    it('dialog has m-0 to override browser default centering', () => {
-      const fab = read('src/components/common/FeedbackFAB.astro');
-      // Without m-0 the <dialog> ignores position: fixed in some UAs
-      expect(fab).toContain('m-0');
+      // Corner-pinning with fixed/bottom/right fights the UA stylesheet's
+      // `inset: 0` and stretches the panel to the top-left (live bug,
+      // user-reported). The dialog must center via margin:auto instead.
+      expect(fab).toContain('m-auto');
+      const dialogTag = fab.slice(fab.indexOf('<dialog'), fab.indexOf('</header>'));
+      expect(dialogTag).not.toMatch(/fixed bottom-\d+ right-\d+/);
+      expect(dialogTag).not.toContain('m-0"');
     });
   });
 

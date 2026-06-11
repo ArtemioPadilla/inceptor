@@ -120,10 +120,11 @@ const tr = {
   </button>
 </div>
 
-<!-- Modal dialog — anchored bottom-right near the FAB so the spatial
-     relationship between the trigger and the panel is preserved.
-     `margin: 0` resets the browser default (centered), then position:fixed
-     bottom/right pin it to the correct corner.
+<!-- Modal dialog — centered via the native <dialog> top-layer behavior
+     (`inset: 0; margin: auto` from the UA stylesheet, kept explicit with
+     m-auto). Don't try to corner-pin it with fixed/bottom/right: the UA's
+     inset:0 wins on the unset sides and the panel ends up stretched to the
+     top-left (the bug this comment replaces).
      max-h + overflow-auto ensure it stays scrollable on small viewports. -->
 <dialog
   id="secid-report-modal"
@@ -145,7 +146,7 @@ const tr = {
   class="rounded-xl backdrop:bg-black/60 p-0 w-[min(92vw,540px)] max-h-[80vh] overflow-hidden
          bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100
          shadow-2xl border border-gray-200 dark:border-gray-700
-         fixed bottom-20 right-5 m-0"
+         m-auto"
 >
   <form method="dialog" class="flex flex-col max-h-[88vh]">
     <!-- Header -->
