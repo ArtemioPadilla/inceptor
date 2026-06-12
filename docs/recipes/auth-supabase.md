@@ -133,3 +133,38 @@ const { data } = await supabase!.from('items').select('*');   // RLS filtra a es
 - En Astro las vars del cliente llevan prefijo `PUBLIC_` (no `VITE_`).
 - El correo de confirmación regresa al **Site URL** → configúralo o pasa `emailRedirectTo`.
 - Migraciones por CI: ver [supabase-migrations-ci.md](./supabase-migrations-ci.md).
+
+## 8. Gating de rutas y roles — usa el scaffold, no checks ad-hoc
+
+No escribas comprobaciones de rol/flag inline en cada isla. El módulo único
+de gating es `src/lib/route-guard.tsx` (regla en CLAUDE.md § "Auth gating
+rules"). Adapta el usuario de Supabase a `GuardUser` UNA vez, en el límite
+del contexto:
+
+```tsx
+import { RouteGuard, type GuardUser } from '@/lib/route-guard';
+import { useAuth } from '@/stores/auth'; // tu contexto/nanostore de sesión
+
+function toGuardUser(session: Session | null): GuardUser | null {
+  if (!session) return null;
+  return {
+    id: session.user.id,
+    roles: session.user.app_metadata?.roles ?? [],      // allowlist explícito
+    flags: { verified: session.user.email_confirmed_at != null },
+  };
+}
+
+export default function AdminIsland() {
+  const session = useAuth();
+  return (
+    <RouteGuard user={toGuardUser(session)} allow={['admin']} requireFlags={['verified']} fallback={<SignInPrompt />}>
+      <AdminPanel />
+    </RouteGuard>
+  );
+}
+```
+
+Reglas duras: allowlists / `=== true` (nunca `!== false` — un campo ausente
+lo pasa), identidad siempre del contexto (nunca props/placeholders), y
+denegar por defecto. El test unitario del scaffold asegura el caso del
+campo ausente.
