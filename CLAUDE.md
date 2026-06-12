@@ -176,6 +176,64 @@ Then hydrate as a single island in the page:
 This is what `src/components/islands/ShowcaseDialog.tsx`, `ShowcaseTabs.tsx`,
 `ShowcaseDropdown.tsx`, `ShowcaseToast.tsx`, and `ShowcaseForm.tsx` all do today.
 
+## Island lifecycle discipline
+
+React islands that attach event listeners, start intervals, or create observers
+**must clean up all side-effects when the component unmounts.** Stale listeners
+are the most common memory leak in island-heavy Astro pages, and they are
+especially dangerous if Astro View Transitions are ever enabled (the old island
+unmounts but its listeners persist).
+
+### Rules
+
+1. **Never call `addEventListener` without a paired `removeEventListener`.**
+2. **Never start `setInterval` / `setTimeout` without storing the id and calling
+   `clearInterval` / `clearTimeout` in the `useEffect` cleanup.**
+3. **Use `createDisposer()` from `src/lib/disposer.ts`** to group all teardowns
+   in one `dispose()` call. Return `d.dispose` as the `useEffect` cleanup.
+
+### Pattern (exemplar: `HydrationCanary.tsx`)
+
+```tsx
+import { createDisposer } from '@/lib/disposer';
+
+export default function MyIsland() {
+  React.useEffect(() => {
+    const d = createDisposer();
+
+    d.on(window, 'resize', handleResize);      // addEventListener + auto removeEventListener
+    d.interval(5000, () => poll());            // setInterval + auto clearInterval
+    const observer = new IntersectionObserver(cb);
+    observer.observe(el);
+    d.add(() => observer.disconnect());        // arbitrary teardown
+
+    return d.dispose;  // ← single cleanup call
+  }, []);
+  return null;
+}
+```
+
+### Hydration-safe client preferences
+
+For browser-only values (theme, locale, `prefers-reduced-motion`) that must not
+cause SSR/hydration mismatches, use `useClientPreference` from
+`src/lib/use-client-preference.ts`. It wraps `useSyncExternalStore` and renders
+a stable `serverDefault` on the server and first paint, then switches to the real
+browser value post-hydration without triggering a mismatch warning.
+
+```ts
+import { useClientPreference, staticSubscribe } from '@/lib/use-client-preference';
+
+const theme = useClientPreference(
+  () => localStorage.getItem('theme') ?? 'light',
+  'light',  // server default — must match what SSR would produce
+  (onChange) => {
+    window.addEventListener('storage', onChange);
+    return () => window.removeEventListener('storage', onChange);
+  },
+);
+```
+
 ## Inceptor reporting (Phase 7)
 
 React islands are wrapped in `<ErrorBoundary>` (from

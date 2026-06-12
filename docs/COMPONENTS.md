@@ -660,6 +660,136 @@ Any island that fetches remote data should follow the same three-state model:
 
 ---
 
+## 12. Island lifecycle discipline
+
+Every React island that registers side-effects in `useEffect` must clean them up
+in the cleanup function. Stale listeners are the most common memory leak and are
+especially dangerous if Astro View Transitions are added later.
+
+### createDisposer
+
+Use `createDisposer()` from `src/lib/disposer.ts` to group all teardowns.
+
+```tsx
+import React from 'react';
+import { createDisposer } from '@/lib/disposer';
+
+export default function MyIsland() {
+  React.useEffect(() => {
+    const d = createDisposer();
+
+    // addEventListener wrapper — removeEventListener is queued automatically
+    d.on(window, 'resize', handleResize);
+
+    // setInterval wrapper — clearInterval is queued automatically
+    d.interval(5000, () => poll());
+
+    // Arbitrary teardown (e.g. for APIs with their own cleanup methods)
+    const observer = new IntersectionObserver(cb);
+    observer.observe(el);
+    d.add(() => observer.disconnect());
+
+    return d.dispose; // single cleanup
+  }, []);
+
+  return <div>...</div>;
+}
+```
+
+The canonical exemplar is `src/components/islands/HydrationCanary.tsx`.
+
+### Hydration-safe client preferences
+
+Browser-only values — theme, locale, `prefers-reduced-motion` — cannot be read
+during SSR. Reading them on first render causes a hydration mismatch. Use
+`useClientPreference` from `src/lib/use-client-preference.ts`.
+
+```tsx
+import { useClientPreference, staticSubscribe } from '@/lib/use-client-preference';
+
+// Stable across SSR + first paint; updates post-hydration without mismatch.
+const theme = useClientPreference(
+  () => (localStorage.getItem('theme') ?? 'light') as Theme,
+  'light',         // server default — renders on server AND first client paint
+  (onChange) => {
+    window.addEventListener('storage', onChange);
+    return () => window.removeEventListener('storage', onChange);
+  },
+);
+```
+
+Use `staticSubscribe` (re-exported from the module) when the value only changes
+on page reload and no event listener is needed.
+
+---
+
+## 13. List state normalization with useListing
+
+Every island that fetches a list of items goes through the same five states.
+Use `useListing` from `src/lib/use-listing.ts` to make the transition explicit
+and testable.
+
+### The five states
+
+| Status | Condition | What to render |
+|---|---|---|
+| `loading` | `isLoading === true` | `<Skeleton>` placeholders |
+| `error` | fetch failed | `<ErrorState>` with retry action |
+| `empty-zero` | fetch succeeded, zero items in the source | `<EmptyState>` — celebratory / "all clear" |
+| `empty-filtered` | items exist, active filter matches nothing | `<EmptyState>` — actionable / "try a different search" |
+| `ready` | filtered items to display | render the list |
+
+### Why two empty states?
+
+`empty-zero` and `empty-filtered` require different copy and actions:
+- Zero-data: "No issues yet — be the first to file one." (Positive; primary CTA)
+- Filtered: "No results for 'authentication'. Try clearing the filter." (Actionable; secondary CTA)
+
+Conflating them with a single state leads to confusing copy like "No issues yet"
+when the user has just typed a search term.
+
+### Usage
+
+```tsx
+import { useListing } from '@/lib/use-listing';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+
+const listing = useListing({
+  isLoading: query.isLoading,
+  error: query.error ?? null,
+  allItems: query.data ?? [],
+  filteredItems: (query.data ?? []).filter(applySearch),
+});
+
+if (listing.status === 'loading') return <Skeleton />;
+if (listing.status === 'error')
+  return (
+    <ErrorState
+      title="Failed to load"
+      hint={listing.error.message}
+      action={<Button onClick={refetch}>Retry</Button>}
+    />
+  );
+if (listing.status === 'empty-zero')
+  return <EmptyState title="No items yet" description="Items you add will appear here." />;
+if (listing.status === 'empty-filtered')
+  return <EmptyState title="No results" description="Try a different search term." />;
+return <List items={listing.items} />;
+```
+
+### EmptyState vs ErrorState
+
+| Component | When to use | Semantic root |
+|---|---|---|
+| `EmptyState` | Zero data or filtered-to-empty | `<div>` (no alert semantics — it's not an error) |
+| `ErrorState` | Fetch failure or unexpected error | `<div role="alert">` (announced to screen readers immediately) |
+
+Both live in `src/components/ui/` and accept `icon`, `title`, a hint/description
+slot, and an `action` slot.
+
+---
+
 ## Checklist for new components
 
 Use this before opening a PR:
