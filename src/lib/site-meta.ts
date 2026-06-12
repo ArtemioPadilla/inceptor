@@ -13,6 +13,19 @@
  * "Inceptor". `repoSlug` honors PUBLIC_REPO_SLUG so CI/fork setups can
  * override without an edit. See CLAUDE.md § "Agent-readable surface".
  */
+
+/**
+ * Canonical production origin — must match SITE_ORIGIN in /site.config.mjs.
+ *
+ * WHY declared twice (here + site.config.mjs):
+ *   astro.config.mjs runs in Node before Vite starts, so it cannot import
+ *   TypeScript files that use `import.meta.env`. Both files declare the same
+ *   string; the vitest in src/tests/site-meta.test.ts and the doctor script
+ *   assert they are in sync so a stale one-sided edit is caught immediately.
+ *
+ * RE-BRAND: update this AND SITE_ORIGIN in /site.config.mjs to your domain.
+ */
+export const SITE_ORIGIN = 'https://artemiop.com';
 export const SITE = {
   /** Product name as it should appear to agents and search engines. */
   name: 'Inceptor',

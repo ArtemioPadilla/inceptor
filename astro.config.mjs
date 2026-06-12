@@ -4,6 +4,10 @@ import react from '@astrojs/react';
 import AstroPWA from '@vite-pwa/astro';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+// Single-sourced canonical origin — see site.config.mjs for the rationale.
+// astro.config.mjs cannot import site-meta.ts directly because it runs in
+// Node before Vite starts (import.meta.env is unavailable here).
+import { SITE_ORIGIN } from './site.config.mjs';
 
 // Subpath the site is served under. GitHub *project* pages live at
 // `<domain>/<repo>/`, so the Pages build sets ASTRO_BASE=/inceptor
@@ -15,10 +19,10 @@ const BASE = process.env.ASTRO_BASE || '/';
 const asset = (p) => `${BASE.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
 
 export default defineConfig({
-  // Production origin — used for sitemap absolute URLs + Open Graph.
+  // Production origin — single-sourced from site.config.mjs.
   // artemiop.com is the custom domain configured on the GitHub Pages account;
   // this project repo is served at https://artemiop.com/inceptor/.
-  site: 'https://artemiop.com',
+  site: SITE_ORIGIN,
   base: BASE,
   // i18n routing — English at root (no prefix), Spanish under /es/.
   // `prefixDefaultLocale: false` keeps existing English URLs unchanged.
