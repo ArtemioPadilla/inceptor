@@ -1,0 +1,136 @@
+name: 'commit-with-retry'
+description: >
+  Stage paths, commit, and push with an exponential-backoff retry loop.
+  Each attempt: git pull --rebase origin main → git push. On failure after
+  all attempts, exits 1 so the caller is never left with silent data loss.
+
+  Designed for bot committers (scheduled data jobs, metrics, AI updates)
+  that write to main. Pair with a `concurrency: main-commits` group on the
+  calling workflow so long jobs don't serialize behind short ones
+  (see README.md).
+
+# ---------------------------------------------------------------------------
+# INPUTS
+# ---------------------------------------------------------------------------
+inputs:
+  paths:
+    description: >
+      Space-separated list of paths to `git add` before committing.
+      Accepts globs (e.g. "data/*.json docs/state.md"). Pass "." to stage
+      everything (use with caution — will include untracked files).
+    required: true
+
+  message:
+    description: >
+      Commit message. Will be passed verbatim to `git commit -m`.
+      Use Conventional Commits format: `chore(data): update state (#N)`.
+    required: true
+
+  attempts:
+    description: >
+      Maximum number of push attempts before the action exits with an error.
+      Between attempts the action sleeps with random jitter (2-10 s) and runs
+      `git pull --rebase origin main` to incorporate concurrent commits.
+      Default: 5.
+    required: false
+    default: '5'
+
+  git_user_name:
+    description: >
+      Name to set for git config user.name. Defaults to the GitHub Actions
+      bot name.
+    required: false
+    default: 'github-actions[bot]'
+
+  git_user_email:
+    description: >
+      Email to set for git config user.email. Defaults to the GitHub Actions
+      bot email.
+    required: false
+    default: '41898282+github-actions[bot]@users.noreply.github.com'
+
+# ---------------------------------------------------------------------------
+# OUTPUTS
+# ---------------------------------------------------------------------------
+outputs:
+  sha:
+    description: >
+      The SHA of the committed + pushed commit.
+      Empty string if nothing was committed (no-op — working tree was clean).
+    value: ${{ steps.push.outputs.sha }}
+
+# ---------------------------------------------------------------------------
+# IMPLEMENTATION
+# ---------------------------------------------------------------------------
+runs:
+  using: composite
+  steps:
+    - name: Configure git identity
+      shell: bash
+      run: |
+        git config user.name "${{ inputs.git_user_name }}"
+        git config user.email "${{ inputs.git_user_email }}"
+
+    - name: Stage files
+      shell: bash
+      run: |
+        # Word-splitting is intentional here: inputs.paths is a space-separated
+        # list of paths/globs and we want each token as a separate argument.
+        # shellcheck disable=SC2086
+        git add ${{ inputs.paths }}
+
+    - name: Commit (no-op if nothing staged)
+      id: commit
+      shell: bash
+      run: |
+        if git diff --cached --quiet; then
+          echo "Nothing to commit — working tree is clean."
+          echo "committed=false" >> "$GITHUB_OUTPUT"
+        else
+          git commit -m "${{ inputs.message }}"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Push with retry
+      id: push
+      if: steps.commit.outputs.committed == 'true'
+      shell: bash
+      run: |
+        MAX_ATTEMPTS="${{ inputs.attempts }}"
+        attempt=1
+
+        while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
+          echo "Push attempt ${attempt}/${MAX_ATTEMPTS}…"
+
+          # Pull with rebase to incorporate any concurrent commits.
+          # If rebase fails (conflict), abort cleanly and retry.
+          if ! git pull --rebase origin main; then
+            echo "::warning::git pull --rebase failed on attempt ${attempt}; aborting rebase and retrying."
+            git rebase --abort 2>/dev/null || true
+          fi
+
+          # Attempt the push.
+          if git push origin HEAD:main; then
+            PUSHED_SHA=$(git rev-parse HEAD)
+            echo "sha=${PUSHED_SHA}" >> "$GITHUB_OUTPUT"
+            echo "Pushed successfully on attempt ${attempt}: ${PUSHED_SHA}"
+            exit 0
+          fi
+
+          # Push failed — wait with jitter before the next attempt.
+          JITTER=$(( RANDOM % 9 + 2 ))  # 2-10 seconds
+          echo "Push failed. Waiting ${JITTER}s before retry…"
+          sleep "$JITTER"
+
+          attempt=$(( attempt + 1 ))
+        done
+
+        echo "::error::commit-with-retry exhausted ${MAX_ATTEMPTS} push attempts without success. Data NOT lost (local commit exists) — check for branch protection rules or concurrent workflow conflicts."
+        exit 1
+
+    - name: Output empty SHA on no-op
+      id: noop-sha
+      if: steps.commit.outputs.committed != 'true'
+      shell: bash
+      run: |
+        echo "sha=" >> "$GITHUB_OUTPUT"
