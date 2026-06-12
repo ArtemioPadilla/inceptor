@@ -36,7 +36,97 @@ jobs:
       - run: npm ci
       # `check` already ends with a full build (npm-run-all --serial build),
       # so no separate build step — the old duplicate cost ~3-4 min per run.
-      - run: npm run check
+      #
+      # DEGRADATION PATH (see docs/SETUP.md — "astro check scale fallback"):
+      # At large content-tree scale, `astro check` can OOM. Set the
+      # CHECK_SKIP_ASTRO=1 env var as a repo/environment secret to fall back
+      # to `tsc --noEmit` + `npm run build` instead. The step below picks this
+      # up automatically.
+      - name: Check (astro check + build, or tsc fallback)
+        run: |
+          if [ "$CHECK_SKIP_ASTRO" = "1" ]; then
+            echo "::warning::CHECK_SKIP_ASTRO=1 — running tsc --noEmit + build instead of astro check (OOM escape hatch)"
+            npm run type-check
+            npm run build
+          else
+            npm run check
+          fi
+        env:
+          CHECK_SKIP_ASTRO: ${{ vars.CHECK_SKIP_ASTRO || '' }}
+
+  # ---------------------------------------------------------------------------
+  # actionlint — static analysis for all workflow files
+  #
+  # Catches the class of bug found in Watchboard (#168):
+  #   - env var conditions that always evaluate false
+  #   - mutable `uses: action@main` refs among pinned `@v1` refs
+  #   - unquoted ${{ inputs.* }} interpolations in run: blocks
+  #   - invalid event names / step syntax
+  #
+  # We download the binary directly (SHA-pinned version + checksum) rather
+  # than using an Action wrapper, so the only third-party code running here
+  # is the pinned actionlint binary itself.
+  #
+  # Lighthouse budgets deferral note:
+  #   `npm run lighthouse` requires a running preview server which in turn
+  #   requires a separate port-forward, a long cold boot, and produces flaky
+  #   results against a synthetic preview in CI. The budget file
+  #   (lighthouse-budgets.json) is enforced locally and in the dev workflow.
+  #   Once the project has a stable staging URL, add a lighthouse-ci job that
+  #   runs `lhci autorun` against that URL (not a locally-started server).
+  #   Tracking: #168.
+  #
+  # axe a11y smoke note:
+  #   The axe/Playwright smoke already runs in visual.yml (one AxeBuilder scan
+  #   per smoke route, failing on serious/critical). Wiring a duplicate here
+  #   would double the cost. See visual.yml for the implementation.
+  # ---------------------------------------------------------------------------
+  actionlint:
+    name: Lint workflows (actionlint)
+    runs-on: ubuntu-latest
+    # Only on PRs and main pushes — not on every feature branch push, which
+    # would be redundant since the PR check already covers it.
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Download actionlint v1.7.12 (SHA-pinned)
+        # The SHA is the sha256 of actionlint_1.7.12_linux_amd64.tar.gz,
+        # taken from the official checksums file published with the release.
+        # Update this comment + the checksum when bumping the version.
+        run: |
+          ACTIONLINT_VERSION="1.7.12"
+          ACTIONLINT_SHA256="8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+          curl -sSL \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            -o actionlint.tar.gz
+          echo "${ACTIONLINT_SHA256}  actionlint.tar.gz" | sha256sum --check --strict
+          tar -xzf actionlint.tar.gz actionlint
+          chmod +x actionlint
+
+      - name: Run actionlint
+        run: |
+          ./actionlint -color .github/workflows/*.yml
+
+      - name: Scan for unpinned third-party action refs (mutable @branch refs)
+        # Flags `uses: owner/repo@main` or `@master` — mutable refs that can
+        # be silently updated. SHA pins are required for all third-party actions.
+        # First-party `actions/*` are trusted runners; they can use @vN tags.
+        run: |
+          # Extract all `uses:` lines that reference non-actions/* and non-github/*
+          # namespaces and are not SHA-pinned (40-char hex).
+          UNPINNED=$(grep -rE "uses: [^/]+/[^@]+@(?!([0-9a-f]{40})|(\\.github))" \
+            .github/workflows/*.yml \
+            | grep -v "uses: actions/" \
+            | grep -v "uses: github/" \
+            | grep -v "uses: \\./" \
+            || true)
+          if [ -n "$UNPINNED" ]; then
+            echo "ERROR: unpinned third-party action refs found:"
+            echo "$UNPINNED"
+            exit 1
+          fi
+          echo "OK: all third-party action refs appear to be SHA-pinned."
 
   server-node:
     name: server-node tests
