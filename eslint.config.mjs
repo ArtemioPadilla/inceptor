@@ -147,6 +147,11 @@ export default [
   {
     ignores: [
       'dist/**',
+      // Agent worktrees nest full checkouts (their own dist, node_modules…)
+      // inside the repo — never lint them from the parent.
+      '.claude/**',
+      'playwright-report/**',
+      'test-results/**',
       '.astro/**',
       'node_modules/**',
       // Config files that are not typed via tsconfig — parsed without

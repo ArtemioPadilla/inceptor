@@ -243,6 +243,21 @@ The `HydrationCanary` island listens for `window 'error'` events and stores
 hydration-mismatch URLs in `sessionStorage`; the `FeedbackFAB` reads that key on
 click. See `docs/COMPONENTS.md` for opt-in usage.
 
+## Auth gating rules (#182)
+
+`src/lib/route-guard.tsx` is the **only** gating module: `<RouteGuard>`,
+`hasRole()`, `hasFlag()`. Hard rules, enforced in review:
+
+- Permission checks are **explicit allowlists / `=== true`** — never
+  `!== false`: an absent field passes `!== false` and silently grants
+  access (shipped bug; the unit test asserts the absent-field case).
+- Identity always comes from the **auth context** — never from prop
+  defaults, query params, or placeholder literals (`userId="user123"`
+  reached production once; that class of bug is banned).
+- **Deny by default**: no user, unknown role, or missing flag ⇒ blocked.
+- Adapt your provider's user to `GuardUser` once at the context boundary;
+  don't sprinkle provider-specific checks across islands.
+
 ## Agent-readable surface — ⚠️ re-brand when instantiating
 
 The site introduces itself to LLM crawlers/agents through a small set of
