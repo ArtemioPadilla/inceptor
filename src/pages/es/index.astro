@@ -260,6 +260,8 @@ const jsonLd = [
           visibleCategories.map((cat) => {
             const entries = getByCategory(cat);
             const first = entries[0];
+            // Guard: noUncheckedIndexedAccess — empty categories never reach here.
+            if (!first) return null;
             return (
               <li class="bg-card">
                 <a
