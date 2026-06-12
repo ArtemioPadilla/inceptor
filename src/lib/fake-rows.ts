@@ -29,7 +29,9 @@ function mulberry32(seed: number) {
 }
 
 function pick<T>(rng: () => number, arr: readonly T[]): T {
-  return arr[Math.floor(rng() * arr.length)];
+  // Math.floor(rng() * arr.length) is always in [0, arr.length-1], so the
+  // non-null assertion is safe. arr is always a non-empty const array here.
+  return arr[Math.floor(rng() * arr.length)]!;
 }
 
 /**

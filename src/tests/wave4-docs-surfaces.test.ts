@@ -128,7 +128,8 @@ describe('blog collection — real posts (#142)', () => {
     // Look for "draft: true" in frontmatter (between the first two ---)
     const fm = content.match(/^---\n([\s\S]*?)\n---/);
     if (!fm) return false;
-    return /^\s*draft:\s*true\s*$/m.test(fm[1]);
+    // Non-null: the regex has one capture group; fm[1] is always present when fm is truthy.
+    return /^\s*draft:\s*true\s*$/m.test(fm[1]!);
   }
 
   it('has at least 3 blog files', () => {

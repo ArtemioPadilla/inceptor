@@ -13,7 +13,8 @@
     "build:no-search": "astro build",
     "preview": "astro preview",
     "check:astro": "astro check",
-    "check": "npm-run-all --parallel check:astro type-check test lint --serial build",
+    "check:pragmas": "node scripts/check-ts-pragmas.mjs",
+    "check": "npm-run-all --parallel check:astro type-check test lint check:pragmas --serial build",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest --watch",
@@ -34,7 +35,8 @@
     "docs": "node -e \"console.log('Open docs/INDEX.md or run: open docs/INDEX.md')\"",
     "new-issue": "bash scripts/new-issue.sh",
     "init": "node scripts/init.mjs",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "hooks:install": "git config core.hooksPath scripts/hooks && echo 'Pre-commit hooks installed. Run: git config --unset core.hooksPath to remove.'"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",

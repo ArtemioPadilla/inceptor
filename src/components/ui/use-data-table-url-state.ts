@@ -72,9 +72,13 @@ export function parseFromUrlParams(
     ? sortRaw
         .split(',')
         .filter(Boolean)
-        .map((token) => {
-          const [id, dir] = token.split(':');
-          return { id, desc: dir === 'desc' };
+        .flatMap((token) => {
+          const parts = token.split(':');
+          // A valid sort token is "columnId:asc|desc". Malformed tokens are dropped.
+          const id = parts[0];
+          if (!id) return [];
+          const dir = parts[1];
+          return [{ id, desc: dir === 'desc' }];
         })
     : [];
 
@@ -91,10 +95,13 @@ export function parseFromUrlParams(
         widthRaw
           .split(',')
           .filter(Boolean)
-          .map((token) => {
-            const [id, sizeStr] = token.split(':');
-            const size = Number(sizeStr);
-            return [id, Number.isFinite(size) ? size : 0];
+          .flatMap((token) => {
+            const parts = token.split(':');
+            const id = parts[0];
+            // Drop malformed tokens (no id or no size segment).
+            if (!id) return [];
+            const size = Number(parts[1]);
+            return [[id, Number.isFinite(size) ? size : 0]];
           })
           .filter(([, size]) => (size as number) > 0),
       )
