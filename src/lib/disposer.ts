@@ -93,7 +93,8 @@ export function createDisposer(): Disposer {
     let i = teardowns.length;
     while (i-- > 0) {
       try {
-        teardowns[i]();
+        // i is decrement-bounded by teardowns.length — never out of range.
+        teardowns[i]!();
       } catch {
         // Individual teardown errors must not prevent the rest from running.
       }

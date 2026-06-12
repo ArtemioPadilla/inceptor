@@ -65,7 +65,7 @@ Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entr
 
 | Component | Status | Summary | Source |
 |---|---|---|---|
-| **Navigation & feedback** | ✅ stable | Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state. | [`src/components/ui/`](../src/components/ui/) |
+| **Navigation & feedback** | ✅ stable | Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state, Error state. | [`src/components/ui/`](../src/components/ui/) |
 
 ## 9. Data
 
