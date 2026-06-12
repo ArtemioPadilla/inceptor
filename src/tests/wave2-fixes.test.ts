@@ -248,5 +248,3 @@ describe('audit wave 2 — trust & polish', () => {
   });
 });
 
-// Small helper so the es/index test reads cleanly
-function withBaseRef() { return 'withBase'; }
