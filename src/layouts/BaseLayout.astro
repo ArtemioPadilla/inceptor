@@ -4,6 +4,7 @@ import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import SiteHeader from '../components/common/SiteHeader.astro';
 import SiteFooter from '../components/common/SiteFooter.astro';
 import { SITE } from '../lib/site-meta';
+import { jsonLd as serializeJsonLd } from '../lib/json-ld';
 import OfflineBanner from '../components/islands/OfflineBanner';
 import HydrationCanary from '../components/islands/HydrationCanary';
 import InstallButton from '../components/islands/InstallButton';
@@ -136,7 +137,7 @@ const canonicalUrl = Astro.site
     {/* JSON-LD structured data — the identity agents/search engines parse.
         Blocks are provided per page; values come from src/lib/site-meta.ts. */}
     {jsonLd.map((block) => (
-      <script type="application/ld+json" set:html={JSON.stringify(block)} />
+      <script type="application/ld+json" set:html={serializeJsonLd(block)} />
     ))}
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased" style="view-transition-name: body-bg">
