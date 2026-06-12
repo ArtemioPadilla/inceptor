@@ -790,6 +790,17 @@ slot, and an `action` slot.
 
 ---
 
+## 14. FeedbackFAB and the AI triage trust gate
+
+The FeedbackFAB files GitHub issues from anonymous visitors, and those
+issues feed the Claude triage workflow. The two surfaces are deliberately
+decoupled by a **human-in-the-loop gate** (ADR 0007): the triage workflow
+only auto-runs for issues opened by OWNER/MEMBER/COLLABORATOR authors —
+anonymous FAB-filed issues wait until a maintainer applies the
+`ai-approved` label. Issue content is always treated as untrusted data by
+the triage prompt; never weaken either layer when touching
+`.github/workflows/claude.yml` or the FAB.
+
 ## Checklist for new components
 
 Use this before opening a PR:
