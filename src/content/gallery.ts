@@ -155,12 +155,12 @@ export const galleryManifest: GalleryEntry[] = [
       'npx shadcn@latest add accordion collapsible avatar skeleton separator scroll-area aspect-ratio --yes',
     island: 'ShowcaseDisclosure',
   },
-  // Navigation & feedback — breadcrumb/pagination/alert/spinner/meter/empty…
+  // Navigation & feedback — breadcrumb/pagination/alert/spinner/meter/empty/error…
   {
     slug: 'feedback',
     name: 'Navigation & feedback',
     summary:
-      'Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state.',
+      'Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state, Error state.',
     source: 'src/components/ui/',
     status: 'stable',
     category: 'feedback',

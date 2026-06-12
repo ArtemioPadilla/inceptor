@@ -54,6 +54,10 @@ export default [
 
       // Turn off base rule in favour of the TS-aware version.
       'no-unused-vars': 'off',
+      // no-undef can't see TypeScript ambient/global types (WindowEventMap,
+      // AddEventListenerOptions, …). tsc owns undefined-identifier checking
+      // in TS files — official typescript-eslint guidance is to disable it.
+      'no-undef': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { InfoIcon, CircleAlertIcon, CircleCheckIcon, InboxIcon } from 'lucide-react';
+import { InfoIcon, CircleAlertIcon, CircleCheckIcon, InboxIcon, WifiOffIcon } from 'lucide-react';
 
 import {
   Breadcrumb,
@@ -22,6 +22,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Meter } from '@/components/ui/meter';
 import { Kbd } from '@/components/ui/kbd';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { DescriptionList, DescriptionItem } from '@/components/ui/description-list';
 import { Button } from '@/components/ui/button';
 import ErrorBoundary from './ErrorBoundary';
@@ -129,6 +130,17 @@ export default function ShowcaseFeedback() {
             title="No issues yet"
             description="When you file your first issue it'll show up here."
             action={<Button size="sm">New issue</Button>}
+          />
+        </section>
+
+        {/* Error state */}
+        <section className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Error state</p>
+          <ErrorState
+            icon={<WifiOffIcon />}
+            title="Failed to load issues"
+            hint="Check your connection and try again. GitHub API allows 60 requests/hour unauthenticated."
+            action={<Button size="sm" variant="outline">Retry</Button>}
           />
         </section>
       </div>

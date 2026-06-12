@@ -10,6 +10,7 @@
  *   - Red badge on FAB when errors are detected
  *   - Diagnostics accordion: env, console, network info
  *   - Copy diagnostics to clipboard
+ *   - Duplicate detection: queries GitHub API for similar open issues before submit
  *   - Opens pre-filled GitHub Issue
  *   - i18n es/en
  */
@@ -57,6 +58,9 @@ const tr = {
     cancel: 'Cancelar',
     open_on_github: 'Abrir en GitHub',
     badge_errors_label: 'errores detectados',
+    similar_issues: 'Problemas similares',
+    file_anyway: 'Reportar de todas formas',
+    checking_dupes: 'Buscando similares…',
   },
   en: {
     button_label: 'Report an issue',
@@ -84,6 +88,9 @@ const tr = {
     cancel: 'Cancel',
     open_on_github: 'Open on GitHub',
     badge_errors_label: 'errors detected',
+    similar_issues: 'Similar issues',
+    file_anyway: 'File anyway',
+    checking_dupes: 'Checking for similar issues…',
   },
 }[lang];
 ---
@@ -91,7 +98,7 @@ const tr = {
 <!-- FAB button -->
 <div class="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-6 right-5 z-50 w-12 h-12">
   <button
-    id="secid-report-btn"
+    id="inceptor-report-btn"
     type="button"
     aria-label={tr.button_label}
     title={tr.button_label}
@@ -110,7 +117,7 @@ const tr = {
     <span class="sr-only">{tr.button_label}</span>
     <!-- Error badge -->
     <span
-      id="secid-report-badge"
+      id="inceptor-report-badge"
       aria-label={tr.badge_errors_label}
       class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full
              bg-red-600 text-white text-[10px] font-bold
@@ -127,7 +134,7 @@ const tr = {
      top-left (the bug this comment replaces).
      max-h + overflow-auto ensure it stays scrollable on small viewports. -->
 <dialog
-  id="secid-report-modal"
+  id="inceptor-report-modal"
   data-repo={repoSlug}
   data-lang={lang}
   data-build-sha={buildSha}
@@ -143,6 +150,9 @@ const tr = {
   data-l-diagnostics-none={tr.diagnostics_none}
   data-l-copy={tr.copy_diagnostics}
   data-l-copied={tr.copied}
+  data-l-similar-issues={tr.similar_issues}
+  data-l-file-anyway={tr.file_anyway}
+  data-l-checking-dupes={tr.checking_dupes}
   class="rounded-xl backdrop:bg-black/60 p-0 w-[min(92vw,540px)] max-h-[80vh] overflow-hidden
          bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100
          shadow-2xl border border-gray-200 dark:border-gray-700
@@ -154,7 +164,7 @@ const tr = {
       <h2 class="text-base font-semibold">{tr.modal_title}</h2>
       <button
         type="button"
-        id="secid-report-close"
+        id="inceptor-report-close"
         aria-label={tr.cancel}
         class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
       >
@@ -168,9 +178,9 @@ const tr = {
     <div class="px-5 py-4 space-y-4 overflow-y-auto flex-1">
       <!-- Type -->
       <div>
-        <label for="secid-report-type" class="block text-sm font-medium mb-1">{tr.type_label}</label>
+        <label for="inceptor-report-type" class="block text-sm font-medium mb-1">{tr.type_label}</label>
         <select
-          id="secid-report-type"
+          id="inceptor-report-type"
           class="w-full rounded-lg border border-gray-300 dark:border-gray-600
                  bg-white dark:bg-gray-700 px-3 py-2 text-sm
                  focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -184,10 +194,10 @@ const tr = {
 
       <!-- Title -->
       <div>
-        <label for="secid-report-title" class="block text-sm font-medium mb-1">{tr.title_label}</label>
+        <label for="inceptor-report-title" class="block text-sm font-medium mb-1">{tr.title_label}</label>
         <input
           type="text"
-          id="secid-report-title"
+          id="inceptor-report-title"
           maxlength="120"
           placeholder={tr.title_placeholder}
           class="w-full rounded-lg border border-gray-300 dark:border-gray-600
@@ -196,11 +206,24 @@ const tr = {
         />
       </div>
 
+      <!-- Similar issues panel — hidden by default, shown after dedupe check -->
+      <div id="inceptor-report-similar" class="hidden rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 p-3 space-y-2">
+        <p id="inceptor-report-similar-label" class="text-xs font-semibold text-amber-700 dark:text-amber-300">{tr.similar_issues}</p>
+        <ul id="inceptor-report-similar-list" class="space-y-1 text-xs"></ul>
+        <button
+          type="button"
+          id="inceptor-report-file-anyway"
+          class="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300 underline hover:no-underline"
+        >
+          {tr.file_anyway}
+        </button>
+      </div>
+
       <!-- Description -->
       <div>
-        <label for="secid-report-description" class="block text-sm font-medium mb-1">{tr.description_label}</label>
+        <label for="inceptor-report-description" class="block text-sm font-medium mb-1">{tr.description_label}</label>
         <textarea
-          id="secid-report-description"
+          id="inceptor-report-description"
           rows="4"
           placeholder={tr.description_placeholder}
           class="w-full rounded-lg border border-gray-300 dark:border-gray-600
@@ -210,11 +233,11 @@ const tr = {
       </div>
 
       <!-- Bug-only fields -->
-      <div id="secid-report-bug-fields" class="space-y-4">
+      <div id="inceptor-report-bug-fields" class="space-y-4">
         <div>
-          <label for="secid-report-steps" class="block text-sm font-medium mb-1">{tr.steps_label}</label>
+          <label for="inceptor-report-steps" class="block text-sm font-medium mb-1">{tr.steps_label}</label>
           <textarea
-            id="secid-report-steps"
+            id="inceptor-report-steps"
             rows="3"
             placeholder={tr.steps_placeholder}
             class="w-full rounded-lg border border-gray-300 dark:border-gray-600
@@ -223,9 +246,9 @@ const tr = {
           ></textarea>
         </div>
         <div>
-          <label for="secid-report-expected" class="block text-sm font-medium mb-1">{tr.expected_label}</label>
+          <label for="inceptor-report-expected" class="block text-sm font-medium mb-1">{tr.expected_label}</label>
           <textarea
-            id="secid-report-expected"
+            id="inceptor-report-expected"
             rows="2"
             placeholder={tr.expected_placeholder}
             class="w-full rounded-lg border border-gray-300 dark:border-gray-600
@@ -236,13 +259,13 @@ const tr = {
       </div>
 
       <!-- Diagnostics accordion -->
-      <details id="secid-report-diagnostics" class="group">
+      <details id="inceptor-report-diagnostics" class="group">
         <summary class="flex items-center gap-2 cursor-pointer text-xs font-medium text-gray-500 dark:text-gray-400 select-none py-1">
           <svg class="w-3.5 h-3.5 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
           {tr.diagnostics_toggle}
-          <span id="secid-report-diag-count"
+          <span id="inceptor-report-diag-count"
             class="hidden inline-flex items-center justify-center rounded-full
                    bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
                    text-[10px] font-bold min-w-[18px] h-[18px] px-1">0</span>
@@ -250,19 +273,19 @@ const tr = {
         <div class="mt-2 space-y-3">
           <div>
             <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">{tr.diagnostics_env}</p>
-            <pre id="secid-report-env"
+            <pre id="inceptor-report-env"
               class="text-xs bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700
                      rounded-lg p-2 whitespace-pre-wrap break-all max-h-28 overflow-auto"></pre>
           </div>
           <div>
             <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">{tr.diagnostics_console}</p>
-            <pre id="secid-report-console"
+            <pre id="inceptor-report-console"
               class="text-xs bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700
                      rounded-lg p-2 whitespace-pre-wrap break-all max-h-32 overflow-auto"></pre>
           </div>
           <div>
             <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">{tr.diagnostics_network}</p>
-            <pre id="secid-report-network"
+            <pre id="inceptor-report-network"
               class="text-xs bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700
                      rounded-lg p-2 whitespace-pre-wrap break-all max-h-32 overflow-auto"></pre>
           </div>
@@ -276,7 +299,7 @@ const tr = {
                    bg-white dark:bg-gray-800 z-10">
       <button
         type="button"
-        id="secid-report-copy"
+        id="inceptor-report-copy"
         title={tr.copy_diagnostics}
         class="min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium
                text-gray-600 dark:text-gray-400
@@ -287,12 +310,12 @@ const tr = {
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
         </svg>
-        <span id="secid-report-copy-label">{tr.copy_diagnostics}</span>
+        <span id="inceptor-report-copy-label">{tr.copy_diagnostics}</span>
       </button>
       <div class="flex items-center gap-2">
         <button
           type="button"
-          id="secid-report-cancel"
+          id="inceptor-report-cancel"
           class="min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium
                  border border-gray-300 dark:border-gray-600
                  hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -301,7 +324,7 @@ const tr = {
         </button>
         <button
           type="button"
-          id="secid-report-submit"
+          id="inceptor-report-submit"
           class="min-h-[44px] px-4 py-2 rounded-lg text-sm font-semibold
                  bg-primary-600 hover:bg-primary-700 text-white
                  focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
@@ -317,10 +340,10 @@ const tr = {
 (function () {
   // ── Telemetry capture (runs once at parse time) ──────────────────────
   var W = window;
-  if (!W.__secid_diag) {
+  if (!W.__inceptor_diag) {
     var MAX = 30;
     var diag = { console: [], network: [], errors: [] };
-    W.__secid_diag = diag;
+    W.__inceptor_diag = diag;
 
     // Intercept console.error / console.warn
     var origError = console.error.bind(console);
@@ -335,21 +358,21 @@ const tr = {
       diag.console.push({ ts: new Date().toISOString(), level: level, msg: msg.slice(0, 500) });
       if (diag.console.length > MAX) diag.console.shift();
     }
-    console.error = function () { captureLog('error', arguments); origError.apply(console, arguments); W.__secid_updateBadge && W.__secid_updateBadge(); };
+    console.error = function () { captureLog('error', arguments); origError.apply(console, arguments); W.__inceptor_updateBadge && W.__inceptor_updateBadge(); };
     console.warn  = function () { captureLog('warn',  arguments); origWarn.apply(console, arguments); };
 
     // Unhandled errors + rejections
     W.addEventListener('error', function (ev) {
       diag.errors.push({ ts: new Date().toISOString(), msg: (ev.message || 'Unknown').slice(0, 300), src: ev.filename ? ev.filename + ':' + ev.lineno : '' });
       if (diag.errors.length > MAX) diag.errors.shift();
-      W.__secid_updateBadge && W.__secid_updateBadge();
+      W.__inceptor_updateBadge && W.__inceptor_updateBadge();
     });
     W.addEventListener('unhandledrejection', function (ev) {
       var r = ev.reason;
       var msg = r instanceof Error ? r.message + '\n' + (r.stack || '') : String(r || 'Unhandled rejection');
       diag.errors.push({ ts: new Date().toISOString(), msg: msg.slice(0, 300), src: 'promise' });
       if (diag.errors.length > MAX) diag.errors.shift();
-      W.__secid_updateBadge && W.__secid_updateBadge();
+      W.__inceptor_updateBadge && W.__inceptor_updateBadge();
     });
 
     // Fetch network error capture
@@ -363,13 +386,13 @@ const tr = {
           if (!res.ok) {
             diag.network.push({ ts: new Date().toISOString(), method: method.toUpperCase(), url: urlStr.slice(0, 200), status: res.status, statusText: res.statusText || '' });
             if (diag.network.length > MAX) diag.network.shift();
-            W.__secid_updateBadge && W.__secid_updateBadge();
+            W.__inceptor_updateBadge && W.__inceptor_updateBadge();
           }
           return res;
         }, function (err) {
           diag.network.push({ ts: new Date().toISOString(), method: method.toUpperCase(), url: urlStr.slice(0, 200), status: 0, statusText: err && err.message ? err.message.slice(0, 100) : 'Network error' });
           if (diag.network.length > MAX) diag.network.shift();
-          W.__secid_updateBadge && W.__secid_updateBadge();
+          W.__inceptor_updateBadge && W.__inceptor_updateBadge();
           throw err;
         });
       };
@@ -380,10 +403,10 @@ const tr = {
   // Count only window-level errors (diag.errors) + explicit console.error calls (diag.console).
   // These two sources don't overlap: window 'error' events push to diag.errors,
   // console.error calls push to diag.console. unhandledrejection also goes to diag.errors only.
-  W.__secid_updateBadge = function () {
-    var badge = document.getElementById('secid-report-badge');
+  W.__inceptor_updateBadge = function () {
+    var badge = document.getElementById('inceptor-report-badge');
     if (!badge) return;
-    var diag = W.__secid_diag;
+    var diag = W.__inceptor_diag;
     var windowErrors = diag.errors ? diag.errors.length : 0;
     var consoleErrors = diag.console ? diag.console.filter(function(c){ return c.level === 'error'; }).length : 0;
     var count = windowErrors + consoleErrors;
@@ -397,13 +420,60 @@ const tr = {
     }
   };
 
+  // ── Duplicate-issue detection ─────────────────────────────────────────
+  // Queries the GitHub Search API for open issues with a title similar to
+  // what the user typed. Gracefully degrades: on rate-limit (403/429) or any
+  // network error, the check is skipped silently and the user proceeds to
+  // submit normally.
+  //
+  // Results are cached in memory by (repo, title) to avoid hammering the API
+  // on every keystroke. The dedupe panel is shown only when matches exist.
+  var dupeCache = {};
+  var dupeTimer = null;
+
+  function checkDuplicates(repo, rawTitle, onResults) {
+    var title = rawTitle.trim();
+    if (!title || title.length < 5) {
+      onResults([]);
+      return;
+    }
+    var cacheKey = repo + '\x00' + title.toLowerCase();
+    if (dupeCache[cacheKey] !== undefined) {
+      onResults(dupeCache[cacheKey]);
+      return;
+    }
+    // Encode the title for the GitHub Search API q param:
+    // repo:{slug}+is:issue+is:open+in:title+{title words}
+    var q = 'repo:' + repo + '+is:issue+is:open+in:title+' + encodeURIComponent(title);
+    var url = 'https://api.github.com/search/issues?q=' + q + '&per_page=3';
+    fetch(url, { headers: { Accept: 'application/vnd.github+json' } })
+      .then(function (res) {
+        if (!res.ok) {
+          // Rate-limited or other error — skip silently.
+          dupeCache[cacheKey] = [];
+          onResults([]);
+          return;
+        }
+        return res.json().then(function (data) {
+          var items = (data && Array.isArray(data.items)) ? data.items.slice(0, 3) : [];
+          dupeCache[cacheKey] = items;
+          onResults(items);
+        });
+      })
+      .catch(function () {
+        // Network error — skip silently.
+        dupeCache[cacheKey] = [];
+        onResults([]);
+      });
+  }
+
   // ── Modal wiring ────────────────────────────────────────────────────
   // Use DOMContentLoaded. Note: this site does not use Astro ViewTransitions,
   // so DOMContentLoaded fires on every full page load. If ViewTransitions are
   // ever added, replace with: document.addEventListener('astro:page-load', ...)
   document.addEventListener('DOMContentLoaded', function () {
-    var btn     = document.getElementById('secid-report-btn');
-    var modal   = document.getElementById('secid-report-modal');
+    var btn     = document.getElementById('inceptor-report-btn');
+    var modal   = document.getElementById('inceptor-report-modal');
     if (!btn || !modal) return;
 
     // Guard: only a plausible owner/repo slug may reach the GitHub URL below
@@ -416,27 +486,88 @@ const tr = {
     var noneLabel  = modal.dataset.lDiagnosticsNone || 'None captured';
     var copyLabel  = modal.dataset.lCopy || 'Copiar diagnósticos';
     var copiedLabel= modal.dataset.lCopied || '¡Copiado!';
+    var lSimilarIssues = modal.dataset.lSimilarIssues || 'Similar issues';
+    // lFileAnyway: the "File anyway" button text is set statically in the HTML
+    // template; it is data-l-file-anyway only for potential future dynamic use.
 
-    var typeEl    = document.getElementById('secid-report-type');
-    var titleEl   = document.getElementById('secid-report-title');
-    var descEl    = document.getElementById('secid-report-description');
-    var stepsEl   = document.getElementById('secid-report-steps');
-    var expectedEl= document.getElementById('secid-report-expected');
-    var bugFields = document.getElementById('secid-report-bug-fields');
-    var envBlock  = document.getElementById('secid-report-env');
-    var consBlock = document.getElementById('secid-report-console');
-    var netBlock  = document.getElementById('secid-report-network');
-    var diagCount = document.getElementById('secid-report-diag-count');
-    var copyBtn   = document.getElementById('secid-report-copy');
-    var copyLabel2= document.getElementById('secid-report-copy-label');
-    var submitBtn = document.getElementById('secid-report-submit');
-    var cancelBtn = document.getElementById('secid-report-cancel');
-    var closeBtn  = document.getElementById('secid-report-close');
+    var typeEl    = document.getElementById('inceptor-report-type');
+    var titleEl   = document.getElementById('inceptor-report-title');
+    var descEl    = document.getElementById('inceptor-report-description');
+    var stepsEl   = document.getElementById('inceptor-report-steps');
+    var expectedEl= document.getElementById('inceptor-report-expected');
+    var bugFields = document.getElementById('inceptor-report-bug-fields');
+    var envBlock  = document.getElementById('inceptor-report-env');
+    var consBlock = document.getElementById('inceptor-report-console');
+    var netBlock  = document.getElementById('inceptor-report-network');
+    var diagCount = document.getElementById('inceptor-report-diag-count');
+    var copyBtn   = document.getElementById('inceptor-report-copy');
+    var copyLabel2= document.getElementById('inceptor-report-copy-label');
+    var submitBtn = document.getElementById('inceptor-report-submit');
+    var cancelBtn = document.getElementById('inceptor-report-cancel');
+    var closeBtn  = document.getElementById('inceptor-report-close');
+
+    // Duplicate-detection panel elements
+    var similarPanel    = document.getElementById('inceptor-report-similar');
+    var similarLabel    = document.getElementById('inceptor-report-similar-label');
+    var similarList     = document.getElementById('inceptor-report-similar-list');
+    var fileAnywayBtn   = document.getElementById('inceptor-report-file-anyway');
+
+    // Track whether the user has dismissed the dedupe panel via "File anyway"
+    var dupeAcknowledged = false;
 
     // Toggle bug-only fields
     if (typeEl && bugFields) {
       typeEl.addEventListener('change', function () {
         bugFields.style.display = typeEl.value === 'bug' ? '' : 'none';
+      });
+    }
+
+    // ── Similar-issues panel logic ───────────────────────────────────────
+    function showSimilarIssues(items) {
+      if (!similarPanel || !similarList || items.length === 0) return;
+      similarList.innerHTML = '';
+      items.forEach(function (issue) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = issue.html_url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = '#' + issue.number + ' ' + (issue.title || '').slice(0, 80);
+        a.className = 'text-amber-800 dark:text-amber-200 underline hover:no-underline truncate block';
+        li.appendChild(a);
+        similarList.appendChild(li);
+      });
+      if (similarLabel) similarLabel.textContent = lSimilarIssues + ' (' + items.length + ')';
+      similarPanel.classList.remove('hidden');
+    }
+
+    function hideSimilarIssues() {
+      if (similarPanel) similarPanel.classList.add('hidden');
+    }
+
+    // Debounce dedupe check on title input
+    if (titleEl && repo) {
+      titleEl.addEventListener('input', function () {
+        dupeAcknowledged = false;
+        hideSimilarIssues();
+        clearTimeout(dupeTimer);
+        dupeTimer = setTimeout(function () {
+          var title = titleEl.value.trim();
+          if (title.length < 5) return;
+          checkDuplicates(repo, title, function (items) {
+            if (items.length > 0 && !dupeAcknowledged) {
+              showSimilarIssues(items);
+            }
+          });
+        }, 600);
+      });
+    }
+
+    // "File anyway" button dismisses the dedupe panel and unlocks submit
+    if (fileAnywayBtn) {
+      fileAnywayBtn.addEventListener('click', function () {
+        dupeAcknowledged = true;
+        hideSimilarIssues();
       });
     }
 
@@ -449,6 +580,8 @@ const tr = {
         window.open(pending, '_blank', 'noopener,noreferrer');
         return;
       }
+      dupeAcknowledged = false;
+      hideSimilarIssues();
       populateDiagnostics();
       modal.showModal();
     });
@@ -461,7 +594,7 @@ const tr = {
 
     // Populate diagnostics
     function populateDiagnostics() {
-      var diag = W.__secid_diag || { console: [], network: [], errors: [] };
+      var diag = W.__inceptor_diag || { console: [], network: [], errors: [] };
 
       // Env block
       if (envBlock) {
@@ -541,8 +674,18 @@ const tr = {
     }
 
     // Submit → open GitHub Issue
+    // If the dedupe panel is visible and not yet acknowledged, clicking submit
+    // acts as a "File anyway" acknowledgement and then proceeds.
     if (submitBtn) {
       submitBtn.addEventListener('click', function () {
+        // If dedupe panel is showing and not yet acknowledged, acknowledge it
+        // and proceed (one extra click is the UX — not a hard block).
+        if (similarPanel && !similarPanel.classList.contains('hidden') && !dupeAcknowledged) {
+          dupeAcknowledged = true;
+          hideSimilarIssues();
+          return; // Let the user review their title once more before filing
+        }
+
         var type    = typeEl ? typeEl.value : 'bug';
         var title   = titleEl ? titleEl.value.trim() : '';
         var desc    = descEl  ? descEl.value.trim()  : '';
@@ -551,7 +694,7 @@ const tr = {
 
         if (!title) { if (titleEl) { titleEl.focus(); } return; }
 
-        var diag = W.__secid_diag || { console: [], network: [], errors: [] };
+        var diag = W.__inceptor_diag || { console: [], network: [], errors: [] };
         var consEntries = (diag.console || []).concat((diag.errors || []).map(function(e){ return { level:'error', ts:e.ts, msg:e.msg + (e.src ? ' @ '+e.src : '') }; }));
         var diagText = '**Entorno / Environment**\n```json\n' + JSON.stringify({
           url: location.href, userAgent: navigator.userAgent,
@@ -589,7 +732,7 @@ const tr = {
     }
 
     // Initial badge update
-    W.__secid_updateBadge();
+    W.__inceptor_updateBadge();
   });
 })();
 </script>

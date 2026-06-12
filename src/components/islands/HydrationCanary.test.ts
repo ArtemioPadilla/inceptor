@@ -2,12 +2,18 @@ import { describe, expect, it } from 'vitest';
 import source from './HydrationCanary.tsx?raw';
 
 describe('HydrationCanary', () => {
-  it('listens for window error events', () => {
-    expect(source).toMatch(/window\.addEventListener\(['"]error['"]/);
+  it('listens for window error events via disposer d.on()', () => {
+    // Since the disposer pattern is used, the source calls d.on(window, 'error', ...)
+    // rather than window.addEventListener directly.
+    expect(source).toMatch(/d\.on\(window,\s*['"]error['"]/);
   });
 
-  it('removes the listener on cleanup (no leak)', () => {
-    expect(source).toMatch(/window\.removeEventListener\(['"]error['"]/);
+  it('removes the listener on cleanup via disposer (no leak)', () => {
+    // The disposer pattern calls d.on(window, 'error', ...) which registers
+    // removeEventListener internally. The test verifies the disposer is used
+    // and that dispose is returned as the useEffect cleanup.
+    expect(source).toMatch(/createDisposer/);
+    expect(source).toMatch(/return d\.dispose/);
   });
 
   it('matches React hydration error signatures', () => {
@@ -25,6 +31,10 @@ describe('HydrationCanary', () => {
 
   it('imports from @/lib/report-issue', () => {
     expect(source).toMatch(/from ['"]@\/lib\/report-issue['"]/);
+  });
+
+  it('imports createDisposer from @/lib/disposer', () => {
+    expect(source).toMatch(/from ['"]@\/lib\/disposer['"]/);
   });
 
   it('renders null (no visible output)', () => {

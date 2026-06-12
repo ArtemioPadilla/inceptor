@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { buildIssueUrl, buildErrorReportBody } from '@/lib/report-issue';
+import { createDisposer } from '@/lib/disposer';
 
 /**
  * Single-mount island that listens for window 'error' events and detects
@@ -15,9 +16,19 @@ import { buildIssueUrl, buildErrorReportBody } from '@/lib/report-issue';
  * per session.
  *
  * This component renders null — it has no visible output.
+ *
+ * Lifecycle discipline: all event listeners are registered via createDisposer()
+ * and torn down in the useEffect cleanup, preventing memory leaks across
+ * Astro page navigations (if View Transitions are ever added) and StrictMode
+ * double-invocations in development.
  */
 export default function HydrationCanary() {
   React.useEffect(() => {
+    // createDisposer groups all side-effect teardowns into a single dispose()
+    // call. This island is the exemplar for the "island lifecycle discipline"
+    // pattern described in CLAUDE.md.
+    const d = createDisposer();
+
     const onError = (event: ErrorEvent) => {
       const msg = String(event.message ?? '');
       // React 18/19 hydration mismatch messages:
@@ -41,8 +52,9 @@ export default function HydrationCanary() {
       }
     };
 
-    window.addEventListener('error', onError);
-    return () => window.removeEventListener('error', onError);
+    d.on(window, 'error', onError);
+
+    return d.dispose;
   }, []);
 
   // Renders nothing — purely a side-effect island.
