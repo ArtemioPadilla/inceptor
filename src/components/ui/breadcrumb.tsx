@@ -22,6 +22,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 function BreadcrumbLink({ className, ...props }: React.ComponentProps<'a'>) {
+  // eslint-disable-next-line jsx-a11y/anchor-has-content -- children passed via ...props spread
   return <a className={cn('transition-colors hover:text-foreground', className)} {...props} />;
 }
 

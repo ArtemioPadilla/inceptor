@@ -4,6 +4,33 @@ import { es } from './es';
 /**
  * The English dictionary is the structural source of truth — adding a key
  * to `en.ts` widens this type. Other locales must satisfy it (see `es.ts`).
+ *
+ * ## Runtime locale detection for islands and non-Astro code
+ *
+ * Astro components can read the locale from `Astro.currentLocale` or derive it
+ * from `Astro.url.pathname` via `detectLocale()`. **Islands (React, etc.) run
+ * outside the Astro request context**, so they must receive the locale as a
+ * prop, attribute, or store:
+ *
+ * 1. **Prop** (preferred for single-island use): pass `lang` as a string prop
+ *    from the Astro parent and forward it into the island.
+ *
+ *    ```astro
+ *    <MyIsland lang={detectLocale(Astro.url.pathname)} client:visible />
+ *    ```
+ *
+ * 2. **Nano Store** (preferred when multiple islands share state): write
+ *    `localeStore.set(detectLocale(pathname))` in a script tag in BaseLayout;
+ *    islands subscribe with `useStore(localeStore)`. Never use React Context
+ *    for cross-island state — Astro partial hydration breaks it.
+ *
+ * 3. **Data attribute** (simple, zero-JS): read `document.documentElement.lang`
+ *    inside a client-side effect. BaseLayout always sets `<html lang={lang}>`.
+ *    Fine for non-critical, display-only use.
+ *
+ * Worker/postMessage boundaries: locale must be passed as a plain string (not
+ * wrapped in an object with an interface — use `Locale` exported from here,
+ * which is a string-literal union derived from `dictionaries`).
  */
 export type Dictionary = typeof en;
 
@@ -51,4 +78,18 @@ export function localizedPath(pathname: string, target: Locale): string {
   const stripped = pathname.replace(/^\/(en|es)(?=\/|$)/, '') || '/';
   if (target === DEFAULT_LOCALE) return stripped;
   return stripped === '/' ? `/${target}` : `/${target}${stripped}`;
+}
+
+/**
+ * Collect every leaf-node dot-path from a nested object. Used by parity tests
+ * to enumerate all translation keys and verify no locale is missing one.
+ *
+ * @example
+ * collectLeafKeys({ nav: { home: 'Home' } }) // → ['nav.home']
+ */
+export function collectLeafKeys(obj: unknown, prefix = ''): string[] {
+  if (typeof obj !== 'object' || obj === null) return [prefix];
+  return Object.entries(obj as Record<string, unknown>).flatMap(([k, v]) =>
+    collectLeafKeys(v, prefix ? `${prefix}.${k}` : k),
+  );
 }

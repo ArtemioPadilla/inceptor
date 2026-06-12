@@ -26,6 +26,7 @@ interface PaginationLinkProps extends React.ComponentProps<'a'> {
 function PaginationLink({ className, isActive, ...props }: PaginationLinkProps) {
   return (
     <li>
+      {/* eslint-disable-next-line jsx-a11y/anchor-has-content -- children come from ...props spread */}
       <a
         aria-current={isActive ? 'page' : undefined}
         className={cn(

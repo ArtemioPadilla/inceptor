@@ -199,9 +199,10 @@ export function DataTable<TData, TValue>({
   const totalSize = rowVirtualizer.getTotalSize();
 
   // Padding rows are spacers that keep the virtualized window in the right position
-  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  // Non-null assertions are safe: the length > 0 guard above guarantees both indexes exist.
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0]!.start : 0;
   const paddingBottom =
-    virtualItems.length > 0 ? totalSize - virtualItems[virtualItems.length - 1].end : 0;
+    virtualItems.length > 0 ? totalSize - virtualItems[virtualItems.length - 1]!.end : 0;
 
   // True empty-state: data has been filtered to zero rows.
   // We must NOT show this while virtualItems are momentarily 0 during initial
@@ -344,7 +345,9 @@ export function DataTable<TData, TValue>({
               </tr>
             ) : (
               virtualItems.map((virtualRow) => {
-                const row = rows[virtualRow.index];
+                // Non-null: virtualRow.index is always within rows bounds (virtualizer
+                // is constructed with count = rows.length).
+                const row = rows[virtualRow.index]!;
                 return (
                   <TableRow
                     key={row.id}

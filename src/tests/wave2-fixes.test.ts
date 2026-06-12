@@ -180,11 +180,15 @@ describe('audit wave 2 — trust & polish', () => {
   });
 
   // ── 7. es/index.astro ────────────────────────────────────────────────────
+  // Updated for ES parity: /es/ is now a full translation matching the EN home
+  // structure (hero + stats + loop + kit), not a minimal pattern-demo page.
   describe('es/index.astro', () => {
     it('has correct capital-I Inceptor branding in the title', () => {
       const page = read('src/pages/es/index.astro');
-      // Must contain 'Inceptor' (capital I), not 'inceptor'
-      expect(page).toContain('Inceptor — ES');
+      // Must contain 'Inceptor' (capital I) — the old lowercase "inceptor — ES"
+      // title was one of the audit findings (§4.6). The new full title is
+      // "Inceptor — scaffold de desarrollo guiado por issues".
+      expect(page).toContain('Inceptor —');
       expect(page).not.toContain('"inceptor — ES"');
     });
 
@@ -193,11 +197,19 @@ describe('audit wave 2 — trust & polish', () => {
       expect(page).toContain('alternates={alternates}');
     });
 
-    it('contains a note card linking back to the EN home', () => {
+    it('is a full-parity page with hero, stats strip, loop section, and kit grid', () => {
       const page = read('src/pages/es/index.astro');
-      expect(page).toContain(withBaseRef());
-      // The link to EN home is important — check it's there
-      expect(page).toContain("withBase('/')");
+      // Hero section markers
+      expect(page).toContain('home.ctaPrimary');
+      expect(page).toContain('home.ctaSecondary');
+      // Stats strip
+      expect(page).toContain('home.statPages');
+      expect(page).toContain('StatusBadgeStrip');
+      // Loop section
+      expect(page).toContain('home.loopHeading');
+      // Kit grid
+      expect(page).toContain('home.kitHeading');
+      expect(page).toContain('galleryManifest');
     });
   });
 
@@ -236,5 +248,3 @@ describe('audit wave 2 — trust & polish', () => {
   });
 });
 
-// Small helper so the es/index test reads cleanly
-function withBaseRef() { return 'withBase'; }

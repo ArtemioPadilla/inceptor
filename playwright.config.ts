@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Allow overriding the preview port so developers with another Astro project
+// already running on 4321 don't get a silent hang. Example:
+//   PREVIEW_PORT=4399 npx playwright test
+// See SETUP.md for docs on the port-busy scenario.
+const PORT = Number(process.env.PREVIEW_PORT ?? 4321);
+
 export default defineConfig({
   testDir: './tests/visual',
   fullyParallel: true,
@@ -8,7 +14,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
   },
   // Screenshots live under tests/__screenshots__/{projectName}/{arg}{ext} so
@@ -34,8 +40,8 @@ export default defineConfig({
   webServer: {
     // Playwright requires a built artifact; run `npm run build` before
     // `npm run test:visual` or `npm run test:visual:update`.
-    command: 'npm run preview -- --port 4321',
-    url: 'http://localhost:4321',
+    command: `npm run preview -- --port ${PORT}`,
+    url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

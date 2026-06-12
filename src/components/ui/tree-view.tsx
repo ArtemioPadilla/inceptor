@@ -21,7 +21,12 @@ function TreeView({ data, defaultExpanded = [], className }: TreeViewProps) {
   const toggle = (id: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      // Use if/else instead of ternary-as-statement to avoid no-unused-expressions
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
 
@@ -30,7 +35,14 @@ function TreeView({ data, defaultExpanded = [], className }: TreeViewProps) {
       const hasChildren = !!node.children?.length;
       const isOpen = expanded.has(node.id);
       return (
-        <li key={node.id} role="treeitem" aria-expanded={hasChildren ? isOpen : undefined}>
+        <li
+          key={node.id}
+          role="treeitem"
+          aria-expanded={hasChildren ? isOpen : undefined}
+          // aria-selected is required for role="treeitem" per ARIA spec.
+          // TreeView does not implement selection; false indicates unselected.
+          aria-selected={false}
+        >
           <button
             type="button"
             onClick={() => hasChildren && toggle(node.id)}

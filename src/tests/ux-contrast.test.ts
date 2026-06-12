@@ -28,11 +28,13 @@ interface Vars {
 function extractVars(blockSelector: RegExp): Vars {
   const m = css.match(blockSelector);
   if (!m) return {};
-  const body = m[1];
+  // Non-null: the regex has exactly one capture group, so m[1] is always present when m is truthy.
+  const body = m[1]!;
   const out: Vars = {};
   for (const line of body.split(/[;\n]/)) {
     const declMatch = line.match(/^\s*(--[a-z0-9-]+):\s*(.+?)\s*$/);
-    if (declMatch) out[declMatch[1]] = declMatch[2];
+    // Non-null: m[1] and m[2] are the two capture groups of the declaration regex.
+    if (declMatch) out[declMatch[1]!] = declMatch[2]!;
   }
   return out;
 }
@@ -48,9 +50,10 @@ function oklchToSrgb(value: string): [number, number, number] | null {
     /oklch\(\s*([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)(?:\s*\/\s*([0-9.%]+))?\s*\)/i,
   );
   if (!m) return null;
-  const L = parseFloat(m[1]);
-  const C = parseFloat(m[2]);
-  const Hdeg = parseFloat(m[3]);
+  // Non-null: the regex has 4 capture groups; m[1..3] always present when m is truthy.
+  const L = parseFloat(m[1]!);
+  const C = parseFloat(m[2]!);
+  const Hdeg = parseFloat(m[3]!);
   // OKLCH → OKLab
   const Hrad = (Hdeg * Math.PI) / 180;
   const a = Math.cos(Hrad) * C;
@@ -103,8 +106,9 @@ describe('WCAG AA contrast (Epic 12 criterion #5)', () => {
       const bgVal = lightVars[bgVar];
       expect(fgVal, `${fgVar} declared in :root`).toBeTruthy();
       expect(bgVal, `${bgVar} declared in :root`).toBeTruthy();
-      const fg = oklchToSrgb(fgVal);
-      const bg = oklchToSrgb(bgVal);
+      // Non-null assertions guarded by the toBeTruthy() expectations above.
+      const fg = oklchToSrgb(fgVal!);
+      const bg = oklchToSrgb(bgVal!);
       expect(fg, `${fgVar} parses as oklch`).not.toBeNull();
       expect(bg, `${bgVar} parses as oklch`).not.toBeNull();
       if (fg && bg) {
@@ -125,8 +129,9 @@ describe('WCAG AA contrast (Epic 12 criterion #5)', () => {
       const bgVal = darkVars[bgVar];
       expect(fgVal, `${fgVar} declared in .dark`).toBeTruthy();
       expect(bgVal, `${bgVar} declared in .dark`).toBeTruthy();
-      const fg = oklchToSrgb(fgVal);
-      const bg = oklchToSrgb(bgVal);
+      // Non-null assertions guarded by the toBeTruthy() expectations above.
+      const fg = oklchToSrgb(fgVal!);
+      const bg = oklchToSrgb(bgVal!);
       expect(fg, `${fgVar} parses as oklch`).not.toBeNull();
       expect(bg, `${bgVar} parses as oklch`).not.toBeNull();
       if (fg && bg) {

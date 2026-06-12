@@ -1,94 +1,297 @@
 ---
 import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { galleryManifest, categoryOrder, categoryLabels, getByCategory } from '../../content/gallery';
+import StatusBadgeStrip from '@/components/marketing/StatusBadgeStrip.astro';
+import { SITE } from '@/lib/site-meta';
 import { t } from '../../i18n';
 
-// Hreflang alternates for the ES home — mirrors index.astro's alternates
+// ── Build-time stats (mirrors src/pages/index.astro) ──────────────────────
+// Same globs as the EN home so both pages show the same honest numbers.
+const pageFiles = import.meta.glob('../**/*.{astro,md,mdx}');
+const pageCount = Object.keys(pageFiles).length;
+
+const testFiles = import.meta.glob('../../**/*.test.{ts,tsx,js,jsx}');
+const testFileCount = Object.keys(testFiles).length;
+
+const componentCount = 44;
+
+const stats = [
+  { value: String(pageCount), label: t('es', 'home.statPages') },
+  { value: String(testFileCount), label: t('es', 'home.statTests') },
+  { value: String(componentCount), label: t('es', 'home.statComponents') },
+  { value: '0 KB', label: t('es', 'home.statJs') },
+];
+
+// Category grid — same logic as EN home
+const VISIBLE_CATEGORIES = 6;
+const populatedCategories = categoryOrder.filter((cat) => getByCategory(cat).length > 0);
+const visibleCategories = populatedCategories.slice(0, VISIBLE_CATEGORIES);
+const hiddenCategoryCount = populatedCategories.length - visibleCategories.length;
+
+// Loop steps — translated. Inline <code> markup stays in the template so the
+// translator only sees plain strings in the dictionary.
+const flow = [
+  {
+    title: t('es', 'home.loopStep1Title'),
+    body: `${t('es', 'home.loopStep1Body').replace('new-issue', '<code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.7rem]">npm run new-issue</code>')}`,
+  },
+  {
+    title: `${t('es', 'home.loopStep2Title').replace('Claude Code', '<code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.7rem]">Claude Code</code>')}`,
+    body: t('es', 'home.loopStep2Body'),
+  },
+  {
+    title: t('es', 'home.loopStep3Title'),
+    body: t('es', 'home.loopStep3Body'),
+  },
+  {
+    title: t('es', 'home.loopStep4Title'),
+    body: `${t('es', 'home.loopStep4Body').replace('/gallery', '<span class="font-mono text-[0.8em]">/gallery</span>').replace('/demos', '<span class="font-mono text-[0.8em]">/demos</span>')}`,
+  },
+];
+
+// Hreflang alternates — mirrors src/pages/index.astro
 const site = 'https://artemiop.com';
 const alternates = [
   { hreflang: 'en', href: `${site}/inceptor/` },
   { hreflang: 'es', href: `${site}/inceptor/es/` },
   { hreflang: 'x-default', href: `${site}/inceptor/` },
 ];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: `${SITE.name} — Inicio`,
+    description: t('es', 'home.tagline'),
+    url: new URL(`${import.meta.env.BASE_URL}es/`, Astro.site ?? 'https://artemiop.com').toString(),
+    inLanguage: 'es',
+  },
+];
 ---
 
-<BaseLayout title="Inceptor — ES" lang="es" alternates={alternates}>
-  <main class="mx-auto max-w-6xl px-4 py-12">
+<BaseLayout
+  title="Inceptor — scaffold de desarrollo guiado por issues"
+  description={t('es', 'home.tagline')}
+  lang="es"
+  alternates={alternates}
+  jsonLd={jsonLd}
+>
+  <!-- ───────────────────────── HERO ───────────────────────── -->
+  <section class="relative overflow-hidden grain">
+    <!-- atmosphere -->
+    <div class="pointer-events-none absolute inset-0 bg-grid mask-fade-b"></div>
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-[600px] glow-emerald"></div>
 
-    <section class="mb-16 text-center">
-      <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400">
-        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Desarrollo guiado por issues
+    <div class="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pb-20 pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:pb-28 lg:pt-20">
+      <!-- copy -->
+      <div>
+        <div class="rise inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1.5 text-xs font-medium tracking-wide text-primary backdrop-blur" style="animation-delay:.02s">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+          </span>
+          <span class="font-mono">inceptor</span>
+          <span class="text-muted-foreground">· {t('es', 'home.kicker')}</span>
+        </div>
+
+        <h1
+          class="rise mt-6 font-display text-5xl font-semibold leading-[0.98] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+          style="view-transition-name: page-title; animation-delay:.08s"
+        >
+          {t('es', 'home.title')}<br />
+          <span class="italic text-primary">{t('es', 'home.titleEmphasis')}</span>
+        </h1>
+
+        <p class="rise mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg" style="animation-delay:.16s">
+          {t('es', 'home.tagline')}
+        </p>
+
+        <div class="rise mt-5" style="animation-delay:.20s">
+          <code class="inline-block rounded-lg border border-border bg-muted px-4 py-2.5 font-mono text-sm text-foreground select-all">
+            npm create inceptor-app
+          </code>
+        </div>
+
+        <div class="rise mt-8 flex flex-wrap items-center gap-3" style="animation-delay:.24s">
+          <a
+            href={withBase('/docs/start-here/quick-start/')}
+            class="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            {t('es', 'home.ctaPrimary')}
+            <span class="transition-transform group-hover:translate-x-0.5">→</span>
+          </a>
+          <a
+            href={withBase('/gallery/')}
+            class="inline-flex items-center gap-2 rounded-xl border border-border bg-card/60 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-colors hover:border-primary/40 hover:bg-accent/50"
+          >
+            {t('es', 'home.ctaSecondary')}
+          </a>
+        </div>
+
+        <div class="rise mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-muted-foreground" style="animation-delay:.3s">
+          <a href={withBase('/demos/')} class="transition-colors hover:text-primary">/demos</a>
+          <span class="text-border">·</span>
+          <a href={withBase('/docs/')} class="transition-colors hover:text-primary">/docs</a>
+          <span class="text-border">·</span>
+          <a href={withBase('/blog/')} class="transition-colors hover:text-primary">/blog</a>
+          <span class="text-border">·</span>
+          <a href="https://github.com/ArtemioPadilla/inceptor" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-primary">github ↗</a>
+          <span class="text-border">·</span>
+          <span class="text-muted-foreground/60">Astro 5 · React 19 · Tailwind v4 · Base UI</span>
+        </div>
       </div>
 
-      <h1
-        class="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
-        style="view-transition-name: page-title"
-      >
-        {t('es', 'home.title')}
-      </h1>
+      <!-- the loop graphic — same SVG as EN home, labels translated -->
+      <div class="rise relative mx-auto hidden aspect-square w-full max-w-md place-items-center lg:grid" style="animation-delay:.2s">
+        <div class="absolute inset-8 rounded-full glow-emerald opacity-70 blur-2xl"></div>
+        <svg viewBox="0 0 400 400" class="float-slow relative h-full w-full" role="img" aria-label="El bucle de Inceptor: issue, build, revisión, merge — y vuelta a empezar.">
+          <defs>
+            <linearGradient id="ig-es" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--color-primary-400)" />
+              <stop offset="100%" stop-color="var(--color-primary-600)" />
+            </linearGradient>
+            <radialGradient id="core-es" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--color-primary-400)" />
+              <stop offset="100%" stop-color="var(--color-primary-700)" />
+            </radialGradient>
+          </defs>
+          <g class="spin-slow" style="transform-origin:200px 200px">
+            <circle cx="200" cy="200" r="150" fill="none" stroke="url(#ig-es)" stroke-width="1.5" stroke-dasharray="4 10" opacity="0.55" />
+            <circle cx="200" cy="50" r="9" fill="url(#ig-es)" />
+            <circle cx="330" cy="275" r="9" fill="url(#ig-es)" />
+            <circle cx="70" cy="275" r="9" fill="url(#ig-es)" />
+          </g>
+          <g fill="none" stroke="url(#ig-es)" stroke-width="2.5" stroke-linecap="round" opacity="0.9">
+            <path d="M200 80 A 120 120 0 0 1 304 260" />
+            <path d="M304 260 A 120 120 0 0 1 96 260" />
+            <path d="M96 260 A 120 120 0 0 1 200 80" />
+          </g>
+          <circle cx="200" cy="200" r="34" fill="url(#core-es)" />
+          <circle cx="200" cy="200" r="34" fill="none" stroke="var(--color-primary-400)" stroke-width="1" opacity="0.5" />
+          <path d="M200 184 v32 M184 200 h32" stroke="var(--primary-foreground)" stroke-width="3" stroke-linecap="round" opacity="0.85" />
+        </svg>
+        <!-- stage labels in Spanish -->
+        <span class="absolute left-1/2 top-1 -translate-x-1/2 rounded-md border border-border bg-card/80 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground backdrop-blur">issue</span>
+        <span class="absolute bottom-12 right-0 rounded-md border border-border bg-card/80 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground backdrop-blur">merge</span>
+        <span class="absolute bottom-12 left-0 rounded-md border border-border bg-card/80 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground backdrop-blur">revisión</span>
+      </div>
+    </div>
 
-      <p class="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-        {t('es', 'home.tagline')}
+    <!-- stat strip -->
+    <div class="relative mx-auto max-w-6xl px-5">
+      <dl class="rise grid grid-cols-2 divide-border rounded-2xl border border-border bg-card/40 backdrop-blur sm:grid-cols-4 sm:divide-x" style="animation-delay:.36s">
+        {stats.map((s) => (
+          <div class="px-6 py-5">
+            <dt class="font-display text-3xl font-semibold text-foreground">{s.value}</dt>
+            <dd class="mt-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">{s.label}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="rise mt-4 flex justify-center" style="animation-delay:.42s">
+        <StatusBadgeStrip />
+      </div>
+    </div>
+  </section>
+
+  <main id="main-content" class="mx-auto max-w-6xl px-5">
+
+    <!-- ─────────────── EL BUCLE ─────────────── -->
+    <section class="py-20 lg:py-24">
+      <div class="relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-12">
+        <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 glow-emerald opacity-50 blur-2xl"></div>
+        <div class="relative">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">{t('es', 'home.loopKicker')}</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {t('es', 'home.loopHeading')}
+          </h2>
+          <ol class="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+            {flow.map((step, i) => (
+              <li class="flex gap-4">
+                <span class="select-none font-display text-4xl font-semibold leading-none text-primary">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 class="font-semibold text-foreground" set:html={step.title} />
+                  <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground" set:html={step.body} />
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div class="mt-10 flex flex-wrap gap-4">
+            <a href={withBase('/docs/start-here/inceptor-tour/')} class="inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary/80">
+              {t('es', 'home.loopCta1')} →
+            </a>
+            <a
+              href={withBase('/how-it-works/')}
+              class="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 font-semibold text-primary transition-colors hover:border-primary/50 hover:bg-primary/10"
+            >
+              {t('es', 'home.loopCta2')} →
+            </a>
+            <a href={withBase('/docs/how-we-work/inceptor/')} class="text-muted-foreground transition-colors hover:text-foreground">
+              {t('es', 'home.loopCta3')}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-10 text-center text-sm text-muted-foreground">
+        {t('es', 'home.loopFeedback').split(t('es', 'home.loopFeedbackHighlight'))[0]}
+        <span class="font-medium text-primary">{t('es', 'home.loopFeedbackHighlight')}</span>
+        {t('es', 'home.loopFeedback').split(t('es', 'home.loopFeedbackHighlight'))[1]}
       </p>
+    </section>
 
-      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <a
-          href={withBase('/gallery/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-emerald-500 bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-400"
-        >
-          {t('es', 'home.ctaPrimary')} →
-        </a>
-        <a
-          href={withBase('/docs/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          {t('es', 'home.ctaSecondary')}
-        </a>
-        <a
-          href={withBase('/')}
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40"
-        >
-          {t('es', 'nav.switchLanguage')}
+    <!-- ─────────────── QUÉ INCLUYE ─────────────── -->
+    <section class="pb-20 lg:pb-24">
+      <div class="mb-10 flex items-end justify-between gap-4">
+        <div>
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-primary">{t('es', 'home.kitKicker')}</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{t('es', 'home.kitHeading')}</h2>
+        </div>
+        <a href={withBase('/gallery/')} class="shrink-0 font-mono text-sm text-muted-foreground transition-colors hover:text-primary">
+          {t('es', 'home.kitBrowseAll')} {galleryManifest.length} →
         </a>
       </div>
-    </section>
 
-    {/* Note card: this page is an i18n pattern demo, not a full translation.
-        Link to the EN home for the complete experience. */}
-    <section class="mb-8 rounded-xl border border-primary/25 bg-primary/5 p-5 text-sm text-muted-foreground">
-      <p>
-        Esta es una <span class="font-medium text-foreground">demostración del patrón i18n</span>
-        — no una traducción completa. Para la experiencia completa (hero, estadísticas,
-        galería de componentes y el bucle de trabajo):
-      </p>
-      <a
-        href={withBase('/')}
-        class="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-primary transition-colors hover:text-primary/80"
-        hreflang="en"
-        lang="en"
-      >
-        Ver la página completa en inglés →
-      </a>
-    </section>
+      <ul class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+        {
+          visibleCategories.map((cat) => {
+            const entries = getByCategory(cat);
+            const first = entries[0];
+            // Guard: noUncheckedIndexedAccess — empty categories never reach here.
+            if (!first) return null;
+            return (
+              <li class="bg-card">
+                <a
+                  href={withBase(`/gallery/${first.slug}/`)}
+                  class="group relative flex h-full flex-col p-6 transition-colors hover:bg-accent/40"
+                >
+                  <span class="absolute inset-x-0 top-0 h-px scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100"></span>
+                  <p class="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-primary">
+                    {categoryLabels[cat]}
+                  </p>
+                  <h3 class="mt-2 text-lg font-semibold text-foreground">
+                    {first.name}
+                  </h3>
+                  <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{first.summary}</p>
+                  <span class="mt-auto pt-4 font-mono text-xs text-muted-foreground">
+                    {entries.length > 1 ? `+${entries.length - 1} ${t('es', 'home.kitMore')} →` : `${t('es', 'home.kitView')} →`}
+                  </span>
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
 
-    <section class="rounded-xl border border-border bg-card p-8 text-card-foreground">
-      <h2 class="text-2xl font-bold">Estado del i18n en este scaffold</h2>
-      <p class="mt-3 text-sm text-muted-foreground">
-        Esta página demuestra el patrón de internacionalización: rutas bajo
-        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">/es/</code>,
-        diccionarios en <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">src/i18n/</code>,
-        y un helper <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">t(locale, key)</code>
-        con fallback al inglés si falta una traducción. El inglés sigue siendo el idioma por
-        defecto (sin prefijo), gracias a <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">prefixDefaultLocale: false</code>
-        en <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">astro.config.mjs</code>.
-      </p>
-      <p class="mt-3 text-sm text-muted-foreground">
-        Para añadir otro idioma: agrega el código a <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">locales</code>,
-        crea <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">src/i18n/&lt;code&gt;.ts</code>
-        con el mismo shape que <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">en.ts</code>,
-        y duplica las páginas que quieras traducir bajo <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">src/pages/&lt;code&gt;/</code>.
-      </p>
+      {hiddenCategoryCount > 0 && (
+        <p class="mt-5 font-mono text-xs text-muted-foreground">
+          + {hiddenCategoryCount} {hiddenCategoryCount === 1 ? t('es', 'home.kitMoreCategory') : t('es', 'home.kitMoreCategories')}
+          <a href={withBase('/gallery/')} class="text-primary underline underline-offset-2 transition-colors hover:text-primary/80"> {t('es', 'home.kitGallery')} →</a>
+        </p>
+      )}
     </section>
 
   </main>

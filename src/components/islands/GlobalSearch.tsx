@@ -73,7 +73,8 @@ function GlobalSearchInner() {
     try {
       const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       const url = [base, '/_pagefind', '/pagefind.js'].join('');
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+      // new Function() bypasses Vite's static import analysis — intentional so
+      // the bundler never sees the literal /_pagefind/pagefind.js path.
       const dyn = new Function('u', 'return import(u)');
       const mod = (await dyn(url)) as PagefindModule;
       await mod.init?.();
@@ -144,7 +145,6 @@ function GlobalSearchInner() {
     void run();
 
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, query]);
 
   // Build the combined item list: filtered nav commands + pagefind results.

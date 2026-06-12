@@ -19,5 +19,6 @@ export type ChartColor = (typeof CHART_COLORS)[number];
 
 /** Picks the i-th color, cycling when index exceeds the palette length. */
 export function chartColor(i: number): ChartColor {
-  return CHART_COLORS[i % CHART_COLORS.length];
+  // Non-null assertion is safe: i % length is always a valid index (0..length-1).
+  return CHART_COLORS[i % CHART_COLORS.length]!;
 }

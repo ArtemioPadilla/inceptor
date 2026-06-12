@@ -303,6 +303,9 @@ const jsonLd = [
           visibleCategories.map((cat) => {
             const entries = getByCategory(cat);
             const first = entries[0];
+            // Categories with zero entries never reach the teaser grid, but
+            // noUncheckedIndexedAccess can't know that — guard explicitly.
+            if (!first) return null;
             return (
               <li class="bg-card">
                 <a
