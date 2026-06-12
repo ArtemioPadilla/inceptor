@@ -6,6 +6,7 @@ import spinner from './spinner.tsx?raw';
 import meter from './meter.tsx?raw';
 import kbd from './kbd.tsx?raw';
 import emptyState from './empty-state.tsx?raw';
+import errorState from './error-state.tsx?raw';
 import descriptionList from './description-list.tsx?raw';
 
 const all: Array<[string, string]> = [
@@ -16,6 +17,7 @@ const all: Array<[string, string]> = [
   ['meter', meter],
   ['kbd', kbd],
   ['empty-state', emptyState],
+  ['error-state', errorState],
   ['description-list', descriptionList],
 ];
 
@@ -37,5 +39,6 @@ describe('navigation & feedback primitives', () => {
     expect(descriptionList).toMatch(/<dl/);
     expect(kbd).toMatch(/<kbd/);
     expect(alert).toMatch(/role="alert"/);
+    expect(errorState).toMatch(/role="alert"/);
   });
 });
