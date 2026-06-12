@@ -21,7 +21,6 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import path from 'node:path';
 
 // ── File-system page discovery ─────────────────────────────────────────────
 // import.meta.glob is resolved by Vite at transform time; the glob runs in the

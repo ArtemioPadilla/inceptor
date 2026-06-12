@@ -51,8 +51,7 @@
  */
 
 import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 
 // ── CLI argument parsing (no external deps) ──────────────────────────────────
 

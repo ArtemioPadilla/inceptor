@@ -7,6 +7,7 @@ describe('cn', () => {
   });
 
   it('drops falsy values', () => {
+    // eslint-disable-next-line no-constant-binary-expression -- intentional: testing that cn() drops falsy values
     expect(cn('a', false && 'b', null, undefined, '')).toBe('a');
   });
 

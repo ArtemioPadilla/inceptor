@@ -20,7 +20,8 @@ describe('generateRows', () => {
   });
 
   it('produces well-formed rows', () => {
-    const [row] = generateRows(1);
+    // Non-null: generateRows(1) always returns exactly one element (n=1).
+    const [row] = generateRows(1) as [ReturnType<typeof generateRows>[number]];
     expect(row.id).toBe(1);
     expect(row.name).toMatch(/^[A-Z][a-z]+ [A-Z][a-z]+$/);
     expect(row.email).toMatch(/@example\.com$/);

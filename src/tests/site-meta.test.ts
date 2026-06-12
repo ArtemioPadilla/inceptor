@@ -46,7 +46,7 @@ describe('canonical site URL single-source (#185)', () => {
     const robots = readFileSync(resolve(ROOT, 'public/robots.txt'), 'utf-8');
     const match = robots.match(/^Sitemap:\s*(.+)$/m);
     expect(match, 'robots.txt must contain a Sitemap: directive').toBeTruthy();
-    const sitemapUrl = match![1].trim();
+    const sitemapUrl = match![1]!.trim();
     expect(sitemapUrl).toMatch(/^https:\/\//);
     expect(sitemapUrl.startsWith(SITE_ORIGIN)).toBe(true);
   });

@@ -1,12 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test('dashboard page screenshot', async ({ page }) => {
-  await page.goto('/demos/dashboard');
-  await page.waitForLoadState('networkidle');
-
-  // Mock GitHub API responses before reloading so TanStack Query sees
-  // deterministic data. Without this, real network calls make the screenshot
-  // non-reproducible across CI runs.
+  // Register the GitHub API mock BEFORE the first navigation so TanStack Query
+  // sees deterministic data on the very first fetch. Without this the spec
+  // depended on live network data, causing non-reproducible screenshots across
+  // CI runs (the primary flake source caught in issue #175).
   await page.route('https://api.github.com/repos/**/issues**', async (route) => {
     const url = new URL(route.request().url());
     const state = url.searchParams.get('state');
@@ -55,10 +53,13 @@ test('dashboard page screenshot', async ({ page }) => {
     });
   });
 
-  // Reload to trigger the mocked fetch; then wait for queries to settle.
-  await page.reload();
+  await page.goto('/demos/dashboard');
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(500);
+
+  // Wait for a visible dashboard element rather than a fixed timeout — the
+  // first visible KPI card means TanStack Query has settled and the island is
+  // interactive. This replaces the former waitForTimeout(500) (#175).
+  await expect(page.locator('[data-testid="kpi-card"], .kpi-card, main h1, main h2').first()).toBeVisible();
 
   // Freeze animations/transitions to prevent chart anti-aliasing drift.
   await page.addStyleTag({

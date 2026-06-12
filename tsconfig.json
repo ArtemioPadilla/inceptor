@@ -4,6 +4,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    "noUncheckedIndexedAccess": true,
+    // Allows `import … from './foo.ts'` paths — required by the gen:catalog
+    // script and its drift test, both of which use Node's --experimental-strip-types
+    // runtime. Safe here because this project never emits JS (tsc --noEmit only).
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "baseUrl": ".",

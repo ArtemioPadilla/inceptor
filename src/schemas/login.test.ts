@@ -17,8 +17,10 @@ describe('LoginSchema (Spec-DD)', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['email']);
-      expect(result.error.issues[0].message).toMatch(/valid email/i);
+      // Non-null: safeParse failure on a 2-field schema always produces at least 1 issue.
+      const issue = result.error.issues[0]!;
+      expect(issue.path).toEqual(['email']);
+      expect(issue.message).toMatch(/valid email/i);
     }
   });
 
@@ -29,8 +31,10 @@ describe('LoginSchema (Spec-DD)', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['password']);
-      expect(result.error.issues[0].message).toMatch(/8 characters/i);
+      // Non-null: failure always produces at least 1 issue.
+      const issue = result.error.issues[0]!;
+      expect(issue.path).toEqual(['password']);
+      expect(issue.message).toMatch(/8 characters/i);
     }
   });
 

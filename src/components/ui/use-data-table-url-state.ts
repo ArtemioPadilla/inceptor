@@ -72,9 +72,13 @@ export function parseFromUrlParams(
     ? sortRaw
         .split(',')
         .filter(Boolean)
-        .map((token) => {
-          const [id, dir] = token.split(':');
-          return { id, desc: dir === 'desc' };
+        .flatMap((token) => {
+          const parts = token.split(':');
+          // A valid sort token is "columnId:asc|desc". Malformed tokens are dropped.
+          const id = parts[0];
+          if (!id) return [];
+          const dir = parts[1];
+          return [{ id, desc: dir === 'desc' }];
         })
     : [];
 
@@ -91,10 +95,13 @@ export function parseFromUrlParams(
         widthRaw
           .split(',')
           .filter(Boolean)
-          .map((token) => {
-            const [id, sizeStr] = token.split(':');
-            const size = Number(sizeStr);
-            return [id, Number.isFinite(size) ? size : 0];
+          .flatMap((token) => {
+            const parts = token.split(':');
+            const id = parts[0];
+            // Drop malformed tokens (no id or no size segment).
+            if (!id) return [];
+            const size = Number(parts[1]);
+            return [[id, Number.isFinite(size) ? size : 0]];
           })
           .filter(([, size]) => (size as number) > 0),
       )
@@ -128,8 +135,13 @@ export function useDataTableUrlState(
   const [state, setState] = React.useState<DataTableUrlState>(initial);
 
   // Keep a ref so the debounced write closure always has the latest merged state
-  // without needing to be re-created on every state update.
+  // without needing to be re-created on every state update. Updating
+  // stateRef.current during render is the standard "escape hatch" pattern for
+  // giving event handlers/timeouts access to the current state value without
+  // adding it to their dep arrays — safe here because the ref is only read
+  // inside the setTimeout callback, never during render.
   const stateRef = React.useRef(state);
+  // eslint-disable-next-line react-hooks/refs -- intentional: escape-hatch ref updated each render so the debounce callback reads current state
   stateRef.current = state;
 
   // Restore state on popstate (browser back/forward navigation).
