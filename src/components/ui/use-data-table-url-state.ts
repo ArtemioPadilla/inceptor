@@ -128,8 +128,13 @@ export function useDataTableUrlState(
   const [state, setState] = React.useState<DataTableUrlState>(initial);
 
   // Keep a ref so the debounced write closure always has the latest merged state
-  // without needing to be re-created on every state update.
+  // without needing to be re-created on every state update. Updating
+  // stateRef.current during render is the standard "escape hatch" pattern for
+  // giving event handlers/timeouts access to the current state value without
+  // adding it to their dep arrays — safe here because the ref is only read
+  // inside the setTimeout callback, never during render.
   const stateRef = React.useRef(state);
+  // eslint-disable-next-line react-hooks/refs -- intentional: escape-hatch ref updated each render so the debounce callback reads current state
   stateRef.current = state;
 
   // Restore state on popstate (browser back/forward navigation).

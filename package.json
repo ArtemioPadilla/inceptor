@@ -13,7 +13,7 @@
     "build:no-search": "astro build",
     "preview": "astro preview",
     "check:astro": "astro check",
-    "check": "npm-run-all --parallel check:astro type-check test --serial build",
+    "check": "npm-run-all --parallel check:astro type-check test lint --serial build",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest --watch",
@@ -33,7 +33,8 @@
     "doctor": "bash scripts/doctor.sh",
     "docs": "node -e \"console.log('Open docs/INDEX.md or run: open docs/INDEX.md')\"",
     "new-issue": "bash scripts/new-issue.sh",
-    "init": "node scripts/init.mjs"
+    "init": "node scripts/init.mjs",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
@@ -74,8 +75,13 @@
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
     "@vite-pwa/astro": "^1.2.0",
     "@vitest/expect": "^4.1.8",
+    "eslint": "^9.39.4",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
     "npm-run-all": "^4.1.5",
     "pagefind": "^1.5.2",
