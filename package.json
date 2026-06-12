@@ -35,6 +35,7 @@
     "docs": "node -e \"console.log('Open docs/INDEX.md or run: open docs/INDEX.md')\"",
     "new-issue": "bash scripts/new-issue.sh",
     "init": "node scripts/init.mjs",
+    "gen:catalog": "node --experimental-strip-types scripts/gen-component-catalog.ts",
     "lint": "eslint .",
     "hooks:install": "git config core.hooksPath scripts/hooks && echo 'Pre-commit hooks installed. Run: git config --unset core.hooksPath to remove.'"
   },

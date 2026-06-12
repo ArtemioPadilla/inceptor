@@ -20,6 +20,5 @@ export type ChartColor = (typeof CHART_COLORS)[number];
 /** Picks the i-th color, cycling when index exceeds the palette length. */
 export function chartColor(i: number): ChartColor {
   // Non-null assertion is safe: i % length is always a valid index (0..length-1).
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return CHART_COLORS[i % CHART_COLORS.length]!;
 }
