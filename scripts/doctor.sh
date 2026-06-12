@@ -92,6 +92,63 @@ else
   warn "ANTHROPIC_API_KEY not set — Claude triage workflow will need it as a GitHub repo secret"
 fi
 
+# ---------------------------------------------------------------------------
+# Placeholder / template-default scan (#185)
+# Warns when the canonical origin or API key placeholders look like they were
+# never updated after forking from the Inceptor template.
+# ---------------------------------------------------------------------------
+echo
+echo "Placeholder scan"
+
+# Read package.json name so we can skip the check when running IN the template
+PKG_NAME=""
+if [ -f package.json ] && command -v node >/dev/null 2>&1; then
+  PKG_NAME="$(node -e "try{process.stdout.write(require('./package.json').name||'')}catch(e){}")"
+fi
+
+if [ "$PKG_NAME" = "inceptor" ] || [ "$PKG_NAME" = "" ]; then
+  ok "package name is '$PKG_NAME' — skipping re-brand check (running in template repo)"
+else
+  # Derived project: flag leftover template defaults in key files
+  PLACEHOLDER_FILES="src/lib/site-meta.ts site.config.mjs public/robots.txt"
+  TEMPLATE_ORIGINS="artemiop.com ArtemioPadilla"
+  found_placeholder=0
+  for f in $PLACEHOLDER_FILES; do
+    if [ -f "$f" ]; then
+      for pat in $TEMPLATE_ORIGINS; do
+        if grep -q "$pat" "$f" 2>/dev/null; then
+          warn "$f still contains template default '$pat' — re-brand before shipping"
+          found_placeholder=1
+        fi
+      done
+    fi
+  done
+  if [ "$found_placeholder" -eq 0 ]; then
+    ok "no leftover template-origin placeholders found"
+  fi
+fi
+
+# API key / secret placeholders — checked regardless of package name
+SCAN_DIRS="public src"
+PLACEHOLDER_PATTERNS="YOUR_[A-Z_]*_KEY YOUR_[A-Z_]*_TOKEN localhost:3000 http://localhost"
+placeholder_hits=0
+for pat in $PLACEHOLDER_PATTERNS; do
+  # grep -r returns 1 if no match; we only want to flag actual matches
+  hits="$(grep -rn --include="*.ts" --include="*.tsx" --include="*.astro" \
+            --include="*.mjs" --include="*.json" --include="*.txt" \
+            "$pat" $SCAN_DIRS 2>/dev/null | grep -v node_modules || true)"
+  if [ -n "$hits" ]; then
+    warn "Found placeholder pattern '$pat' in source:"
+    printf "%s\n" "$hits" | head -5 | while IFS= read -r line; do
+      warn "  $line"
+    done
+    placeholder_hits=$((placeholder_hits + 1))
+  fi
+done
+if [ "$placeholder_hits" -eq 0 ]; then
+  ok "no API-key or localhost placeholder patterns found in source"
+fi
+
 echo
 if [ "$ERRORS" -gt 0 ]; then
   printf "\033[31m%d issue(s) need attention.\033[0m\n" "$ERRORS"

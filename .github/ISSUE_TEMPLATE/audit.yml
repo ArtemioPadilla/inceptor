@@ -1,0 +1,51 @@
+name: 🔍 Audit cycle
+description: Kick off a full site + codebase audit (the audit→implement loop)
+title: "audit: [scope] — [Month YYYY]"
+labels: ["type:chore", "audit"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This files the kickoff issue for an audit cycle. The deliverable is a
+        `docs/AUDIT-YYYY-MM.md` written from `docs/AUDIT_TEMPLATE.md`, followed
+        by wave-based implementation PRs. See `docs/AUDIT-2026-06.md` for a
+        complete worked example of the loop.
+  - type: input
+    id: scope
+    attributes:
+      label: Scope
+      description: What surfaces are in scope (site, codebase, CI, a specific epic…)
+      placeholder: "deployed site + full codebase"
+    validations:
+      required: true
+  - type: input
+    id: deploy
+    attributes:
+      label: Deploy under audit
+      description: URL + commit SHA the live checks will run against
+      placeholder: "https://example.com @ abc1234"
+    validations:
+      required: true
+  - type: textarea
+    id: focus
+    attributes:
+      label: Focus areas / known concerns
+      description: Anything the audit should weight extra (recent regressions, complaints, new features)
+      placeholder: "- mobile nav\n- dashboard data states"
+  - type: checkboxes
+    id: dimensions
+    attributes:
+      label: Review dimensions
+      options:
+        - label: Design / UX / UI
+        - label: Accessibility (axe + keyboard)
+        - label: SEO / agent-readability
+        - label: Performance
+        - label: Tests & CI
+        - label: Security
+  - type: markdown
+    attributes:
+      value: |
+        **Definition of done:** audit doc merged, findings triaged into waves,
+        every actionable item lands as a PR or a filed issue (the audit doc's
+        §8 records the mapping).

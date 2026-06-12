@@ -1,0 +1,178 @@
+# ============================================================================
+# ARCHETYPE: Scheduled Data-Snapshot Pipeline
+# Fetch resilience + empty-data guards + safe commit chain
+# ============================================================================
+#
+# HOW TO USE
+# ----------
+# 1. Copy this file to .github/workflows/data-snapshot.yml in your project.
+# 2. Copy examples/scripts/fetch-snapshot.mjs to scripts/ in your project.
+# 3. Search-and-replace every TODO comment with project-specific values.
+# 4. Choose your outage policy (see OUTAGE POLICY section below).
+# 5. Delete this comment block before shipping.
+#
+# WHAT THIS SOLVES (lessons from mexico-weather + Watchboard)
+# -----------------------------------------------------------
+# Six failure modes diagnosed from real failed runs (ArtemioPadilla/mexico-weather
+# #296 and #298), each with its fix baked into this template:
+#
+#   1. Rate limits beat naive retries.
+#      `fetch-snapshot.mjs` honours the Retry-After header on HTTP 429;
+#      waits 60 s (or whatever the server requests) before retrying.
+#
+#   2. Stalled endpoints hang forever.
+#      Each fetch attempt has a hard AbortController timeout (default 30 s).
+#      `curl -sf --retry 3` without `--max-time` stalled for 9 minutes.
+#
+#   3. Empty responses clobber good snapshots.
+#      `fetch-snapshot.mjs --min-items 1 --shrink-guard 0.5` refuses to
+#      write a payload with fewer than N items, or one that shrank >50%
+#      vs. the previous committed snapshot.  Exits non-zero → previous
+#      snapshot survives in the repo.
+#
+#   4. Untracked files never commit with `git diff`.
+#      This workflow uses `git add` BEFORE `git diff --staged --quiet`
+#      (not `git diff --quiet -- file`) so never-tracked files are included.
+#
+#   5. bash -e exempts if/then bodies.
+#      Commit/push is done with the subshell pattern:
+#        git diff --staged --quiet || ( git commit ... && git push ... )
+#      This propagates failures correctly under GitHub Actions' bash -e.
+#      Alternatively, use the commit-with-retry composite (referenced below).
+#
+#   6. Outage policy: fail-green vs fail-red.
+#      See the OUTAGE POLICY section below.
+#
+# OUTAGE POLICY
+# -------------
+# Two policies; choose one per source based on your SLA:
+#
+#   fail-red (--fail-on-error):
+#     The cron step fails visibly. Use for mission-critical sources where a
+#     stale snapshot would mislead users. Produces noise if the source is
+#     chronically flaky (e.g. SMN, NASA FIRMS which have hourly outages).
+#
+#   fail-green (default, no --fail-on-error):
+#     The fetch step exits 0 with fetched=false output. Downstream steps
+#     that depend on fresh data are gated on `if: steps.fetch.outputs.fetched == 'true'`
+#     so nothing regenerates from missing input. The previous committed snapshot
+#     survives. The cron stays green during outages.
+#
+# ============================================================================
+
+name: Data Snapshot  # TODO: rename to match your source (e.g. "Weather Snapshot")
+
+on:
+  schedule:
+    # TODO: adjust cron; stagger relative to other data jobs to avoid rate limits
+    - cron: '15 * * * *'    # Example: every hour at :15
+  workflow_dispatch:         # Manual trigger for testing
+
+concurrency:
+  group: data-snapshot-${{ github.ref }}
+  cancel-in-progress: false  # let in-progress runs finish
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    name: Fetch and commit snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      # ── Fetch step ─────────────────────────────────────────────────────────
+      # fetch-snapshot.mjs handles: retries, Retry-After on 429, per-attempt
+      # timeout, empty-data guard (min-items), shrink guard (50% vs previous).
+      # It writes fetched=true/false to $GITHUB_OUTPUT so downstream steps
+      # can be gated on whether fresh data arrived.
+      - name: Fetch snapshot
+        id: fetch
+        shell: bash
+        env:
+          # TODO: if the upstream API requires auth, add a secret here
+          # API_KEY: ${{ secrets.MY_API_KEY }}
+          GITHUB_OUTPUT: ${{ env.GITHUB_OUTPUT }}
+        run: |
+          node scripts/fetch-snapshot.mjs \
+            --url   "https://api.example.com/data" \
+            --out   "data/snapshot.json" \
+            --min-items 1 \
+            --shrink-guard 0.5 \
+            --attempts 5 \
+            --timeout-ms 30000
+            # TODO: add --fail-on-error for fail-red policy (see OUTAGE POLICY)
+
+      # ── Validate step ───────────────────────────────────────────────────────
+      # Gate all downstream processing on fresh data.  If the fetch step
+      # returned fetched=false (outage, empty guard, shrink guard) we skip
+      # validation and the commit — the previous snapshot survives as-is.
+      - name: Validate snapshot schema
+        id: validate
+        if: steps.fetch.outputs.fetched == 'true'
+        shell: bash
+        run: |
+          # TODO: replace with your schema validation (Zod, JSON Schema, etc.)
+          # Exit non-zero to refuse the snapshot and preserve the old one.
+          #
+          # Plain assertions are fine for simple shapes:
+          node - <<'JS'
+          const data = JSON.parse(require('fs').readFileSync('data/snapshot.json', 'utf-8'));
+
+          // Example assertions — replace with your schema
+          if (!Array.isArray(data.features ?? data.items ?? data)) {
+            console.error('Expected an array root or {features:[]} shape');
+            process.exit(1);
+          }
+
+          console.log('Validation passed');
+          JS
+
+      # ── Commit step ─────────────────────────────────────────────────────────
+      # Uses `git add` first (catches never-tracked files), then checks
+      # `git diff --staged` (not `git diff -- file`) to handle both new and
+      # existing snapshots correctly.
+      #
+      # The subshell pattern `|| ( commit && push )` propagates failures under
+      # bash -e where `if/then` bodies are exempt from errexit.
+      #
+      # Alternative: use the commit-with-retry composite for production use:
+      #   uses: ./.github/actions/commit-with-retry
+      #   with:
+      #     message: 'data: refresh snapshot [skip ci]'
+      #     paths: 'data/snapshot.json'
+      - name: Commit snapshot
+        if: steps.fetch.outputs.fetched == 'true' && steps.validate.conclusion == 'success'
+        shell: bash
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # git add FIRST — `git diff --staged` includes never-tracked files;
+          # `git diff -- file` does NOT (failure mode #4 above)
+          git add data/snapshot.json
+
+          # The subshell pattern propagates push failures under bash -e
+          # (failure mode #5 above)
+          git diff --staged --quiet || (
+            git commit -m "data: refresh snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ) [skip ci]" &&
+            git pull --rebase --autostash origin "$GITHUB_REF_NAME" &&
+            git push origin "$GITHUB_REF_NAME"
+          )
+
+      # ── Report step ─────────────────────────────────────────────────────────
+      # Always report outcome — useful for debugging silent failures.
+      - name: Report outcome
+        if: always()
+        shell: bash
+        run: |
+          echo "fetched : ${{ steps.fetch.outputs.fetched }}"
+          echo "validate: ${{ steps.validate.conclusion }}"
+          echo "job     : ${{ job.status }}"
