@@ -57,10 +57,14 @@ export interface WizardIslandProps {
   /** Ordered list of steps. */
   steps: WizardStep[];
   /**
-   * Render prop receiving the current step id. Return the step's form/content.
+   * Render prop receiving the current step id and a setStepData callback.
+   * Return the step's form/content.
    * Must be a function — not JSX — because it needs to re-evaluate on step change.
+   *
+   * @param stepId - The id of the currently active step.
+   * @param setStepData - Merge data into the wizard data bag for the given step.
    */
-  children: (stepId: string) => React.ReactNode;
+  children: (stepId: string, setStepData: (stepId: string, data: Record<string, unknown>) => void) => React.ReactNode;
   /** Called with the accumulated data bag when Submit is clicked on the final step. */
   onSubmit?: (data: Record<string, unknown>) => Promise<void> | void;
   /** Called when the user exits/cancels the wizard. */
@@ -196,8 +200,13 @@ function WizardInner({
   const [stepError, setStepError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isComplete, setIsComplete] = React.useState(false);
-  /** Accumulated data bag; each step can merge data into it via the onSubmit handler. */
-  const [wizardData] = React.useState<Record<string, unknown>>({});
+  /** Accumulated data bag; each step can merge data into it via setStepData. */
+  const [wizardData, setWizardData] = React.useState<Record<string, unknown>>({});
+
+  /** Stable callback so steps can write their data into the bag. */
+  const setStepData = React.useCallback((stepId: string, data: Record<string, unknown>) => {
+    setWizardData((prev) => ({ ...prev, [stepId]: data }));
+  }, []);
 
   // Compute visible steps (filtered by condition)
   const visibleSteps = steps.filter(
@@ -309,7 +318,7 @@ function WizardInner({
         )}
 
         {/* Step content via render prop */}
-        <div>{children(currentStep.id)}</div>
+        <div>{children(currentStep.id, setStepData)}</div>
       </div>
 
       {/* Navigation controls */}

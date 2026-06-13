@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ErrorBoundary from './ErrorBoundary';
-import type { DetailsPageSimpleProps, ResourceStatus } from './DetailsPageSimple';
+import { statusVariant, type DetailsPageSimpleProps } from './DetailsPageSimple';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -34,20 +34,10 @@ export interface DetailsPageWithTabsProps extends Omit<DetailsPageSimpleProps, '
   defaultTab?: string;
 }
 
-// ── Status helpers (shared logic, co-located) ─────────────────────────────────
+// ── Status helpers (imported from DetailsPageSimple to avoid duplication) ─────
 
-const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  running: 'default',
-  stopped: 'secondary',
-  error: 'destructive',
-  pending: 'outline',
-};
-
-function statusVariant(
-  status: ResourceStatus,
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  return STATUS_VARIANT[status] ?? 'outline';
-}
+// statusVariant is re-exported from DetailsPageSimple above.
+// The local STATUS_VARIANT constant has been removed.
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 

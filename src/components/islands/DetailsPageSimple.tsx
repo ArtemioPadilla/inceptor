@@ -56,14 +56,14 @@ export interface DetailsPageSimpleProps {
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
-const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+export const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   running: 'default',
   stopped: 'secondary',
   error: 'destructive',
   pending: 'outline',
 };
 
-function statusVariant(status: ResourceStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
+export function statusVariant(status: ResourceStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
   return STATUS_VARIANT[status] ?? 'outline';
 }
 

@@ -116,7 +116,7 @@ export function ShowcaseWizardLinear() {
           await new Promise((r) => setTimeout(r, 800));
         }}
       >
-        {(stepId) => {
+        {(stepId, _setStepData) => {
           if (stepId === 'account') return <AccountStep />;
           if (stepId === 'plan') return <PlanStep />;
           if (stepId === 'confirm') return <ConfirmStep />;
@@ -145,7 +145,7 @@ export function ShowcaseWizardConditional() {
         onCancel={() => {}}
         labels={{ submit: 'Finish', cancel: 'Cancel setup' }}
       >
-        {(stepId) => {
+        {(stepId, _setStepData) => {
           if (stepId === 'basic') return <p className="text-sm text-muted-foreground">Basic settings here.</p>;
           if (stepId === 'advanced') return <p className="text-sm text-muted-foreground">Advanced settings — only visible when condition is true.</p>;
           if (stepId === 'done') return <p className="text-sm text-muted-foreground">All steps complete. Click Finish.</p>;

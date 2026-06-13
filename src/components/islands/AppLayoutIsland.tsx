@@ -133,6 +133,7 @@ function TopBar({
   hasSplitPanel,
   isSplitOpen,
   onSplitToggle,
+  hamburgerRef,
 }: {
   logo?: React.ReactNode;
   actions?: React.ReactNode;
@@ -141,12 +142,14 @@ function TopBar({
   hasSplitPanel: boolean;
   isSplitOpen: boolean;
   onSplitToggle: () => void;
+  hamburgerRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-sidebar-border bg-sidebar px-4">
       {/* Mobile hamburger + logo */}
       <div className="flex items-center gap-3">
         <button
+          ref={hamburgerRef}
           type="button"
           aria-label={isMobileNavOpen ? 'Close navigation' : 'Open navigation'}
           aria-expanded={isMobileNavOpen}
@@ -223,6 +226,10 @@ function AppLayoutInner({
   const [isSplitOpen, setIsSplitOpen] = React.useState(defaultSplitOpen);
   const hasSplitPanel = splitPanelContent !== undefined;
 
+  // Refs for focus management
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+  const hamburgerRef = React.useRef<HTMLButtonElement>(null);
+
   // Track viewport width to auto-close mobile nav on resize to >= md (768px).
   React.useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
@@ -239,13 +246,49 @@ function AppLayoutInner({
     };
   }, []);
 
-  // Close mobile nav on Escape.
+  // When mobile nav opens, move focus into the drawer.
+  React.useEffect(() => {
+    if (isMobileNavOpen && drawerRef.current) {
+      const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      focusable[0]?.focus();
+    } else if (!isMobileNavOpen && hamburgerRef.current) {
+      // Return focus to hamburger when drawer closes.
+      hamburgerRef.current.focus();
+    }
+  }, [isMobileNavOpen]);
+
+  // Close mobile nav on Escape; implement focus trap while drawer is open.
   React.useEffect(() => {
     if (!isMobileNavOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         setIsMobileNavOpen(false);
+        return;
+      }
+      // Focus trap inside drawer
+      if (e.key === 'Tab' && drawerRef.current) {
+        const focusable = Array.from(
+          drawerRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     }
 
@@ -281,6 +324,7 @@ function AppLayoutInner({
           />
           {/* Drawer */}
           <div
+            ref={drawerRef}
             id="mobile-sidenav"
             role="dialog"
             aria-modal="true"
@@ -310,6 +354,7 @@ function AppLayoutInner({
           hasSplitPanel={hasSplitPanel}
           isSplitOpen={isSplitOpen}
           onSplitToggle={() => setIsSplitOpen((v) => !v)}
+          hamburgerRef={hamburgerRef}
         />
 
         {/* ── Content + optional split panel ────────────────────── */}
