@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
+import {
+  PropertyFilter,
+  filterByTokens,
+  type FilterToken,
+  type FilterProperty,
+} from '@/components/ui/property-filter';
 import ErrorBoundary from './ErrorBoundary';
 
 // Sample data for the showcase — illustrates generic column type-safety.
@@ -56,17 +62,29 @@ const columns: ColumnDef<Person, string>[] = [
 // ShowcaseDataTable is a single island wrapping the full DataTable composition.
 // This avoids the compound-component gotcha (DataTable manages its own filter
 // and sort state internally — it cannot span multiple islands).
+const FILTER_PROPERTIES: FilterProperty[] = [
+  { key: 'name', label: 'Name', operators: [':', '='] },
+  { key: 'role', label: 'Role', operators: ['=', '!='] },
+  { key: 'status', label: 'Status', operators: ['=', '!='] },
+  { key: 'id', label: 'ID', operators: ['>', '<', '>=', '<='] },
+];
+
 export default function ShowcaseDataTable() {
+  const [tokens, setTokens] = React.useState<FilterToken[]>([]);
+  const filtered = React.useMemo(() => filterByTokens(PEOPLE, tokens), [tokens]);
+
   return (
     <ErrorBoundary name="ShowcaseDataTable">
-    <div className="space-y-2">
+    <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Sort columns, filter rows, toggle visibility, and resize column widths. Virtualization
-        is active even on this small dataset — try adding thousands of rows.
+        Structured token filtering (PropertyFilter) feeds the table; then sort,
+        toggle column visibility, and resize widths. Virtualization is active
+        even on this small dataset.
       </p>
+      <PropertyFilter properties={FILTER_PROPERTIES} tokens={tokens} onChange={setTokens} />
       <DataTable
         columns={columns}
-        data={PEOPLE}
+        data={filtered}
         height="360px"
         estimateRowSize={48}
       />
