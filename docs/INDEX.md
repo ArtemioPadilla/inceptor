@@ -26,6 +26,7 @@ Core visual and interaction principles every Inceptor contributor must know.
 | See the June 2026 site + codebase audit (bugs, UX, proposals)   | [`docs/AUDIT-2026-06.md`](./AUDIT-2026-06.md)                                                                              |
 | See how we reach Cloudscape-grade robustness (gap roadmap)      | [`docs/CLOUDSCAPE-GAP-ROADMAP.md`](./CLOUDSCAPE-GAP-ROADMAP.md)                                                            |
 | Understand the workflow / methodology                           | [`docs/PRINCIPLES.md`](./PRINCIPLES.md)                                                                                    |
+| Build a surface (listing, create, details, delete, states)      | [`src/content/docs/patterns/`](../src/content/docs/patterns/) — live at `/docs/patterns/`                                  |
 | Look up the ethics checklist                                    | [`docs/ETHICS.md`](./ETHICS.md)                                                                                            |
 | Add a new component                                             | [`docs/COMPONENTS.md`](./COMPONENTS.md)                                                                                    |
 | Compare Inceptor to Cloudscape and see the gap roadmap          | [`docs/CLOUDSCAPE-GAP-ROADMAP.md`](./CLOUDSCAPE-GAP-ROADMAP.md)                                                            |

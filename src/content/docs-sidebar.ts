@@ -71,6 +71,17 @@ export const docsSidebar: DocsGroup[] = [
     ],
   },
   {
+    label: 'Patterns',
+    items: [
+      { label: 'Overview', slug: 'patterns' },
+      { label: 'Listing', slug: 'patterns/listing' },
+      { label: 'Create flow', slug: 'patterns/create-flow' },
+      { label: 'Details page', slug: 'patterns/details-page' },
+      { label: 'Delete with confirmation', slug: 'patterns/delete-confirm' },
+      { label: 'Empty, error & loading states', slug: 'patterns/states' },
+    ],
+  },
+  {
     label: 'Reference',
     items: [
       { label: 'Commands cheatsheet', slug: 'reference/commands' },
