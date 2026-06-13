@@ -6,29 +6,31 @@ lands) will use the same structure.
 
 ## "Where do I find…?"
 
-| I want to… | Read |
-|---|---|
-| Understand the stack at a glance | [`CLAUDE.md`](../CLAUDE.md) — Stack section |
-| See installed package versions | [`CLAUDE.md`](../CLAUDE.md) — Stack table |
-| Understand how we position Inceptor (category, wedge, audience) | [`docs/POSITIONING.md`](./POSITIONING.md) |
-| See the June 2026 site + codebase audit (bugs, UX, proposals) | [`docs/AUDIT-2026-06.md`](./AUDIT-2026-06.md) |
-| Understand the workflow / methodology | [`docs/PRINCIPLES.md`](./PRINCIPLES.md) |
-| Look up the ethics checklist | [`docs/ETHICS.md`](./ETHICS.md) |
-| Add a new component | [`docs/COMPONENTS.md`](./COMPONENTS.md) |
-| Build auth + DB, an AI feature, or host a backend | [`docs/recipes/`](./recipes/) (Supabase, BYOK, hosting, CI migrations) |
-| Improve the DX (FinSight learnings) | [`docs/DX-IMPROVEMENT-PLAN.md`](./DX-IMPROVEMENT-PLAN.md) |
-| See the Inceptor workflow + sub-agents | [`CLAUDE.md`](../CLAUDE.md) — Workflow section |
-| Pick the next thing to ship | [`ROADMAP.md`](../ROADMAP.md) |
-| See what's already shipped | [`INTEGRATION-PLAN.md`](../INTEGRATION-PLAN.md) — historical record |
-| Open a PR | `npm run ship` |
-| Run the Monday ritual | `npm run monday` |
-| Diagnose a broken environment | `npm run doctor` |
-| Open this index | `npm run docs` |
-| Run tests | `npm test` (Vitest) or `npm run test:visual` (Playwright) |
-| Refresh visual baselines | `npm run test:visual:update` (see [`CONTRIBUTING.md`](../CONTRIBUTING.md)) |
-| Write an ADR | Copy [`docs/decisions/TEMPLATE.md`](./decisions/TEMPLATE.md) |
-| Browse past ADRs | [`docs/decisions/`](./decisions/) |
-| Report a bug | Use the FeedbackFAB on any rendered page, or [open an issue](https://github.com/ArtemioPadilla/inceptor/issues/new/choose) |
+| I want to…                                                                | Read                                                                                                                       |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Understand the stack at a glance                                          | [`CLAUDE.md`](../CLAUDE.md) — Stack section                                                                                |
+| See installed package versions                                            | [`CLAUDE.md`](../CLAUDE.md) — Stack table                                                                                  |
+| Understand how we position Inceptor (category, wedge, audience)           | [`docs/POSITIONING.md`](./POSITIONING.md)                                                                                  |
+| See the June 2026 site + codebase audit (bugs, UX, proposals)             | [`docs/AUDIT-2026-06.md`](./AUDIT-2026-06.md)                                                                              |
+| Understand the workflow / methodology                                     | [`docs/PRINCIPLES.md`](./PRINCIPLES.md)                                                                                    |
+| Look up the ethics checklist                                              | [`docs/ETHICS.md`](./ETHICS.md)                                                                                            |
+| Add a new component                                                       | [`docs/COMPONENTS.md`](./COMPONENTS.md)                                                                                    |
+| Make a foundation-level decision (tokens, density, layout, theming, a11y) | [`docs/foundation/`](./foundation/)                                                                                        |
+| See the Cloudscape gap roadmap (Horizon 1 patterns)                       | [`docs/CLOUDSCAPE-GAP-ROADMAP.md`](./CLOUDSCAPE-GAP-ROADMAP.md)                                                            |
+| Build auth + DB, an AI feature, or host a backend                         | [`docs/recipes/`](./recipes/) (Supabase, BYOK, hosting, CI migrations)                                                     |
+| Improve the DX (FinSight learnings)                                       | [`docs/DX-IMPROVEMENT-PLAN.md`](./DX-IMPROVEMENT-PLAN.md)                                                                  |
+| See the Inceptor workflow + sub-agents                                    | [`CLAUDE.md`](../CLAUDE.md) — Workflow section                                                                             |
+| Pick the next thing to ship                                               | [`ROADMAP.md`](../ROADMAP.md)                                                                                              |
+| See what's already shipped                                                | [`INTEGRATION-PLAN.md`](../INTEGRATION-PLAN.md) — historical record                                                        |
+| Open a PR                                                                 | `npm run ship`                                                                                                             |
+| Run the Monday ritual                                                     | `npm run monday`                                                                                                           |
+| Diagnose a broken environment                                             | `npm run doctor`                                                                                                           |
+| Open this index                                                           | `npm run docs`                                                                                                             |
+| Run tests                                                                 | `npm test` (Vitest) or `npm run test:visual` (Playwright)                                                                  |
+| Refresh visual baselines                                                  | `npm run test:visual:update` (see [`CONTRIBUTING.md`](../CONTRIBUTING.md))                                                 |
+| Write an ADR                                                              | Copy [`docs/decisions/TEMPLATE.md`](./decisions/TEMPLATE.md)                                                               |
+| Browse past ADRs                                                          | [`docs/decisions/`](./decisions/)                                                                                          |
+| Report a bug                                                              | Use the FeedbackFAB on any rendered page, or [open an issue](https://github.com/ArtemioPadilla/inceptor/issues/new/choose) |
 
 ## Quick refs
 
@@ -55,18 +57,18 @@ the `Tdd-Red: <sha>` trailer on green commits (see PRINCIPLES.md §2.2).
 
 ### TDD tiers
 
-| Label | When | Required artifact |
-|---|---|---|
+| Label             | When                                   | Required artifact               |
+| ----------------- | -------------------------------------- | ------------------------------- |
 | `tdd-tier:strict` | default for `type:feat` and `type:fix` | red commit + `Tdd-Red:` trailer |
-| `tdd-tier:smoke` | one-line variant, CSS-only tweak | `?raw` source assertion |
-| `tdd-tier:exempt` | typo, comment, dep bump, ADR | no test needed |
+| `tdd-tier:smoke`  | one-line variant, CSS-only tweak       | `?raw` source assertion         |
+| `tdd-tier:exempt` | typo, comment, dep bump, ADR           | no test needed                  |
 
 ### Ethics checklist tiers
 
-| Tier | Triggers when… | Required items |
-|---|---|---|
-| **Tier-0** | only `docs/**`, `*.md`, `tests/**` change | (gate skipped) |
-| **Tier-1** | UI tweak without new behavior | #1, #7, #8 |
+| Tier       | Triggers when…                                   | Required items                          |
+| ---------- | ------------------------------------------------ | --------------------------------------- |
+| **Tier-0** | only `docs/**`, `*.md`, `tests/**` change        | (gate skipped)                          |
+| **Tier-1** | UI tweak without new behavior                    | #1, #7, #8                              |
 | **Tier-2** | new persuasive surface, telemetry, or affordance | #1, #2, #6, #7, #8 (+ Triad promotions) |
 
 Full checklist: [`docs/ETHICS.md`](./ETHICS.md).
