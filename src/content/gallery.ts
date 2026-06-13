@@ -24,7 +24,7 @@ export interface GalleryEntry {
   /**
    * Category bucket on the index page.
    */
-  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'navmenu' | 'extras' | 'inceptor';
+  category: 'primitives' | 'forms' | 'advanced' | 'compound' | 'overlays' | 'disclosure' | 'feedback' | 'data' | 'charts' | 'motion' | 'pwa' | 'navmenu' | 'extras' | 'gen-ai' | 'inceptor';
   /**
    * Optional install command for shadcn-style components.
    * If omitted, the gallery omits the install section.
@@ -230,6 +230,17 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'extras',
     island: 'ShowcaseExtras',
   },
+  // Generative AI — agent-native UI primitives (#204)
+  {
+    slug: 'gen-ai',
+    name: 'Generative AI',
+    summary:
+      'Chat thread, prompt input, streaming + thinking states, AI output label (disclosure), and response feedback.',
+    source: 'src/components/ui/ai/',
+    status: 'stable',
+    category: 'gen-ai',
+    island: 'ShowcaseAI',
+  },
   // Inceptor
   {
     slug: 'error-boundary',
@@ -261,6 +272,7 @@ export const categoryLabels: Record<GalleryEntry['category'], string> = {
   motion: 'Motion',
   pwa: 'PWA',
   extras: 'Extras & data-viz',
+  'gen-ai': 'Generative AI',
   inceptor: 'Inceptor reporting',
 };
 

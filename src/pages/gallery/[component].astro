@@ -17,6 +17,7 @@ import ShowcaseFeedback from '../../components/islands/ShowcaseFeedback';
 import ShowcaseAdvanced from '../../components/islands/ShowcaseAdvanced';
 import ShowcaseNav from '../../components/islands/ShowcaseNav';
 import ShowcaseExtras from '../../components/islands/ShowcaseExtras';
+import ShowcaseAI from '../../components/islands/ShowcaseAI';
 import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
 import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
 import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
@@ -127,6 +128,7 @@ const propsTables = extractPropsForSource(entry.source, repoRoot);
           {entry.island === 'ShowcaseCharts' && <ShowcaseCharts client:visible />}
           {entry.island === 'MotionDemo' && <MotionDemo client:visible />}
           {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
+          {entry.island === 'ShowcaseAI' && <ShowcaseAI client:visible />}
           {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
         </div>
         <div class="dark rounded-lg border border-border bg-background p-6 text-foreground">

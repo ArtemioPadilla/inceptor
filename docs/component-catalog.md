@@ -5,7 +5,7 @@
 
 Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entry here is rendered live at `/gallery`.
 
-**Total:** 19 gallery entries across 14 categories.
+**Total:** 20 gallery entries across 15 categories.
 
 **Legend**
 
@@ -104,6 +104,12 @@ Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entr
 |---|---|---|---|
 | **ErrorBoundary** | ✅ stable | Throw an error inside an island — get a pre-filled GitHub issue with stack trace, component path, URL, and UA. | [`src/components/islands/ErrorBoundary.tsx`](../src/components/islands/ErrorBoundary.tsx) |
 
+## 15. Generative AI
+
+| Component | Status | Summary | Source |
+|---|---|---|---|
+| **Generative AI** | ✅ stable | Chat thread, prompt input, streaming + thinking states, AI output label (disclosure), and response feedback. | [`src/components/ui/ai/`](../src/components/ui/ai/) |
+
 ---
 
-_Last generated: 2026-06-12. Run `npm run gen:catalog` to refresh._
+_Last generated: 2026-06-13. Run `npm run gen:catalog` to refresh._
