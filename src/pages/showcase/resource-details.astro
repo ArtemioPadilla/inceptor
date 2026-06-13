@@ -1,0 +1,115 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {
+  ShowcaseDetailsSimple,
+  ShowcaseDetailsTabbed,
+  ShowcaseDetailsLoading,
+  ShowcaseDetailsEmpty,
+  ShowcaseDetailsError,
+} from '@/components/islands/ShowcaseResourceDetails';
+---
+
+<BaseLayout
+  title="Resource Details — Blueprints"
+  description="DetailsPageSimple and DetailsPageWithTabs blueprints for resource detail views."
+>
+  <main class="mx-auto max-w-7xl px-4 py-12 space-y-12">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">
+        Resource Details — Blueprints
+      </h1>
+      <p class="mt-2 text-muted-foreground max-w-2xl">
+        Two composable blueprints for resource detail views. Use <strong>DetailsPageSimple</strong>
+        for flat layouts; use <strong>DetailsPageWithTabs</strong> when information architecture
+        requires tabbed sections.
+      </p>
+    </header>
+
+    <!-- When to use each variant -->
+    <section aria-labelledby="guidance-heading" class="rounded-lg border border-border bg-card p-6">
+      <h2 id="guidance-heading" class="text-lg font-semibold mb-4">When to choose each variant</h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-2">
+          <h3 class="text-sm font-medium">DetailsPageSimple</h3>
+          <ul class="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+            <li>3–6 summary stats + one related list</li>
+            <li>No tab navigation needed</li>
+            <li>Good for: VM instances, API keys, team members</li>
+          </ul>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-sm font-medium">DetailsPageWithTabs</h3>
+          <ul class="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+            <li>Multiple distinct information sections</li>
+            <li>Logs, metrics, config, events on same resource</li>
+            <li>Good for: projects, services, deployments</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo: DetailsPageSimple -->
+    <section aria-labelledby="simple-demo-heading">
+      <h2 id="simple-demo-heading" class="text-xl font-semibold mb-4">
+        DetailsPageSimple — realistic data
+      </h2>
+      <div class="rounded-xl border border-border p-6">
+        <ShowcaseDetailsSimple client:load />
+      </div>
+    </section>
+
+    <!-- Demo: DetailsPageWithTabs -->
+    <section aria-labelledby="tabbed-demo-heading">
+      <h2 id="tabbed-demo-heading" class="text-xl font-semibold mb-4">
+        DetailsPageWithTabs — realistic data
+      </h2>
+      <div class="rounded-xl border border-border p-6">
+        <ShowcaseDetailsTabbed client:load />
+      </div>
+    </section>
+
+    <!-- Empty / error / loading patterns -->
+    <section aria-labelledby="states-heading">
+      <h2 id="states-heading" class="text-xl font-semibold mb-4">
+        Empty / error / loading patterns
+      </h2>
+      <div class="grid gap-6 sm:grid-cols-3">
+        <div class="rounded-xl border border-border p-4">
+          <p class="text-xs font-medium text-muted-foreground mb-3">Loading state</p>
+          <ShowcaseDetailsLoading client:load />
+        </div>
+        <div class="rounded-xl border border-border p-4">
+          <p class="text-xs font-medium text-muted-foreground mb-3">Empty state</p>
+          <ShowcaseDetailsEmpty client:load />
+        </div>
+        <div class="rounded-xl border border-border p-4">
+          <p class="text-xs font-medium text-muted-foreground mb-3">Error state</p>
+          <ShowcaseDetailsError client:load />
+        </div>
+      </div>
+    </section>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
+      <a href={withBase('/gallery/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Gallery
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/DetailsPageSimple.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        DetailsPageSimple source ↗
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/DetailsPageWithTabs.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        DetailsPageWithTabs source ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>

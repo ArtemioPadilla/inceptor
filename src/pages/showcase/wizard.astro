@@ -1,0 +1,90 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { ShowcaseWizardLinear, ShowcaseWizardConditional } from '@/components/islands/ShowcaseWizard';
+---
+
+<BaseLayout
+  title="Wizard Blueprint"
+  description="Reusable multi-step wizard with typed step contract, per-step validation, progress indicator."
+>
+  <main class="mx-auto max-w-4xl px-4 py-12 space-y-12">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">
+        Wizard Blueprint
+      </h1>
+      <p class="mt-2 text-muted-foreground max-w-2xl">
+        A composable multi-step wizard with typed step contract, per-step validation gates,
+        progress indicator, keyboard shortcuts (<kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Ctrl+Enter</kbd>),
+        and completion affordance.
+      </p>
+    </header>
+
+    <!-- Demo 1: Linear wizard (3 steps + per-step validation) -->
+    <section aria-labelledby="linear-heading">
+      <h2 id="linear-heading" class="text-xl font-semibold mb-4">
+        Linear wizard — 3 steps with per-step validation
+      </h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Each step has a <code>validate()</code> gate. Step 2 deliberately blocks if "Block me"
+        is typed. Try it: type "Block me" and click Next.
+      </p>
+      <ShowcaseWizardLinear client:load />
+    </section>
+
+    <!-- Demo 2: Conditional step + cancel -->
+    <section aria-labelledby="conditional-heading">
+      <h2 id="conditional-heading" class="text-xl font-semibold mb-4">
+        Conditional step wizard
+      </h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        The "Advanced" step is only shown when its <code>condition</code> returns true.
+        Wire <code>condition: (data) =&gt; boolean</code> to form state for dynamic flows.
+      </p>
+      <ShowcaseWizardConditional client:load />
+    </section>
+
+    <!-- Guidance -->
+    <section aria-labelledby="guidance-heading" class="rounded-lg border border-border bg-card p-6">
+      <h2 id="guidance-heading" class="text-lg font-semibold mb-4">Linear vs conditional steps</h2>
+      <div class="grid gap-4 sm:grid-cols-2 text-sm">
+        <div class="space-y-2">
+          <h3 class="font-medium">Linear steps</h3>
+          <ul class="text-muted-foreground space-y-1 list-disc list-inside">
+            <li>Omit the <code>condition</code> prop</li>
+            <li>All steps always shown in progress bar</li>
+            <li>Best for: onboarding, account setup</li>
+          </ul>
+        </div>
+        <div class="space-y-2">
+          <h3 class="font-medium">Conditional steps</h3>
+          <ul class="text-muted-foreground space-y-1 list-disc list-inside">
+            <li>Add <code>condition: (data) =&gt; boolean</code></li>
+            <li>Step hidden from progress bar when condition is false</li>
+            <li>Best for: optional sections, role-based flows</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-4 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
+        <strong>Keyboard shortcut:</strong>
+        <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono">Ctrl+Enter</kbd> /
+        <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono">Cmd+Enter</kbd>
+        advances the wizard (or submits on the final step).
+      </div>
+    </section>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
+      <a href={withBase('/gallery/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Gallery
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/WizardIsland.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>

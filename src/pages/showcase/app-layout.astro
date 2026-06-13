@@ -1,0 +1,113 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { ShowcaseAppLayoutDefault, ShowcaseAppLayoutSplit } from '@/components/islands/ShowcaseAppLayout';
+---
+
+<BaseLayout
+  title="App Layout — Service Shell"
+  description="Reusable service shell pattern: left nav, top bar, main content, optional split panel."
+>
+  <main class="mx-auto max-w-7xl px-4 py-12 space-y-8">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">
+        App Layout — Service Shell
+      </h1>
+      <p class="mt-2 text-muted-foreground max-w-2xl">
+        A reusable shell component with a left navigation area, top utilities bar, main content
+        region, and an optional split panel for contextual details. Fully keyboard-navigable and
+        responsive down to mobile.
+      </p>
+    </header>
+
+    <!-- Demo 1: Default layout state -->
+    <section aria-labelledby="demo-default-heading">
+      <h2 id="demo-default-heading" class="text-xl font-semibold mb-3">
+        Default layout state
+      </h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Left nav + top bar + main content. No split panel. Resize below 768 px to see the mobile
+        hamburger menu.
+      </p>
+      <div class="rounded-xl border border-border overflow-hidden" style="height: 420px">
+        <ShowcaseAppLayoutDefault client:load />
+      </div>
+    </section>
+
+    <!-- Demo 2: Split panel enabled -->
+    <section aria-labelledby="demo-split-heading">
+      <h2 id="demo-split-heading" class="text-xl font-semibold mb-3">
+        Split panel enabled state
+      </h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Click the panel-toggle button in the top-right to open/close the details panel. On
+        screens ≥ 1024 px the panel appears side-by-side; on smaller screens it stacks below.
+      </p>
+      <div class="rounded-xl border border-border overflow-hidden" style="height: 420px">
+        <ShowcaseAppLayoutSplit client:load />
+      </div>
+    </section>
+
+    <!-- Keyboard navigation docs -->
+    <section aria-labelledby="keyboard-heading">
+      <h2 id="keyboard-heading" class="text-xl font-semibold mb-3">Keyboard navigation</h2>
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="border-b border-border">
+            <th class="py-2 pr-8 text-left font-medium">Key</th>
+            <th class="py-2 text-left font-medium">Behaviour</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-border">
+            <td class="py-2 pr-8">
+              <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Tab / Shift+Tab</kbd>
+            </td>
+            <td class="py-2 text-muted-foreground">Move focus between nav items, top-bar buttons, and main content</td>
+          </tr>
+          <tr class="border-b border-border">
+            <td class="py-2 pr-8">
+              <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Enter / Space</kbd>
+            </td>
+            <td class="py-2 text-muted-foreground">Activate the focused nav item or button</td>
+          </tr>
+          <tr>
+            <td class="py-2 pr-8">
+              <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Escape</kbd>
+            </td>
+            <td class="py-2 text-muted-foreground">Close the mobile nav drawer when open</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Mobile behaviour -->
+    <section aria-labelledby="mobile-heading">
+      <h2 id="mobile-heading" class="text-xl font-semibold mb-3">Mobile behaviour</h2>
+      <ul class="space-y-2 text-sm text-muted-foreground list-disc list-inside">
+        <li>The left sidebar is hidden below the <code>md</code> (768 px) breakpoint.</li>
+        <li>A hamburger button in the top bar opens a drawer overlay with nav items.</li>
+        <li>The drawer closes on Escape, backdrop click, or nav-item selection.</li>
+        <li>On resize back to desktop width, the mobile nav auto-closes.</li>
+        <li>The split panel stacks below main content on screens narrower than <code>lg</code> (1024 px).</li>
+      </ul>
+    </section>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
+      <a href={withBase('/gallery/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Gallery
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/AppLayoutIsland.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+      <a href={withBase('/docs/foundation/layout')} class="underline underline-offset-4 hover:text-foreground">
+        Layout docs ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>

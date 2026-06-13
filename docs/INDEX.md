@@ -4,6 +4,18 @@ When you can't remember where something lives, look here first. Each row
 points you at exactly one file. The deployed docs site (when [Epic 15](../ROADMAP.md)
 lands) will use the same structure.
 
+## Foundation
+
+Core visual and interaction principles every Inceptor contributor must know.
+
+| Topic | Read |
+|---|---|
+| Design tokens (colours, radius, chart palette) | [`docs/foundation/tokens.md`](./foundation/tokens.md) |
+| Density modes (compact vs comfortable) | [`docs/foundation/density.md`](./foundation/density.md) |
+| Page regions, spacing rhythm, responsive breakpoints | [`docs/foundation/layout.md`](./foundation/layout.md) |
+| Light/dark theming, CSS variable layering | [`docs/foundation/theming.md`](./foundation/theming.md) |
+| Keyboard, focus, contrast, motion baseline | [`docs/foundation/accessibility.md`](./foundation/accessibility.md) |
+
 ## "Where do I find…?"
 
 | I want to…                                                      | Read                                                                                                                       |
