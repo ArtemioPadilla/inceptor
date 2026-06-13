@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Flashbar, type FlashItem } from '@/components/ui/flashbar';
 import { InfoIcon, CircleAlertIcon, CircleCheckIcon, InboxIcon, WifiOffIcon } from 'lucide-react';
 
 import {
@@ -143,7 +144,22 @@ export default function ShowcaseFeedback() {
             action={<Button size="sm" variant="outline">Retry</Button>}
           />
         </section>
+
+        {/* Flashbar — page-level stacked notifications */}
+        <section className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Flashbar</p>
+          <FlashbarDemo />
+        </section>
       </div>
     </ErrorBoundary>
   );
+}
+
+function FlashbarDemo() {
+  const [items, setItems] = React.useState<FlashItem[]>([
+    { id: 'a', type: 'success', content: '3 elementos guardados.' },
+    { id: 'b', type: 'error', content: 'No se pudo eliminar 1 elemento.', action: { label: 'Reintentar', onClick: () => {} } },
+    { id: 'c', type: 'info', content: 'Una nueva versión está disponible.' },
+  ]);
+  return <Flashbar items={items} onDismiss={(id) => setItems((x) => x.filter((i) => i.id !== id))} />;
 }

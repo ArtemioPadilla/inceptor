@@ -18,6 +18,7 @@ import { Rating } from '@/components/ui/rating';
 import { TagInput } from '@/components/ui/tag-input';
 import { InputOTP } from '@/components/ui/input-otp';
 import { Button } from '@/components/ui/button';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Label } from '@/components/ui/label';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -97,6 +98,16 @@ function AdvancedInner() {
           </SheetContent>
         </Sheet>
       </section>
+
+      <section className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">File upload</p>
+        <FileUploadDemo />
+      </section>
     </div>
   );
+}
+
+function FileUploadDemo() {
+  const [files, setFiles] = React.useState<File[]>([]);
+  return <FileUpload files={files} onChange={setFiles} multiple maxSize={5 * 1024 * 1024} />;
 }
