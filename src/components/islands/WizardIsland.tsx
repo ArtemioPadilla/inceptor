@@ -91,7 +91,7 @@ function ProgressBar({
   return (
     <nav aria-label="Wizard progress" className="mb-6">
       {/* Visual step list */}
-      <ol className="flex items-center gap-0" role="list">
+      <ol className="flex items-center gap-0">
         {steps.map((step, index) => {
           const isDone = index < current;
           const isActive = index === current;
@@ -206,39 +206,14 @@ function WizardInner({
   const totalVisible = visibleSteps.length;
   const currentStep = visibleSteps[currentIndex];
 
-  // Focus management: move focus to the step heading on step change.
-  const headingRef = React.useRef<HTMLHeadingElement>(null);
-
-  React.useEffect(() => {
-    if (headingRef.current) {
-      headingRef.current.focus();
-    }
-  }, [currentIndex]);
-
-  // Keyboard: Ctrl/Meta+Enter submits / advances (convenience shortcut).
-  React.useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        void handleNext();
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex]);
-
-  if (!currentStep) return null;
-  if (isComplete) return <CompletionScreen label={completeLabel} />;
-
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === totalVisible - 1;
 
-  async function handleNext() {
+  // handleNext and handleBack must be declared before the keyboard useEffect.
+  const handleNext = React.useCallback(async () => {
     setStepError(null);
     // Run optional per-step validation gate
-    if (currentStep.validate) {
+    if (currentStep?.validate) {
       const result = await currentStep.validate();
       if (result === false) {
         setStepError('Please complete this step before continuing.');
@@ -264,12 +239,39 @@ function WizardInner({
     } else {
       setCurrentIndex((i) => i + 1);
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, isLast, currentStep]);
 
-  function handleBack() {
+  const handleBack = React.useCallback(() => {
     setStepError(null);
     setCurrentIndex((i) => Math.max(0, i - 1));
-  }
+  }, []);
+
+  // Focus management: move focus to the step heading on step change.
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+
+  React.useEffect(() => {
+    if (headingRef.current) {
+      headingRef.current.focus();
+    }
+  }, [currentIndex]);
+
+  // Keyboard: Ctrl/Meta+Enter submits / advances (convenience shortcut).
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        void handleNext();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleNext]);
+
+  // Conditional returns come AFTER all hooks (Rules of Hooks).
+  if (!currentStep) return null;
+  if (isComplete) return <CompletionScreen label={completeLabel} />;
 
   return (
     <div className="flex flex-col gap-6" data-testid="wizard-shell">

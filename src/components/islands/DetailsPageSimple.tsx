@@ -192,7 +192,7 @@ function DetailsPageSimpleInner({
       {relatedItems.length > 0 && (
         <section aria-label="Related data">
           <h3 className="text-sm font-semibold mb-2">Related</h3>
-          <ul className="space-y-1" role="list">
+          <ul className="space-y-1">
             {relatedItems.map((item) => {
               const Tag = item.href ? 'a' : 'span';
               return (

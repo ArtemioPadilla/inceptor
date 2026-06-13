@@ -114,7 +114,7 @@ function SideNav({
         className,
       )}
     >
-      <ul className="flex flex-col gap-0.5" role="list">
+      <ul className="flex flex-col gap-0.5">
         {items.map((item) => (
           <li key={item.id}>
             <NavItemButton item={item} onSelect={onSelect} />

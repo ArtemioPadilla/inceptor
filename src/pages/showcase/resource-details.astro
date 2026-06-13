@@ -1,8 +1,13 @@
 ---
 import { withBase } from '@/lib/href';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import DetailsPageSimple from '@/components/islands/DetailsPageSimple';
-import DetailsPageWithTabs from '@/components/islands/DetailsPageWithTabs';
+import {
+  ShowcaseDetailsSimple,
+  ShowcaseDetailsTabbed,
+  ShowcaseDetailsLoading,
+  ShowcaseDetailsEmpty,
+  ShowcaseDetailsError,
+} from '@/components/islands/ShowcaseResourceDetails';
 ---
 
 <BaseLayout
@@ -30,7 +35,6 @@ import DetailsPageWithTabs from '@/components/islands/DetailsPageWithTabs';
           <ul class="text-sm text-muted-foreground space-y-1 list-disc list-inside">
             <li>3–6 summary stats + one related list</li>
             <li>No tab navigation needed</li>
-            <li>Resource has a single information type</li>
             <li>Good for: VM instances, API keys, team members</li>
           </ul>
         </div>
@@ -39,148 +43,29 @@ import DetailsPageWithTabs from '@/components/islands/DetailsPageWithTabs';
           <ul class="text-sm text-muted-foreground space-y-1 list-disc list-inside">
             <li>Multiple distinct information sections</li>
             <li>Logs, metrics, config, events on same resource</li>
-            <li>Resource has long-content sections</li>
             <li>Good for: projects, services, deployments</li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- Demo: DetailsPageSimple — realistic data -->
+    <!-- Demo: DetailsPageSimple -->
     <section aria-labelledby="simple-demo-heading">
       <h2 id="simple-demo-heading" class="text-xl font-semibold mb-4">
         DetailsPageSimple — realistic data
       </h2>
       <div class="rounded-xl border border-border p-6">
-        <DetailsPageSimple
-          client:load
-          title="api-service-prod"
-          status="running"
-          summaryBlocks={[
-            { label: 'Region', value: 'us-east-1' },
-            { label: 'Uptime', value: '14d 6h' },
-            { label: 'CPU', value: '12%' },
-            { label: 'Memory', value: '1.4 GB' },
-          ]}
-          relatedItems={[
-            { id: 'vpc-01', label: 'vpc-01 (VPC)', meta: '10.0.0.0/16' },
-            { id: 'sg-web', label: 'sg-web (Security Group)', meta: 'inbound 443, 80' },
-            { id: 'iam-role', label: 'ec2-service-role (IAM)', meta: 'ReadOnly' },
-          ]}
-          actions={
-            <button
-              type="button"
-              class="rounded-md bg-destructive px-3 py-1.5 text-xs font-medium
-                     text-destructive-foreground hover:bg-destructive/90
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Terminate
-            </button>
-          }
-        />
+        <ShowcaseDetailsSimple client:load />
       </div>
     </section>
 
-    <!-- Demo: DetailsPageWithTabs — realistic data -->
+    <!-- Demo: DetailsPageWithTabs -->
     <section aria-labelledby="tabbed-demo-heading">
       <h2 id="tabbed-demo-heading" class="text-xl font-semibold mb-4">
         DetailsPageWithTabs — realistic data
       </h2>
       <div class="rounded-xl border border-border p-6">
-        <DetailsPageWithTabs
-          client:load
-          title="web-frontend-prod"
-          status="running"
-          summaryBlocks={[
-            { label: 'Framework', value: 'Astro 5' },
-            { label: 'Build', value: '#1,482' },
-            { label: 'Deploy time', value: '43s' },
-            { label: 'CDN nodes', value: '38' },
-          ]}
-          defaultTab="overview"
-          tabs={[
-            {
-              id: 'overview',
-              label: 'Overview',
-              content: (
-                <div class="space-y-2 text-sm text-muted-foreground">
-                  <p>Last deployed 2 hours ago by <strong>artemio</strong>.</p>
-                  <p>Serving 1,234 requests/min on 38 edge nodes.</p>
-                  <p>Custom domain: <code>app.inceptor.dev</code></p>
-                </div>
-              ),
-            },
-            {
-              id: 'logs',
-              label: 'Logs',
-              content: (
-                <div class="font-mono text-xs bg-muted rounded-md p-4 space-y-1 overflow-x-auto">
-                  <p><span class="text-muted-foreground">2026-06-13 00:40:01</span> <span class="text-green-600 dark:text-green-400">INFO</span>  Build #1482 deployed</p>
-                  <p><span class="text-muted-foreground">2026-06-13 00:40:03</span> <span class="text-green-600 dark:text-green-400">INFO</span>  Health check passed (200 OK)</p>
-                  <p><span class="text-muted-foreground">2026-06-13 00:41:15</span> <span class="text-yellow-600 dark:text-yellow-400">WARN</span>  Cache miss rate 18% (threshold 15%)</p>
-                </div>
-              ),
-            },
-            {
-              id: 'config',
-              label: 'Config',
-              content: (
-                <dl class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                  {[
-                    ['Node version', '22.x'],
-                    ['Build command', 'npm run build'],
-                    ['Output dir', 'dist/'],
-                    ['Environment', 'Production'],
-                  ].map(([k, v]) => (
-                    <div key={k}>
-                      <dt class="text-muted-foreground">{k}</dt>
-                      <dd class="font-medium">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ),
-            },
-          ]}
-          actions={
-            <button
-              type="button"
-              class="rounded-md border border-border px-3 py-1.5 text-xs font-medium
-                     hover:bg-accent hover:text-accent-foreground
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Redeploy
-            </button>
-          }
-        />
-      </div>
-    </section>
-
-    <!-- Long-content behaviour -->
-    <section aria-labelledby="longcontent-heading">
-      <h2 id="longcontent-heading" class="text-xl font-semibold mb-4">Long-content behaviour</h2>
-      <div class="rounded-xl border border-border p-6">
-        <DetailsPageWithTabs
-          client:load
-          title="database-cluster-01"
-          status="running"
-          defaultTab="events"
-          tabs={[
-            {
-              id: 'events',
-              label: 'Events (long)',
-              content: (
-                <ul class="space-y-1 max-h-48 overflow-y-auto pr-2">
-                  {Array.from({ length: 20 }, (_, i) => (
-                    <li key={i} class="text-xs text-muted-foreground border-b border-border pb-1">
-                      2026-06-13 00:{String(i).padStart(2, '0')}:00 — Routine health check #{i + 1}
-                    </li>
-                  ))}
-                </ul>
-              ),
-            },
-            { id: 'config', label: 'Config', content: <p class="text-sm text-muted-foreground">Config here.</p> },
-          ]}
-        />
+        <ShowcaseDetailsTabbed client:load />
       </div>
     </section>
 
@@ -190,24 +75,17 @@ import DetailsPageWithTabs from '@/components/islands/DetailsPageWithTabs';
         Empty / error / loading patterns
       </h2>
       <div class="grid gap-6 sm:grid-cols-3">
-        <!-- Loading -->
         <div class="rounded-xl border border-border p-4">
           <p class="text-xs font-medium text-muted-foreground mb-3">Loading state</p>
-          <DetailsPageSimple client:load loading={true} title="Resource" />
+          <ShowcaseDetailsLoading client:load />
         </div>
-        <!-- Empty -->
         <div class="rounded-xl border border-border p-4">
           <p class="text-xs font-medium text-muted-foreground mb-3">Empty state</p>
-          <DetailsPageSimple client:load empty={true} emptyMessage="No resource selected." />
+          <ShowcaseDetailsEmpty client:load />
         </div>
-        <!-- Error -->
         <div class="rounded-xl border border-border p-4">
           <p class="text-xs font-medium text-muted-foreground mb-3">Error state</p>
-          <DetailsPageSimple
-            client:load
-            error="Failed to load resource: 404 Not Found"
-            onRetry={() => console.log('[demo] retry')}
-          />
+          <ShowcaseDetailsError client:load />
         </div>
       </div>
     </section>

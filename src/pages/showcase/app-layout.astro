@@ -1,7 +1,7 @@
 ---
 import { withBase } from '@/lib/href';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import AppLayoutIsland from '@/components/islands/AppLayoutIsland';
+import { ShowcaseAppLayoutDefault, ShowcaseAppLayoutSplit } from '@/components/islands/ShowcaseAppLayout';
 ---
 
 <BaseLayout
@@ -29,37 +29,8 @@ import AppLayoutIsland from '@/components/islands/AppLayoutIsland';
         Left nav + top bar + main content. No split panel. Resize below 768 px to see the mobile
         hamburger menu.
       </p>
-
       <div class="rounded-xl border border-border overflow-hidden" style="height: 420px">
-        <AppLayoutIsland
-          client:load
-          navItems={[
-            { id: 'dashboard', label: 'Dashboard', active: true },
-            { id: 'projects', label: 'Projects' },
-            { id: 'team', label: 'Team' },
-            { id: 'settings', label: 'Settings' },
-          ]}
-          topActions={null}
-        >
-          <div class="space-y-4">
-            <h3 class="text-lg font-semibold">Dashboard</h3>
-            <p class="text-sm text-muted-foreground">
-              This is the main content region. It scrolls independently. The left nav and top bar
-              stay fixed.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {['Revenue', 'Users', 'Requests'].map((kpi) => (
-                <div
-                  key={kpi}
-                  class="rounded-lg border border-border bg-card p-4"
-                >
-                  <p class="text-xs text-muted-foreground">{kpi}</p>
-                  <p class="mt-1 text-2xl font-bold">—</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </AppLayoutIsland>
+        <ShowcaseAppLayoutDefault client:load />
       </div>
     </section>
 
@@ -70,62 +41,10 @@ import AppLayoutIsland from '@/components/islands/AppLayoutIsland';
       </h2>
       <p class="text-sm text-muted-foreground mb-4">
         Click the panel-toggle button in the top-right to open/close the details panel. On
-        screens ≥ 1024 px the panel appears as a side-by-side column; on smaller screens it
-        stacks below the main content.
+        screens ≥ 1024 px the panel appears side-by-side; on smaller screens it stacks below.
       </p>
-
       <div class="rounded-xl border border-border overflow-hidden" style="height: 420px">
-        <AppLayoutIsland
-          client:load
-          defaultSplitOpen={true}
-          navItems={[
-            { id: 'resources', label: 'Resources', active: true },
-            { id: 'logs', label: 'Logs' },
-            { id: 'alerts', label: 'Alerts' },
-          ]}
-          splitPanelContent={
-            <div class="p-4 space-y-3">
-              <h3 class="text-sm font-semibold">Resource details</h3>
-              <dl class="space-y-2 text-xs">
-                <div class="flex justify-between">
-                  <dt class="text-muted-foreground">Name</dt>
-                  <dd class="font-medium">api-service-prod</dd>
-                </div>
-                <div class="flex justify-between">
-                  <dt class="text-muted-foreground">Region</dt>
-                  <dd class="font-medium">us-east-1</dd>
-                </div>
-                <div class="flex justify-between">
-                  <dt class="text-muted-foreground">Status</dt>
-                  <dd class="font-medium text-green-600 dark:text-green-400">Running</dd>
-                </div>
-                <div class="flex justify-between">
-                  <dt class="text-muted-foreground">Uptime</dt>
-                  <dd class="font-medium">14d 6h</dd>
-                </div>
-              </dl>
-            </div>
-          }
-        >
-          <div class="space-y-4">
-            <h3 class="text-lg font-semibold">Resources</h3>
-            <p class="text-sm text-muted-foreground">
-              Select a resource to populate the details panel on the right. Toggle the panel
-              with the button in the top bar.
-            </p>
-            <ul class="space-y-2">
-              {['api-service-prod', 'web-frontend-prod', 'db-primary'].map((name) => (
-                <li
-                  key={name}
-                  class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2 text-sm"
-                >
-                  <span class="font-medium">{name}</span>
-                  <span class="text-xs text-green-600 dark:text-green-400">Running</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </AppLayoutIsland>
+        <ShowcaseAppLayoutSplit client:load />
       </div>
     </section>
 
@@ -140,18 +59,24 @@ import AppLayoutIsland from '@/components/islands/AppLayoutIsland';
           </tr>
         </thead>
         <tbody>
-          {[
-            ['Tab / Shift+Tab', 'Move focus between nav items, top-bar buttons, and main content'],
-            ['Enter / Space', 'Activate the focused nav item or button'],
-            ['Escape', 'Close the mobile nav drawer when open'],
-          ].map(([key, desc]) => (
-            <tr key={key} class="border-b border-border last:border-0">
-              <td class="py-2 pr-8">
-                <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{key}</kbd>
-              </td>
-              <td class="py-2 text-muted-foreground">{desc}</td>
-            </tr>
-          ))}
+          <tr class="border-b border-border">
+            <td class="py-2 pr-8">
+              <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Tab / Shift+Tab</kbd>
+            </td>
+            <td class="py-2 text-muted-foreground">Move focus between nav items, top-bar buttons, and main content</td>
+          </tr>
+          <tr class="border-b border-border">
+            <td class="py-2 pr-8">
+              <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Enter / Space</kbd>
+            </td>
+            <td class="py-2 text-muted-foreground">Activate the focused nav item or button</td>
+          </tr>
+          <tr>
+            <td class="py-2 pr-8">
+              <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Escape</kbd>
+            </td>
+            <td class="py-2 text-muted-foreground">Close the mobile nav drawer when open</td>
+          </tr>
         </tbody>
       </table>
     </section>
@@ -161,7 +86,7 @@ import AppLayoutIsland from '@/components/islands/AppLayoutIsland';
       <h2 id="mobile-heading" class="text-xl font-semibold mb-3">Mobile behaviour</h2>
       <ul class="space-y-2 text-sm text-muted-foreground list-disc list-inside">
         <li>The left sidebar is hidden below the <code>md</code> (768 px) breakpoint.</li>
-        <li>A hamburger button in the top bar opens a drawer overlay with the nav items.</li>
+        <li>A hamburger button in the top bar opens a drawer overlay with nav items.</li>
         <li>The drawer closes on Escape, backdrop click, or nav-item selection.</li>
         <li>On resize back to desktop width, the mobile nav auto-closes.</li>
         <li>The split panel stacks below main content on screens narrower than <code>lg</code> (1024 px).</li>
