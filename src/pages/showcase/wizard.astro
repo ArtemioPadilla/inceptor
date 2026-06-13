@@ -1,0 +1,217 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import WizardIsland from '@/components/islands/WizardIsland';
+---
+
+<BaseLayout
+  title="Wizard Blueprint"
+  description="Reusable multi-step wizard with typed step contract, per-step validation, progress indicator."
+>
+  <main class="mx-auto max-w-4xl px-4 py-12 space-y-12">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">
+        Wizard Blueprint
+      </h1>
+      <p class="mt-2 text-muted-foreground max-w-2xl">
+        A composable multi-step wizard with typed step contract, per-step validation gates,
+        progress indicator, keyboard shortcuts, and completion affordance. Integrates with
+        react-hook-form + zod for per-step validation.
+      </p>
+    </header>
+
+    <!-- Demo 1: Linear wizard (3 steps + per-step validation) -->
+    <section aria-labelledby="linear-heading">
+      <h2 id="linear-heading" class="text-xl font-semibold mb-4">
+        Linear wizard — 3 steps with per-step validation
+      </h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        Each step has a <code>validate()</code> gate. Step 2 deliberately blocks if "Block me"
+        is typed. Try it: type "Block me" and click Next.
+      </p>
+      <WizardIsland
+        client:load
+        steps={[
+          {
+            id: 'account',
+            title: 'Account',
+            description: 'Set up your account details.',
+            validate: async () => {
+              // Simulated async check — always passes in this demo
+              await new Promise((r) => setTimeout(r, 200));
+              return true;
+            },
+          },
+          {
+            id: 'plan',
+            title: 'Plan',
+            description: 'Choose your plan. Type "Block me" to see validation failure.',
+            validate: () => {
+              const el = document.getElementById('wizard-demo-plan-input') as HTMLInputElement | null;
+              if (el?.value?.toLowerCase() === 'block me') {
+                return 'Remove "Block me" from the input to proceed.';
+              }
+              return true;
+            },
+          },
+          {
+            id: 'confirm',
+            title: 'Confirm',
+            description: 'Review and submit.',
+          },
+        ]}
+        onSubmit={async (_data) => {
+          await new Promise((r) => setTimeout(r, 800));
+        }}
+      >
+        {(stepId: string) => {
+          if (stepId === 'account') {
+            return (
+              <div class="space-y-4">
+                <div class="space-y-1.5">
+                  <label for="wizard-email" class="text-sm font-medium">Email</label>
+                  <input
+                    id="wizard-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm
+                           shadow-sm transition-colors placeholder:text-muted-foreground
+                           focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <label for="wizard-name" class="text-sm font-medium">Full name</label>
+                  <input
+                    id="wizard-name"
+                    type="text"
+                    placeholder="Ada Lovelace"
+                    class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm
+                           shadow-sm transition-colors placeholder:text-muted-foreground
+                           focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </div>
+              </div>
+            );
+          }
+          if (stepId === 'plan') {
+            return (
+              <div class="space-y-4">
+                <p class="text-sm text-muted-foreground">
+                  Type "Block me" below to trigger a validation error, or leave it blank to proceed.
+                </p>
+                <input
+                  id="wizard-demo-plan-input"
+                  type="text"
+                  placeholder='Type "Block me" to block advance'
+                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm
+                         shadow-sm transition-colors placeholder:text-muted-foreground
+                         focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+                <div class="grid grid-cols-3 gap-3">
+                  {['Free', 'Pro', 'Team'].map((plan) => (
+                    <label key={plan} class="flex items-center gap-2 rounded-lg border border-border p-3 cursor-pointer hover:bg-accent">
+                      <input type="radio" name="wizard-plan" value={plan} class="size-3.5" />
+                      <span class="text-sm font-medium">{plan}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          if (stepId === 'confirm') {
+            return (
+              <div class="space-y-3 text-sm">
+                <p class="text-muted-foreground">Everything looks good. Click Submit to finish.</p>
+                <div class="rounded-md border border-border bg-muted/40 p-3 space-y-1">
+                  <p><span class="text-muted-foreground">Step 1:</span> Account details collected</p>
+                  <p><span class="text-muted-foreground">Step 2:</span> Plan selected</p>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                  Submission simulates a 800 ms async call. Watch the loading state on the button.
+                </p>
+              </div>
+            );
+          }
+          return null;
+        }}
+      </WizardIsland>
+    </section>
+
+    <!-- Demo 2: Conditional step -->
+    <section aria-labelledby="conditional-heading">
+      <h2 id="conditional-heading" class="text-xl font-semibold mb-4">
+        Conditional step wizard
+      </h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        The "Advanced" step is only shown when the <code>condition</code> on the step
+        evaluates to true. In this demo it always appears, but you can wire it to form state
+        (e.g. "show advanced settings only if power-user checkbox is checked").
+      </p>
+      <WizardIsland
+        client:load
+        steps={[
+          { id: 'basic', title: 'Basic setup' },
+          {
+            id: 'advanced',
+            title: 'Advanced',
+            description: 'Only shown for power users (condition example).',
+            condition: () => true, // wire to actual state in production
+          },
+          { id: 'done', title: 'Done' },
+        ]}
+        onSubmit={async () => {
+          await new Promise((r) => setTimeout(r, 500));
+        }}
+        onCancel={() => console.log('[wizard demo] cancelled')}
+        labels={{ submit: 'Finish', cancel: 'Cancel setup' }}
+      >
+        {(stepId: string) => {
+          if (stepId === 'basic') return <p class="text-sm text-muted-foreground">Basic settings here.</p>;
+          if (stepId === 'advanced') return <p class="text-sm text-muted-foreground">Advanced settings here — only visible when condition is true.</p>;
+          if (stepId === 'done') return <p class="text-sm text-muted-foreground">All steps complete.</p>;
+          return null;
+        }}
+      </WizardIsland>
+    </section>
+
+    <!-- Linear vs conditional guidance -->
+    <section aria-labelledby="guidance-heading" class="rounded-lg border border-border bg-card p-6">
+      <h2 id="guidance-heading" class="text-lg font-semibold mb-4">Linear vs conditional steps</h2>
+      <div class="grid gap-4 sm:grid-cols-2 text-sm">
+        <div class="space-y-2">
+          <h3 class="font-medium">Linear steps</h3>
+          <ul class="text-muted-foreground space-y-1 list-disc list-inside">
+            <li>Omit the <code>condition</code> prop</li>
+            <li>All steps always shown in progress bar</li>
+            <li>Best for: account setup, onboarding flows</li>
+          </ul>
+        </div>
+        <div class="space-y-2">
+          <h3 class="font-medium">Conditional steps</h3>
+          <ul class="text-muted-foreground space-y-1 list-disc list-inside">
+            <li>Add <code>condition: (data) => boolean</code> to a step</li>
+            <li>Step hidden from progress bar when condition is false</li>
+            <li>Best for: optional sections, role-based flows</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-4 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
+        <strong>Keyboard shortcut:</strong> <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono">Ctrl+Enter</kbd> or <kbd class="rounded bg-muted px-1.5 py-0.5 font-mono">Cmd+Enter</kbd> advances the wizard (or submits on the final step).
+      </div>
+    </section>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
+      <a href={withBase('/gallery/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Gallery
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/WizardIsland.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
