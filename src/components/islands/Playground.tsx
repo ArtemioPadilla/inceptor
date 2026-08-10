@@ -118,7 +118,15 @@ class RenderBoundary extends React.Component<
  */
 export default function Playground({ initialCode, scope, className }: PlaygroundProps) {
   const [code, setCode] = React.useState(initialCode);
-  const [runtimeError, setRuntimeError] = React.useState<Error | null>(null);
+  // Tagged with the `code` that produced it so a render-phase error from a
+  // *previous* snippet never leaks into the display for the current one —
+  // computed during render (no effect needed) by comparing `runtimeError.code`
+  // to the current `code` below, which also sidesteps the "setState directly
+  // in an effect" anti-pattern a naive `useEffect(() => reset(), [code])`
+  // would trigger.
+  const [runtimeError, setRuntimeError] = React.useState<{ code: string; error: Error } | null>(
+    null,
+  );
 
   const mergedScope = React.useMemo(
     () => ({ ...defaultPlaygroundScope, ...scope }),
@@ -132,14 +140,12 @@ export default function Playground({ initialCode, scope, className }: Playground
     [code, mergedScope],
   );
 
-  // Clear any previous render-phase error as soon as the code changes; the
-  // RenderBoundary below is also remounted via `key={code}` for the same
-  // "give the next attempt a clean slate" reason.
-  React.useEffect(() => {
-    setRuntimeError(null);
-  }, [code]);
+  const onRenderError = React.useCallback(
+    (renderError: Error) => setRuntimeError({ code, error: renderError }),
+    [code],
+  );
 
-  const error = compileError ?? runtimeError;
+  const error = compileError ?? (runtimeError?.code === code ? runtimeError.error : null);
 
   return (
     <div className={cn('grid gap-3 md:grid-cols-2', className)}>
@@ -166,7 +172,7 @@ export default function Playground({ initialCode, scope, className }: Playground
               {error.message}
             </p>
           ) : (
-            <RenderBoundary key={code} onError={setRuntimeError}>
+            <RenderBoundary key={code} onError={onRenderError}>
               {element}
             </RenderBoundary>
           )}
