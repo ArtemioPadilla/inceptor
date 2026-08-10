@@ -110,7 +110,7 @@ Advisory (`continue-on-error: true`) until baselines match Linux CI.
 
 ## Epic 8 — Scope intentionally trimmed in v1.0
 
-- [ ] `<DataTable>` column pinning *(deferred from #25 — folded into Epic 23's broader ProTable-style power-features pass)*
+- [x] `<DataTable>` column pinning *(deferred from #25 — shipped as part of Epic 23's broader ProTable-style power-features pass, #246)*
 - [ ] Evaluate TanStack Form vs the react-hook-form + zod wrapper
 - [ ] Tighten Slot/`cloneElement` semantics if prop conflicts surface
 
@@ -182,9 +182,9 @@ Advisory (`continue-on-error: true`) until baselines match Linux CI.
 - [x] `/demos/settings` composed demo; dashboard data-viz (sparkline/gauge/bar-list) (#100)
 - [ ] `VariantGrid` + full `PropsTable` (recipes shipped #100; prop tables still pending)
 - [ ] Per-component Playwright baselines + manifest-driven `gallery.spec.ts` *(unblocks Epic 1)*
-- [ ] **`<Playground>` live prop editing** — scope resolved by the 2026-08 DX study: skip full Sandpack/CodeSandbox-style in-browser bundling (wrong cost/benefit for a "ship zero JS by default" static site); instead a `react-runner`-style single-file transpile-on-keystroke editor scoped to a fixed `{ React, @/components/ui/* }` scope, gated `client:visible` like every other gallery island. An "Open in StackBlitz" external link (shadcn's approach) covers the fork-into-a-real-project case more cheaply than building it in-house. `/gallery.json` endpoint stays a stretch add-on.
-- [ ] **Blocks-style Preview/Code toggle** for composed page sections (dashboard KPI row, settings form) — reuse the existing `CodeSnippet` (Shiki + copy) infra, applied to a full composition instead of one component; mirrors shadcn's `/blocks` pattern. Feeds Epic 27's installable page blocks.
-- [ ] **Inline maturity/hydration badges** on each component's `/gallery` detail page and `PropsTable` rows — extend the existing ✅/🔵/🧪 stability glyphs (today only in `docs/component-catalog.md`) inline at point of use, plus a second glyph for hydration cost (`client:load` vs `client:visible`-safe). Pattern borrowed from MUI X's inline Pro/Premium markers, independent of the licensing angle.
+- [x] **`<Playground>` live prop editing** *(#248)* — shipped on `sucrase` directly (not `react-runner`, which peer-caps at React ≤18, incompatible with this repo's React 19) — a single-file transpile-on-keystroke editor scoped to a fixed component scope, gated `client:visible`, wired into 3 gallery pages as a proof of concept (`primitives`/`feedback`/`disclosure`). An "Open in StackBlitz" external link and full rollout to every component remain open. `/gallery.json` endpoint stays a stretch add-on.
+- [x] **Blocks-style Preview/Code toggle** for composed page sections *(#249)* — `BlockPreviewToggle.astro`, reusing `CodeSnippet`, applied to Epic 27's login/settings/app-layout blocks. Dashboard-KPI-row/settings-form-as-isolated-snippet still open.
+- [x] **Inline maturity/hydration badges** on each component's `/gallery` detail page *(#248)* — `src/lib/gallery-badges.ts` extends the existing ✅/🔵/🧪 stability glyphs inline near the title, plus a hydration-directive glyph (optional `hydration?` field on `GalleryEntry`, backward-compatible). `PropsTable`-row-level badges still open (no `PropsTable` exists yet, see the line above in this epic).
 
 ### Per-archetype demos (when archetypes land)
 
@@ -208,7 +208,7 @@ choice.
 - [x] Navigation & menus — Combobox, Command palette (⌘K), Navigation menu, Menubar, Stepper (#97)
 - [x] Extras & data-viz — Tree view, Timeline, Bar list, Sparkline, Gauge (#98)
 - [x] Catalog doc synced (#99)
-- [ ] *(dependency-gated, per-project)* Rich text, Carousel, Lightbox, Code block (Shiki), advanced charts — documented in the catalog. Date/Color picker and Resizable graduated to real, scoped work — see Epic 21 (inputs) and Epic 22 (Splitter). *(Date/Color picker: build on `react-day-picker` + Base UI `Popover`/`Field`, following shadcn's Base UI `date-picker` composition pattern almost 1:1 — no new heavy dependency, per the 2026-08 ecosystem study.)*
+- [ ] *(dependency-gated, per-project)* Rich text, Carousel, Lightbox, Code block (Shiki), advanced charts — documented in the catalog. Date/Color picker (#244) and Splitter (#243) shipped — see Epic 21/22.
 - [ ] *(niche / on-demand)* Mentions, Cascader, Transfer, QR, Tour, Watermark, Segment Group *(the last ~90% covered already by the shipped Toggle Group — only the sliding-indicator polish is missing)*, Listbox, JSON tree view *(specialized Tree View variant — build only when a concrete consumer needs it, e.g. an API-payload/audit-log viewer)*, Timer, Floating panel, Signature pad, Image cropper
 - [ ] *(explicitly not building — recorded so it isn't re-proposed)* Marquee, Angle slider, Swap — all fit consumer/marketing/creative-tool UI, not enterprise-admin CRUD, per the 2026-08 ecosystem study's niche-primitive triage
 - [ ] *(explicitly deferred, not core)* Kanban board, Gantt chart — real components exist to copy (Kibo UI, `kibo-ui.com`, MIT), but they're project-management-tool primitives, not general admin-dashboard ones (same reasoning `docs/CLOUDSCAPE-GAP-ROADMAP.md:114` already applies to board/DnD UI: *"build only if a real downstream project needs one, then extract upstream"*). If ever needed: Kanban is a clean port (~250 LOC, `@dnd-kit/core`, real keyboard/SR accessibility story); Gantt is not (~1000+ LOC, drags in `jotai` which conflicts with this repo's Nano-Stores-only convention — would need an internal-state rewrite, not a copy-paste)
@@ -253,8 +253,8 @@ a human or Dependabot PR bypasses all of it because CI runs only `check` +
 
 ### Component documentation depth *(from the 2026-08 ecosystem-comparison study)*
 
-- [~] **Testing-recipe polyfills in `vitest.setup.ts`** — Chakra UI's Testing doc documents a full jsdom-gap polyfill set (`ResizeObserver`, `matchMedia`, `IntersectionObserver`, `scrollIntoView`, `requestAnimationFrame`, clipboard). `matchMedia` was already polyfilled; **`scrollIntoView` added** while fixing the chat auto-scroll bug (see `ChatThread` in `src/components/ui/ai/chat-message.tsx`). Still open: `ResizeObserver`/`IntersectionObserver` polyfills, and documenting the recipe itself as a named section in `docs/COMPONENTS.md` (today §7 only covers source-inspection tests, not RTL/behavior-test setup) — directly unblocks the still-partial RTL behavior-test line in Epic 10.
-- [ ] **Keyboard-navigation contract tables** — formalize MUI Data Grid's `Key | Description` table convention (grouped by interaction context: Navigation / Selection / Sorting, etc.), using Inceptor's own `<Kbd>` component, as a required subsection on `DataTable`, `Combobox`, `Command palette`, `Tree view`, and `Menubar` gallery/doc pages. Documentation-only, no new engineering — gives `npm run keyboard-nav` something authoritative to verify against.
+- [x] **Testing-recipe polyfills in `vitest.setup.ts`** *(#242, #243, #248)* — `matchMedia`, `scrollIntoView`, `ResizeObserver`, `IntersectionObserver` all now polyfilled. Recipe documented as a named section in `docs/COMPONENTS.md` §7 (#248) — directly unblocks the still-partial RTL behavior-test line in Epic 10.
+- [x] **Keyboard-navigation contract tables** *(#248)* — MUI Data Grid's `Key | Description` convention, grouped by interaction context, using Inceptor's `<Kbd>` component — added to `docs/component-guidelines/{data,navmenu,extras}.md` for `DataTable`/`Combobox`/`Command palette`/`Menubar`/`Tree view`, read from real source (including honest "not actually keyboard-operable" admissions where true, e.g. DataTable column-resize, Tree view's arrow-key nav despite `role="tree"` markup).
 
 ## Epic 19 — Self-hosted backend archetypes — ✅ shipped (#109)
 
@@ -303,7 +303,7 @@ no upfront picker.** This epic turns that decision into shipped surface.
 
 ---
 
-## Epic 21 — Universal input & utility primitives *(2026-08 ecosystem study)*
+## Epic 21 — Universal input & utility primitives — ✅ shipped (#244)
 
 The single most-repeated gap across a 6-library comparison (Astryx, MUI, shadcn,
 Chakra, Ant Design, Ark UI): **date/time picker was the only component all six
@@ -311,25 +311,24 @@ had that Inceptor has none of.** Scope resolved by follow-up research — this i
 input-only work, *not* a calendar/scheduler app (see the explicit deferral in
 Epic 17). Ordered by impact/effort.
 
-- [ ] **Date Picker + Date Range Picker** *(H/S–M)* — `Popover` + `Calendar`
+- [x] **Date Picker + Date Range Picker** *(H/S–M)* — `Popover` + `Calendar`
   composition on `react-day-picker` (MIT, ~22 kB, actively maintained, 500k+
   weekly downloads), no root component — copy shadcn's Base UI `date-picker`
   pattern near-verbatim, it's built the same way this repo already builds
-  primitives. `mode="range"` covers the range variant.
-- [ ] **Time Picker** *(M/S)* — a time-input composed alongside the date
-  picker (date+time combined), same `react-day-picker`/Base UI foundation.
-- [ ] **Color Picker** *(M/S)* — theming/branding admin screens.
-- [ ] **Editable** *(H/S)* — inline click-to-edit text; table-cell/settings-label
-  renaming is a CRUD staple. Cheap: a thin focus/commit-on-blur wrapper around
-  the existing `Input`.
-- [ ] **Password Input** *(H/XS)* — reveal toggle + optional strength meter on
-  top of the existing `Input`; every auth/settings form needs it.
-- [ ] **Clipboard** *(M/XS)* — copy-to-clipboard state (icon swap + timeout),
-  used constantly for API keys/IDs/webhook URLs in dev-facing admin panels.
-- [ ] *(polish, not new)* **Segmented control sliding indicator** — Toggle
-  Group already covers ~90% of this; only the animated-indicator variant is
-  missing, no new component needed.
-- [ ] *(architecture)* **Write ADR 0009** — "Base UI remains primary; permit
+  primitives. `mode="range"` covers the range variant. (#244)
+- [x] **Time Picker** *(M/S)* — a time-input composed alongside the date
+  picker (date+time combined), same `react-day-picker`/Base UI foundation. (#244)
+- [x] **Color Picker** *(M/S)* — theming/branding admin screens. (#244)
+- [x] **Editable** *(H/S)* — inline click-to-edit text; table-cell/settings-label
+  renaming is a CRUD staple. Built on `@zag-js/editable` per ADR 0009. (#244)
+- [x] **Password Input** *(H/XS)* — reveal toggle on top of the existing
+  `Input`; every auth/settings form needs it. (#244)
+- [x] **Clipboard** *(M/XS)* — copy-to-clipboard state (icon swap + timeout),
+  used constantly for API keys/IDs/webhook URLs in dev-facing admin panels. (#244)
+- [x] *(polish, not new)* **Segmented control sliding indicator** — added as
+  `variant="segmented"` on the existing Toggle Group, additive, no regression
+  to the default variant. (#244)
+- [x] *(architecture)* **Write ADR 0009** — "Base UI remains primary; permit
   `@zag-js/*` machines for primitives Base UI does not ship." Base UI is still
   `1.0.0-rc.0` with no GA cut since Dec 2025, while Ark UI (the zag.js-backed
   alternative) ships stable releases every 2–5 weeks. Not a reason to migrate
@@ -338,82 +337,83 @@ Epic 17). Ordered by impact/effort.
   this epic existed, Splitter, Editable, Tour), depending directly on
   `@zag-js/<component>` (not the full `@ark-ui/react` wrapper) and wrapping it
   in the same shadcn-style pattern is lower-risk than either hand-rolling
-  every gap primitive or reopening ADR 0002 wholesale.
+  every gap primitive or reopening ADR 0002 wholesale. (`docs/decisions/0009-zag-js-for-gap-primitives.md`)
 
-## Epic 22 — Resizable layout & bulk actions *(2026-08 ecosystem study)*
+## Epic 22 — Resizable layout & bulk actions — ✅ shipped (#243)
 
-- [ ] **Splitter** *(H/M)* — resizable panes for master-detail layouts
+- [x] **Splitter** *(H/M)* — resizable panes for master-detail layouts
   (`AppLayoutIsland`, `ResourceDetails`) — a defining Cloudscape/enterprise-
-  console pattern. 5 of 6 studied libraries ship one; Base UI doesn't, so this
-  is an ADR-0009 zag.js candidate (see Epic 21) or a hand-built pointer +
-  CSS-grid drag controller.
-- [ ] **Action Bar** *(H/S)* — contextual bulk-action toolbar over `DataTable`
-  row selection (which already exists) — the "N items selected" pattern.
-  Pairs directly with Epic 23.
+  console pattern. Built on `@zag-js/splitter` per ADR 0009; keyboard-resizable
+  for free from the state machine. (#243)
+- [x] **Action Bar** *(H/S)* — contextual bulk-action toolbar, standalone and
+  data-source-agnostic (DataTable had no row-selection state yet at ship
+  time — wired together in Epic 23). (#243)
 
-## Epic 23 — DataTable power features *(ProTable-inspired, 2026-08 study)*
+## Epic 23 — DataTable power features — ✅ shipped (#246)
 
 Ant Design Pro's `ProTable` is the most feature-complete admin-table prior art
-studied. Absorbs the column-pinning line from Epic 8. Combine with the
+studied. Absorbs the column-pinning line from Epic 8. Combines with the
 existing five-state `useListing` model (loading/error/empty-zero/empty-
 filtered/ready) rather than replacing it — that model is already more
 rigorous about empty/error UX than ProTable's own docs describe.
 
-- [ ] Column pinning *(deferred from #25, Epic 8)*
-- [ ] Per-column filter dropdowns (not just the current global text filter)
-- [ ] Expandable rows + a computed summary/footer row
-- [ ] Sticky header with configurable offset
-- [ ] Column-visibility persistence in `localStorage`
-- [ ] A `request(params, sort, filter) => {data, total}`-shaped contract,
-  wired through `useListing`, so server-side and client-side tables share one
-  integration point
-- [ ] **Download Trigger** — export-button-with-loading-state component,
-  pairs naturally with `DataTable` for CSV/PDF export
+- [x] Column pinning *(deferred from #25, Epic 8)* (#246)
+- [x] Per-column filter dropdowns (not just the current global text filter) (#246)
+- [x] Expandable rows (folded into the same virtualized item list so scroll
+  offsets stay accurate — regression-tested after a review cycle caught a real
+  coverage gap here) + a computed summary/footer row (#246)
+- [x] Sticky header with configurable offset (#246)
+- [x] Column-visibility persistence in `localStorage` (SSR-safe, post-mount only) (#246)
+- [x] A `request(params, sort, filter) => {data, total}`-shaped contract,
+  wired through the real `useListing` state machine, not a parallel one (#246)
+- [x] **Download Trigger** — standalone export-button-with-loading-state
+  component, wired into `DataTable`'s toolbar via `onExport` (#246)
 
-## Epic 24 — Unified field abstraction *(`fieldType`, 2026-08 study)*
+## Epic 24 — Unified field abstraction (`fieldType`) — ✅ shipped (#247)
 
 The highest-leverage single idea from the study, with no exact equivalent in
 the other 5 libraries — inspired by Ant ProComponents' `ProField`
 `valueType`. One data-type definition (money, date, select w/ options,
 status…) driving `DataTable` cell rendering, filter input, `Form` field, and
-`description-list` row — today four separate, independently-wired surfaces.
-Directly accelerates the in-flight service-shell/resource-details/wizard work
-(Epic from #202).
+`description-list` row — previously four separate, independently-wired
+surfaces. Directly accelerates the in-flight service-shell/resource-details/
+wizard work (Epic from #202).
 
-- [ ] Design the `fieldType` union + shared renderer contract
-- [ ] Wire `DataTable` columns through it
-- [ ] Wire `Form` fields through it (react-hook-form + zod stays underneath)
-- [ ] Wire `description-list` rows through it
-- [ ] Wire filter inputs (`PropertyFilter`) through it
+- [x] Design the `fieldType` union + shared renderer contract — `src/lib/field-type.ts` (#247)
+- [x] Wire `DataTable` columns through it (`ColumnMeta.fieldType`, additive — explicit `cell` always wins) (#247)
+- [x] Wire `Form` fields through it (react-hook-form + zod stays underneath, via `FieldFormItem`) (#247)
+- [x] Wire `description-list` rows through it (#247)
+- [x] Wire filter inputs (`PropertyFilter`) through it *(known gap: date/dateRange fieldType only wires the input widget — `filterByTokens`'s numeric coercion isn't date-aware yet; degrades safely, documented in `docs/component-guidelines/data.md`)* (#247)
 
-## Epic 25 — Generative theming *(2026-08 study)*
+## Epic 25 — Generative theming — ✅ shipped (#241)
 
 Four of six studied libraries (Chakra semantic tokens, Astryx `defineTheme()`,
 MUI CSS-variables mode, Ant Seed→Map→Alias) derive light+dark from a single
-definition; `src/styles/global.css` still hand-duplicates the full palette
-under `:root` and `.dark`.
+definition; `src/styles/global.css` previously hand-duplicated the full
+palette under `:root` and `.dark`.
 
-- [ ] Semantic tokens as one `{ base, dark }` definition per token, expanded
-  at build time (or via `light-dark()`) into the existing `:root`/`.dark`
-  CSS-var blocks — same authoring surface, no duplication
-- [ ] `defineTheme(accentColor)` — derive a full accessible palette from one
-  brand color; ties directly into the re-brand-on-instantiate workflow
-  `CLAUDE.md` already documents for `create-inceptor-app`
+- [x] Semantic tokens as one `{ base, dark }` definition per token via CSS
+  `light-dark()` — same CSS variable names, byte-identical resolved values,
+  no build step needed (#241)
+- [x] `defineTheme(accentColor)` — derive a full accessible palette from one
+  brand color (`src/lib/define-theme.ts`); ties into the re-brand-on-instantiate
+  workflow `CLAUDE.md` documents for `create-inceptor-app`, not yet wired into
+  a setup script (#241)
 
-## Epic 26 — Agent-consumable component registry *(2026-08 study)*
+## Epic 26 — Agent-consumable component registry — ✅ shipped (#245)
 
 Four independent sources (shadcn's registry+MCP, Ark UI's MCP+`llms.txt`, Ant
 Pro's agent-facing guideline docs, Astryx's CLI+MCP+vibe-test harness)
 converged on this without coordinating — the idea with the most philosophical
 fit for a template whose entire premise is "Claude builds the UI."
 
-- [ ] `registry.json` (shadcn-`build`-compatible shape, confirmed
-  primitive-agnostic — Base UI is one of shadcn's own blessed bases as of
-  2026, so schema compatibility is plausible) exposing Inceptor's own
-  components
-- [ ] An MCP server serving that registry
-- [ ] Per-component guideline docs in Ant Pro's format — Purpose / When to use
-  / API overview / Usage pattern / Common mistakes
+- [x] `registry.json` (shadcn-`build`-compatible shape) exposing Inceptor's
+  own components, generated from `src/content/gallery.ts` via `npm run gen:registry` (#245)
+- [x] An MCP server serving that registry — `mcp-server/`, exposing
+  `list_components`/`get_component` tools, verified over real stdio transport (#245)
+- [x] Per-component guideline docs in Ant Pro's format — Purpose / When to use
+  / API overview / Common mistakes — `docs/component-guidelines/`, covering
+  15 of the most-used/most-complex components to start (#245)
 - [ ] *(unverified hypothesis, not a decided plan)* Evaluate whether
   Inceptor projects could `npx shadcn add` components **from** the broader
   shadcn ecosystem (Kibo UI, Magic UI, Origin UI) once this registry exists —
@@ -428,30 +428,32 @@ fit for a template whose entire premise is "Claude builds the UI."
   against its own docs; Inceptor's entire workflow depends on the same
   property holding, but nothing currently measures it.
 
-## Epic 27 — Installable page blocks *(2026-08 study)*
+## Epic 27 — Installable page blocks — ✅ shipped (#249)
 
 Inceptor has islands (`AppLayoutIsland`, `WizardIsland`, `DetailsPageSimple`)
-but no complete, installable page compositions — a structural gap, not a
-component-count one.
+but previously had no complete, installable page compositions — a structural
+gap, not a component-count one.
 
-- [ ] Login/auth page (shadcn ships 5+ variants as reference)
-- [ ] Settings page as an installable block (today `/demos/settings` is a demo,
-  not a reusable block)
-- [ ] 2–3 `AppLayout` sidebar variants (icon-collapse, dual-sidebar)
-- [ ] Preview/Code toggle per block, reusing `CodeSnippet` — see Epic 16
+- [x] Login/auth page — `LoginForm` island + `/login`, reuses the existing
+  `src/schemas/login.ts` (#249)
+- [x] Settings page as an installable block — `SettingsDemo.tsx` formalized
+  with a Danger-zone tab, now powers both `/demos/settings` and `/blocks/settings` (#249)
+- [x] 2 `AppLayout` sidebar variants (icon-collapse, dual-sidebar) — opt-in
+  `sidebarVariant` prop on `AppLayoutIsland`, backward-compatible when omitted (#249)
+- [x] Preview/Code toggle per block, reusing `CodeSnippet` — `BlockPreviewToggle.astro`
+  (Astro-only, no nested islands) + new `/blocks/*` routes (#249)
 
-## Epic 28 — AI kit refinement *(2026-08 study)*
+## Epic 28 — AI kit refinement — ✅ shipped (#242)
 
-- [~] **Chat auto-scroll** — `ChatThread` had no scroll-anchoring at all
+- [x] **Chat auto-scroll** — `ChatThread` had no scroll-anchoring at all
   (reported directly against `/demos/ai-chat`); fixed with a bottom-sentinel
-  `useEffect` that scrolls on every render, covered by a new behavior test.
-  Still open: the fuller shadcn `MessageScroller` behavior — stick to bottom
-  *unless* the user has scrolled up to read history, so streaming doesn't
-  yank their scroll position.
-- [ ] `shimmer` / `scroll-fade` CSS utilities for `streaming-text.tsx`
-- [ ] **Citation** component — source-attribution for AI answers; Inceptor's
-  `ai/` kit has chat/streaming/feedback/disclosure but nothing for citing
-  sources, unlike Astryx's chat-component family
+  effect (#188 direct fix), then refined to the full shadcn `MessageScroller`
+  behavior — stick to bottom *unless* the user has scrolled up, plus a
+  "Nuevos mensajes ↓" jump-to-bottom affordance (#242)
+- [x] `shimmer` / `scroll-fade-y` CSS utilities for `streaming-text.tsx`
+  (shimmer degrades to static under `prefers-reduced-motion`) (#242)
+- [x] **Citation** component — `CitationRef`/`CitationList`, source-attribution
+  for AI answers, wired into `ShowcaseAI.tsx` (#242)
 
 ---
 
