@@ -24,11 +24,28 @@ import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import ErrorBoundary from './ErrorBoundary';
 
-// A realistic settings surface composing Tabs + every form control. Tabs share
-// selected-tab state across List/Content, so the whole thing must hydrate as a
-// single island (CLAUDE.md compound-component gotcha).
+/**
+ * SettingsDemo — an installable settings-page block (ROADMAP Epic 27).
+ *
+ * A realistic settings surface composing Tabs + every form control across
+ * sectioned Cards: Profile, Notifications, Appearance, and a destructive
+ * Danger zone. Tabs and the AlertDialog both share state across their
+ * sub-components, so the whole composition hydrates as a single island
+ * (CLAUDE.md compound-component gotcha). Used by both /demos/settings (the
+ * live demo) and /blocks/settings (the installable-block preview + source).
+ */
 export default function SettingsDemo() {
   return (
     <ErrorBoundary name="SettingsDemo">
@@ -65,6 +82,9 @@ function SettingsInner() {
   const [density, setDensity] = React.useState(50);
   const [reduceMotion, setReduceMotion] = React.useState(false);
 
+  // Danger zone
+  const [accountDeleted, setAccountDeleted] = React.useState(false);
+
   const [saved, setSaved] = React.useState(false);
   // Track the timeout id so we can clear it on re-click or unmount,
   // preventing a setState call on an already-unmounted component.
@@ -98,10 +118,11 @@ function SettingsInner() {
   return (
     <div className="mx-auto w-full max-w-2xl">
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
+          <TabsTrigger value="danger">Danger zone</TabsTrigger>
         </TabsList>
 
         {/* ---------------- Profile ---------------- */}
@@ -290,6 +311,66 @@ function SettingsInner() {
                 </span>
                 <Switch checked={reduceMotion} onCheckedChange={setReduceMotion} />
               </label>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ---------------- Danger zone ---------------- */}
+        <TabsContent value="danger">
+          <Card className="border-destructive/40">
+            <CardHeader>
+              <CardTitle className="text-xl text-destructive">Danger zone</CardTitle>
+              <CardDescription>
+                Irreversible, destructive actions. Proceed with caution.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {accountDeleted ? (
+                <p className="text-sm text-muted-foreground" role="status">
+                  Account scheduled for deletion. (Demo only — no data was changed.)
+                </p>
+              ) : (
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/40 p-4">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">Delete account</p>
+                    <p className="text-sm text-muted-foreground">
+                      Permanently remove your account and all associated data.
+                    </p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      render={<Button variant="destructive" type="button" />}
+                    >
+                      Delete account
+                    </AlertDialogTrigger>
+                    <AlertDialogContent aria-label="Delete account">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete account</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your
+                          account and remove your data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogClose render={<Button variant="outline" type="button" />}>
+                          Cancel
+                        </AlertDialogClose>
+                        <AlertDialogClose
+                          render={
+                            <Button
+                              variant="destructive"
+                              type="button"
+                              onClick={() => setAccountDeleted(true)}
+                            />
+                          }
+                        >
+                          Yes, delete my account
+                        </AlertDialogClose>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
