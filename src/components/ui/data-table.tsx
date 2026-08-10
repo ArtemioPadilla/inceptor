@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   type ColumnDef,
+  type ColumnPinningState,
   type ColumnSizingState,
   type RowSelectionState,
   type SortingState,
@@ -12,7 +13,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsUpDown, PinIcon, PinOffIcon } from 'lucide-react';
 
 import { ActionBar } from '@/components/ui/action-bar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -65,6 +66,13 @@ export interface DataTableProps<TData, TValue> {
    * when `enableSelection` is true.
    */
   renderBulkActions?: (selectedRows: TData[]) => React.ReactNode;
+  /**
+   * Opt-in column pinning (ROADMAP Epic 23 / Epic 8's deferred item). Renders
+   * a small pin/unpin icon button in each pinnable header cell. Pinned-left
+   * columns get `position: sticky` so they stay visible during horizontal
+   * scroll. Uses TanStack Table's built-in column-pinning state.
+   */
+  enableColumnPinning?: boolean;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -85,6 +93,7 @@ export function DataTable<TData, TValue>({
   syncToUrl = false,
   enableSelection = false,
   renderBulkActions,
+  enableColumnPinning = false,
 }: DataTableProps<TData, TValue>) {
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
@@ -196,6 +205,9 @@ export function DataTable<TData, TValue>({
     return [selectionColumn, ...columns];
   }, [columns, enableSelection]);
 
+  // Column-pinning state (Epic 23 / Epic 8's deferred item).
+  const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>({});
+
   const table = useReactTable({
     data,
     columns: tableColumns,
@@ -203,6 +215,7 @@ export function DataTable<TData, TValue>({
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
     enableRowSelection: enableSelection,
+    enableColumnPinning,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -211,12 +224,14 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: onColumnVisibility,
     onColumnSizingChange: onColumnSizing,
     onRowSelectionChange: setRowSelection,
+    onColumnPinningChange: setColumnPinning,
     state: {
       sorting,
       globalFilter,
       columnVisibility,
       columnSizing,
       rowSelection,
+      columnPinning,
     },
   });
 
@@ -342,35 +357,79 @@ export function DataTable<TData, TValue>({
                     : sortDir === 'desc'
                       ? 'descending'
                       : 'none';
+                  // Column-pinning (Epic 23): sticky-position pinned-left/right
+                  // columns so they stay visible during horizontal scroll.
+                  const pinnedSide = header.column.getIsPinned();
+                  const pinStyle: React.CSSProperties = pinnedSide
+                    ? {
+                        position: 'sticky',
+                        left: pinnedSide === 'left' ? header.column.getStart('left') : undefined,
+                        right: pinnedSide === 'right' ? header.column.getAfter('right') : undefined,
+                        zIndex: 20,
+                        background: 'var(--background)',
+                      }
+                    : {};
+                  const headerLabel =
+                    typeof header.column.columnDef.header === 'string'
+                      ? header.column.columnDef.header
+                      : header.column.id;
                   return (
                     <TableHead
                       key={header.id}
-                      style={{ width: header.getSize() }}
+                      style={{ width: header.getSize(), ...pinStyle }}
                       className="relative select-none whitespace-nowrap"
                       aria-sort={header.column.getCanSort() ? ariaSortValue : undefined}
+                      data-pinned={pinnedSide || undefined}
                     >
-                      {header.isPlaceholder ? null : (
-                        // Sortable headers use a real <button> for keyboard accessibility.
-                        // The button is full-width and visually unstyled (appearance:none)
-                        // so it looks identical to the previous div; focus ring added.
-                        header.column.getCanSort() ? (
+                      <div className="flex items-center justify-between gap-1">
+                        {header.isPlaceholder ? null : (
+                          // Sortable headers use a real <button> for keyboard accessibility.
+                          // The button is visually unstyled (appearance:none) so it looks
+                          // identical to a plain div; focus ring added.
+                          header.column.getCanSort() ? (
+                            <button
+                              type="button"
+                              className={cn(
+                                'flex min-w-0 items-center cursor-pointer hover:text-foreground',
+                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
+                              )}
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              <SortIcon direction={sortDir} />
+                            </button>
+                          ) : (
+                            <div className="flex min-w-0 items-center">
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </div>
+                          )
+                        )}
+                        {enableColumnPinning && header.column.getCanPin() && (
                           <button
                             type="button"
+                            onClick={() =>
+                              header.column.pin(pinnedSide ? false : 'left')
+                            }
+                            aria-label={
+                              pinnedSide
+                                ? `Unpin ${headerLabel} column`
+                                : `Pin ${headerLabel} column left`
+                            }
                             className={cn(
-                              'flex w-full items-center cursor-pointer hover:text-foreground',
-                              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
+                              'inline-flex shrink-0 items-center justify-center rounded-sm p-0.5',
+                              'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                              pinnedSide && 'text-primary',
                             )}
-                            onClick={header.column.getToggleSortingHandler()}
                           >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            <SortIcon direction={sortDir} />
+                            {pinnedSide ? (
+                              <PinOffIcon className="h-3 w-3" />
+                            ) : (
+                              <PinIcon className="h-3 w-3" />
+                            )}
                           </button>
-                        ) : (
-                          <div className="flex items-center">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </div>
-                        )
-                      )}
+                        )}
+                      </div>
                       {/* Column resize handle — drag to resize column width */}
                       {header.column.getCanResize() && (
                         <div
@@ -417,11 +476,23 @@ export function DataTable<TData, TValue>({
                     data-index={virtualRow.index}
                     ref={rowVirtualizer.measureElement}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      const pinnedSide = cell.column.getIsPinned();
+                      const cellPinStyle: React.CSSProperties = pinnedSide
+                        ? {
+                            position: 'sticky',
+                            left: pinnedSide === 'left' ? cell.column.getStart('left') : undefined,
+                            right: pinnedSide === 'right' ? cell.column.getAfter('right') : undefined,
+                            zIndex: 10,
+                            background: 'var(--background)',
+                          }
+                        : {};
+                      return (
+                        <TableCell key={cell.id} style={cellPinStyle} data-pinned={pinnedSide || undefined}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 );
               })
