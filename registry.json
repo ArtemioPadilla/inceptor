@@ -1002,6 +1002,24 @@
       }
     },
     {
+      "name": "field-type",
+      "type": "registry:ui",
+      "title": "fieldType",
+      "description": "One field definition (money, status, date, select…) drives DataTable cell rendering, PropertyFilter widgets, Form fields, and description-list rows — instead of wiring each surface by hand.",
+      "files": [
+        {
+          "path": "src/lib/field-type.ts",
+          "type": "registry:file"
+        }
+      ],
+      "dependencies": [
+        "react-day-picker",
+        "zod"
+      ],
+      "registryDependencies": [],
+      "cssVars": {}
+    },
+    {
       "name": "data-table",
       "type": "registry:ui",
       "title": "DataTable",

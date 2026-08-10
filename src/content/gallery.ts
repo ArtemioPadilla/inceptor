@@ -178,6 +178,17 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'feedback',
     island: 'ShowcaseFeedback',
   },
+  // Unified fieldType abstraction (ROADMAP Epic 24)
+  {
+    slug: 'field-type',
+    name: 'fieldType',
+    summary:
+      'One field definition (money, status, date, select…) drives DataTable cell rendering, PropertyFilter widgets, Form fields, and description-list rows — instead of wiring each surface by hand.',
+    source: 'src/lib/field-type.ts',
+    status: 'stable',
+    category: 'data',
+    island: 'ShowcaseFieldType',
+  },
   // Data — TanStack Table / Virtual
   {
     slug: 'data-table',

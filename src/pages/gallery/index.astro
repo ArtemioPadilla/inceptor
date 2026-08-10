@@ -24,6 +24,7 @@ import ShowcaseDropdown from '../../components/islands/ShowcaseDropdown';
 import ShowcaseTabs from '../../components/islands/ShowcaseTabs';
 import ShowcaseToast from '../../components/islands/ShowcaseToast';
 import ShowcaseForm from '../../components/islands/ShowcaseForm';
+import ShowcaseFieldType from '../../components/islands/ShowcaseFieldType';
 import ShowcaseDataTable from '../../components/islands/ShowcaseDataTable';
 import ShowcaseKpis from '../../components/islands/ShowcaseKpis';
 import ShowcaseCharts from '../../components/islands/ShowcaseCharts';
@@ -109,6 +110,7 @@ const populatedCategoryCount = categoryOrder.filter((cat) => getByCategory(cat).
                     {entry.island === 'ShowcaseTabs' && <ShowcaseTabs client:visible />}
                     {entry.island === 'ShowcaseToast' && <ShowcaseToast client:visible />}
                     {entry.island === 'ShowcaseForm' && <ShowcaseForm client:visible />}
+                    {entry.island === 'ShowcaseFieldType' && <ShowcaseFieldType client:visible />}
                     {entry.island === 'ShowcaseDataTable' && <ShowcaseDataTable client:visible />}
                     {entry.island === 'ShowcaseKpis' && <ShowcaseKpis client:visible />}
                     {entry.island === 'ShowcaseCharts' && <ShowcaseCharts client:visible />}
