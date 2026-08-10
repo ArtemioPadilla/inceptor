@@ -252,6 +252,28 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'inceptor',
     island: 'ShowcaseErrorBoundary',
   },
+  // Resizable layout & bulk actions (ROADMAP Epic 22)
+  {
+    slug: 'splitter',
+    name: 'Splitter',
+    summary:
+      'Resizable master-detail panes on @zag-js/splitter (ADR 0009 — Base UI ships no equivalent). Drag or arrow-key resize, per-panel min/max size.',
+    source: 'src/components/ui/splitter.tsx',
+    status: 'stable',
+    category: 'disclosure',
+    install: 'npm install @zag-js/splitter @zag-js/react',
+    island: 'ShowcaseSplitter',
+  },
+  {
+    slug: 'action-bar',
+    name: 'Action Bar',
+    summary:
+      'Bottom-anchored, dismissible bulk-action toolbar — the "N items selected" pattern. Data-source agnostic: plugs into DataTable row selection or any other list.',
+    source: 'src/components/ui/action-bar.tsx',
+    status: 'stable',
+    category: 'feedback',
+    island: 'ShowcaseActionBar',
+  },
 ];
 
 export function getByCategory(category: GalleryEntry['category']): GalleryEntry[] {

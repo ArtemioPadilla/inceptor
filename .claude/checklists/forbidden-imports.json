@@ -23,6 +23,11 @@
       "pattern": "@astrojs/tailwind",
       "reason": "Does not exist for Tailwind v4 — it goes through the Vite plugin.",
       "allowedAlternative": "@tailwindcss/vite"
+    },
+    {
+      "pattern": "@ark-ui/react",
+      "reason": "ADR 0009 permits `@zag-js/<component>` machines for primitives Base UI doesn't ship, but not the full Ark UI wrapper — it carries its own data-scope/data-part styling conventions that would sit awkwardly next to Base UI's render-prop convention.",
+      "allowedAlternative": "@zag-js/<component> (e.g. @zag-js/splitter), wrapped shadcn-style in src/components/ui/"
     }
   ]
 }

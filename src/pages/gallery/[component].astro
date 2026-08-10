@@ -29,6 +29,8 @@ import ShowcaseCharts from '../../components/islands/ShowcaseCharts';
 import MotionDemo from '../../components/islands/MotionDemo';
 import ShowcasePWA from '../../components/islands/ShowcasePWA';
 import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundary';
+import ShowcaseSplitter from '../../components/islands/ShowcaseSplitter';
+import ShowcaseActionBar from '../../components/islands/ShowcaseActionBar';
 
 export async function getStaticPaths() {
   return galleryManifest.map((entry) => ({
@@ -130,6 +132,8 @@ const propsTables = extractPropsForSource(entry.source, repoRoot);
           {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
           {entry.island === 'ShowcaseAI' && <ShowcaseAI client:visible />}
           {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
+          {entry.island === 'ShowcaseSplitter' && <ShowcaseSplitter client:visible />}
+          {entry.island === 'ShowcaseActionBar' && <ShowcaseActionBar client:visible />}
         </div>
         <div class="dark rounded-lg border border-border bg-background p-6 text-foreground">
           <p class="mb-4 text-xs uppercase tracking-wide text-muted-foreground">Dark</p>
@@ -152,6 +156,8 @@ const propsTables = extractPropsForSource(entry.source, repoRoot);
           {entry.island === 'MotionDemo' && <MotionDemo client:visible />}
           {entry.island === 'ShowcasePWA' && <ShowcasePWA client:visible />}
           {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
+          {entry.island === 'ShowcaseSplitter' && <ShowcaseSplitter client:visible />}
+          {entry.island === 'ShowcaseActionBar' && <ShowcaseActionBar client:visible />}
         </div>
       </div>
     </section>

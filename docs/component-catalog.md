@@ -5,7 +5,7 @@
 
 Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entry here is rendered live at `/gallery`.
 
-**Total:** 20 gallery entries across 15 categories.
+**Total:** 22 gallery entries across 15 categories.
 
 **Legend**
 
@@ -60,12 +60,14 @@ Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entr
 | Component | Status | Summary | Source |
 |---|---|---|---|
 | **Disclosure & layout** | ✅ stable | Accordion, Collapsible, Avatar, Skeleton, Separator, Scroll area, Aspect ratio. | [`src/components/ui/`](../src/components/ui/) |
+| **Splitter** | ✅ stable | Resizable master-detail panes on @zag-js/splitter (ADR 0009 — Base UI ships no equivalent). Drag or arrow-key resize, per-panel min/max size. | [`src/components/ui/splitter.tsx`](../src/components/ui/splitter.tsx) |
 
 ## 8. Feedback & status
 
 | Component | Status | Summary | Source |
 |---|---|---|---|
 | **Navigation & feedback** | ✅ stable | Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state, Error state. | [`src/components/ui/`](../src/components/ui/) |
+| **Action Bar** | ✅ stable | Bottom-anchored, dismissible bulk-action toolbar — the "N items selected" pattern. Data-source agnostic: plugs into DataTable row selection or any other list. | [`src/components/ui/action-bar.tsx`](../src/components/ui/action-bar.tsx) |
 
 ## 9. Data
 
