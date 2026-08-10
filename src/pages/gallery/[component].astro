@@ -4,9 +4,11 @@ import { withBase } from '@/lib/href';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { galleryManifest, type GalleryEntry } from '../../content/gallery';
 import { galleryRecipes } from '../../content/gallery-recipes';
+import { galleryPlaygrounds } from '../../content/gallery-playgrounds';
 import CodeSnippet from '../../components/gallery/CodeSnippet.astro';
 import { extractPropsForSource } from '../../lib/component-docs';
 import { stabilityGlyph, getHydrationDirective } from '../../lib/gallery-badges';
+import Playground from '../../components/islands/Playground';
 
 // Import every gallery island statically so Astro can wire hydration.
 // (Dynamic lookups via a registry don't work for `client:*` directives.)
@@ -49,6 +51,7 @@ interface Props {
 const { entry } = Astro.props;
 const repoBlob = `https://github.com/ArtemioPadilla/inceptor/blob/main/${entry.source}`;
 const recipe = galleryRecipes[entry.slug];
+const playground = galleryPlaygrounds[entry.slug];
 
 // Build-time props extraction via the TypeScript compiler API.
 // `repoRoot` is resolved from this file's location (src/pages/gallery/ → three
@@ -210,6 +213,19 @@ const propsTables = extractPropsForSource(entry.source, repoRoot);
         </p>
       )}
     </section>
+
+    {playground && (
+      <section class="mt-8 rounded-lg border border-border bg-card p-6">
+        <h2 class="mb-1 text-sm font-semibold text-foreground">Live playground</h2>
+        <p class="mb-4 text-sm text-muted-foreground">
+          Edit the snippet below — it transpiles and re-renders as you type. No
+          bundler, no imports needed: the components used here are already in
+          scope (see
+          <code class="rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground border border-border">src/lib/playground-scope.ts</code>).
+        </p>
+        <Playground client:visible initialCode={playground.code} />
+      </section>
+    )}
 
     {propsTables.length > 0 && (
       <section class="mt-8 space-y-8" id="props-api">
