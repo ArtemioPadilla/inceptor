@@ -1,0 +1,1465 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "inceptor",
+  "homepage": "https://artemiop.com",
+  "items": [
+    {
+      "name": "primitives",
+      "type": "registry:ui",
+      "title": "Primitives",
+      "description": "Button, Input, Label, Card, Table, Badge — every primitive in one place, every variant on screen.",
+      "files": [
+        {
+          "path": "src/components/ui/button.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/input.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/label.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/card.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/table.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "background": "oklch(1 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "destructive-foreground": "oklch(0.985 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "primary-foreground": "oklch(0.99 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "secondary": "oklch(0.97 0 0)",
+          "secondary-foreground": "oklch(0.205 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "muted": "oklch(0.97 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "background": "oklch(0.145 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "destructive-foreground": "oklch(0.145 0.02 25)",
+          "foreground": "oklch(0.985 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "primary": "oklch(0.78 0.155 164)",
+          "primary-foreground": "oklch(0.2 0.03 165)",
+          "ring": "oklch(0.78 0.155 164)",
+          "secondary": "oklch(0.269 0 0)",
+          "secondary-foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "card": "oklch(0.205 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "muted": "oklch(0.269 0 0)"
+        }
+      }
+    },
+    {
+      "name": "form-controls",
+      "type": "registry:ui",
+      "title": "Form controls",
+      "description": "Select, Checkbox, Radio group, Switch, Slider, Textarea — every input on Base UI primitives.",
+      "files": [
+        {
+          "path": "src/components/ui/select.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/checkbox.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/radio-group.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/switch.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/slider.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/textarea.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "primary": "oklch(0.50 0.123 163)",
+          "primary-foreground": "oklch(0.99 0 0)",
+          "secondary": "oklch(0.97 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "input": "oklch(1 0 0 / 15%)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)",
+          "ring": "oklch(0.78 0.155 164)",
+          "primary": "oklch(0.78 0.155 164)",
+          "primary-foreground": "oklch(0.2 0.03 165)",
+          "secondary": "oklch(0.269 0 0)"
+        }
+      }
+    },
+    {
+      "name": "advanced",
+      "type": "registry:ui",
+      "title": "Advanced inputs",
+      "description": "Toggle, Toggle group, Number field, Toolbar, Sheet, Rating, Tag input, Input OTP.",
+      "files": [
+        {
+          "path": "src/components/ui/toggle.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/toggle-group.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/number-field.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/toolbar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/sheet.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/rating.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tag-input.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/input-otp.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "class-variance-authority",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "input": "oklch(0.922 0 0)",
+          "muted": "oklch(0.97 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "background": "oklch(1 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "card": "oklch(1 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "secondary": "oklch(0.97 0 0)",
+          "secondary-foreground": "oklch(0.205 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "input": "oklch(1 0 0 / 15%)",
+          "muted": "oklch(0.269 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "ring": "oklch(0.78 0.155 164)",
+          "background": "oklch(0.145 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "card": "oklch(0.205 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "secondary": "oklch(0.269 0 0)",
+          "secondary-foreground": "oklch(0.985 0 0)"
+        }
+      }
+    },
+    {
+      "name": "input-primitives",
+      "type": "registry:ui",
+      "title": "Input & utility primitives",
+      "description": "Date picker, Date range picker, Time picker, Color picker, Editable, Password input, Clipboard, Toggle group (segmented).",
+      "files": [
+        {
+          "path": "src/components/ui/accordion.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/action-bar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/alert-dialog.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/alert.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/aspect-ratio.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/avatar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/bar-list.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/breadcrumb.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/button.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/calendar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/callout.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/card.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/checkbox.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/clipboard.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/collapsible.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/color-picker.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/combobox.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/command-palette.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/context-menu.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/data-table.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/date-picker.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/description-list.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/dialog.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/divider.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/dropdown-menu.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/editable.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/empty-state.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/error-state.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/file-upload.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/flashbar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/form.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/hover-card.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/input-otp.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/input.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/kbd.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/kpi-card.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/label.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/menubar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/meter.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/metric.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/navigation-menu.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/number-field.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/pagination.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/password-input.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/popover.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/progress-bar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/property-filter.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/radio-group.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/rating.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/scroll-area.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/select.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/separator.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/sheet.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/skeleton.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/slider.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/spinner.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/splitter.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/stepper.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/switch.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/table.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tabs.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tag-input.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/textarea.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/time-picker.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/timeline.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/toast.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/toggle-group.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/toggle.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/toolbar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tooltip.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tracker.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tree-view.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/use-data-table-url-state.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "@tanstack/react-table",
+        "@tanstack/react-virtual",
+        "@zag-js/editable",
+        "@zag-js/react",
+        "@zag-js/splitter",
+        "class-variance-authority",
+        "lucide-react",
+        "react",
+        "react-day-picker",
+        "react-hook-form"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "border": "oklch(0.922 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "background": "oklch(1 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "foreground": "oklch(0.145 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "muted": "oklch(0.97 0 0)",
+          "destructive-foreground": "oklch(0.985 0 0)",
+          "primary-foreground": "oklch(0.99 0 0)",
+          "secondary": "oklch(0.97 0 0)",
+          "secondary-foreground": "oklch(0.205 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)"
+        },
+        "dark": {
+          "border": "oklch(1 0 0 / 12%)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "ring": "oklch(0.78 0.155 164)",
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "card": "oklch(0.205 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "background": "oklch(0.145 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "foreground": "oklch(0.985 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "muted": "oklch(0.269 0 0)",
+          "destructive-foreground": "oklch(0.145 0.02 25)",
+          "primary-foreground": "oklch(0.2 0.03 165)",
+          "secondary": "oklch(0.269 0 0)",
+          "secondary-foreground": "oklch(0.985 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)"
+        }
+      }
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "Modal dialog on Base UI primitive — accessible, dismissible by ESC + backdrop.",
+      "files": [
+        {
+          "path": "src/components/ui/dialog.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "background": "oklch(1 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)"
+        },
+        "dark": {
+          "background": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)"
+        }
+      }
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown menu",
+      "description": "Anchored menu on Base UI Menu primitive with align/side props.",
+      "files": [
+        {
+          "path": "src/components/ui/dropdown-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "muted": "oklch(0.97 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "muted": "oklch(0.269 0 0)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)"
+        }
+      }
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Tabbed panels on Base UI Tabs primitive.",
+      "files": [
+        {
+          "path": "src/components/ui/tabs.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "background": "oklch(1 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "muted": "oklch(0.97 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "ring": "oklch(0.6 0.13 163)"
+        },
+        "dark": {
+          "background": "oklch(0.145 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "muted": "oklch(0.269 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "ring": "oklch(0.78 0.155 164)"
+        }
+      }
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "Transient notification using Base UI Toast primitive + createToastManager.",
+      "files": [
+        {
+          "path": "src/components/ui/toast.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "class-variance-authority",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "background": "oklch(1 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "destructive-foreground": "oklch(0.985 0 0)",
+          "foreground": "oklch(0.145 0 0)"
+        },
+        "dark": {
+          "background": "oklch(0.145 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "destructive-foreground": "oklch(0.145 0.02 25)",
+          "foreground": "oklch(0.985 0 0)"
+        }
+      }
+    },
+    {
+      "name": "form",
+      "type": "registry:ui",
+      "title": "Form",
+      "description": "Compound form on Base UI Field + react-hook-form + Zod. Single island because compound state.",
+      "files": [
+        {
+          "path": "src/components/ui/form.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "react",
+        "react-hook-form"
+      ],
+      "registryDependencies": [
+        "input-primitives"
+      ],
+      "cssVars": {
+        "light": {
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "muted-foreground": "oklch(0.49 0 0)"
+        },
+        "dark": {
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "muted-foreground": "oklch(0.715 0 0)"
+        }
+      }
+    },
+    {
+      "name": "navigation",
+      "type": "registry:ui",
+      "title": "Navigation & menus",
+      "description": "Combobox, Command palette (⌘K), Navigation menu, Menubar, Stepper.",
+      "files": [
+        {
+          "path": "src/components/ui/combobox.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/command-palette.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/navigation-menu.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/menubar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/stepper.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "feedback"
+      ],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "card": "oklch(1 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "primary-foreground": "oklch(0.99 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "input": "oklch(1 0 0 / 15%)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)",
+          "ring": "oklch(0.78 0.155 164)",
+          "card": "oklch(0.205 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "primary-foreground": "oklch(0.2 0.03 165)"
+        }
+      }
+    },
+    {
+      "name": "overlays",
+      "type": "registry:ui",
+      "title": "Overlays",
+      "description": "Tooltip, Popover, Alert dialog, Hover card, Context menu — all on Base UI portals.",
+      "files": [
+        {
+          "path": "src/components/ui/tooltip.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/popover.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/alert-dialog.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/hover-card.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/context-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "border": "oklch(0.922 0 0)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "background": "oklch(1 0 0)",
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)"
+        },
+        "dark": {
+          "border": "oklch(1 0 0 / 12%)",
+          "popover": "oklch(0.205 0 0)",
+          "popover-foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "background": "oklch(0.145 0 0)",
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)"
+        }
+      }
+    },
+    {
+      "name": "disclosure",
+      "type": "registry:ui",
+      "title": "Disclosure & layout",
+      "description": "Accordion, Collapsible, Avatar, Skeleton, Separator, Scroll area, Aspect ratio.",
+      "files": [
+        {
+          "path": "src/components/ui/accordion.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/collapsible.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/avatar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/skeleton.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/separator.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/scroll-area.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/aspect-ratio.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "border": "oklch(0.922 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "muted": "oklch(0.97 0 0)"
+        },
+        "dark": {
+          "border": "oklch(1 0 0 / 12%)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "ring": "oklch(0.78 0.155 164)",
+          "muted": "oklch(0.269 0 0)"
+        }
+      }
+    },
+    {
+      "name": "feedback",
+      "type": "registry:ui",
+      "title": "Navigation & feedback",
+      "description": "Breadcrumb, Pagination, Alert, Spinner, Meter, Kbd, Description list, Empty state, Error state.",
+      "files": [
+        {
+          "path": "src/components/ui/breadcrumb.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/pagination.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/alert.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/spinner.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/meter.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/kbd.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/description-list.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/empty-state.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/error-state.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@base-ui-components/react",
+        "class-variance-authority",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "input-primitives"
+      ],
+      "cssVars": {
+        "light": {
+          "foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "primary": "oklch(0.50 0.123 163)",
+          "secondary": "oklch(0.97 0 0)",
+          "muted": "oklch(0.97 0 0)"
+        },
+        "dark": {
+          "foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "primary": "oklch(0.78 0.155 164)",
+          "secondary": "oklch(0.269 0 0)",
+          "muted": "oklch(0.269 0 0)"
+        }
+      }
+    },
+    {
+      "name": "data-table",
+      "type": "registry:ui",
+      "title": "DataTable",
+      "description": "Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility, resizing, virtualization, URL state sync.",
+      "files": [
+        {
+          "path": "src/components/ui/data-table.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/use-data-table-url-state.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": [
+        "@tanstack/react-table",
+        "@tanstack/react-virtual",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "dropdown-menu",
+        "input-primitives"
+      ],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "ring": "oklch(0.6 0.13 163)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "foreground": "oklch(0.985 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "ring": "oklch(0.78 0.155 164)"
+        }
+      }
+    },
+    {
+      "name": "kpis",
+      "type": "registry:ui",
+      "title": "KPI primitives",
+      "description": "Tremor-Raw-style: KpiCard, Metric, ProgressBar, Tracker, Callout, Divider. CSS-var-themed, dark-mode-flip.",
+      "files": [
+        {
+          "path": "src/components/ui/kpi-card.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/metric.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/progress-bar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/tracker.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/callout.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/divider.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "border": "oklch(0.922 0 0)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "muted": "oklch(0.97 0 0)"
+        },
+        "dark": {
+          "border": "oklch(1 0 0 / 12%)",
+          "card": "oklch(0.205 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "muted": "oklch(0.269 0 0)"
+        }
+      }
+    },
+    {
+      "name": "charts",
+      "type": "registry:ui",
+      "title": "Charts",
+      "description": "Themed Recharts wrappers (Line, Bar, Area, Donut). Colors come from --chart-1..5 CSS vars.",
+      "files": [
+        {
+          "path": "src/components/ui/charts/area-chart.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/bar-chart.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/chart-colors.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/donut-chart.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/gauge.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/index.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/line-chart.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/sparkline.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/use-mounted.ts",
+          "type": "registry:hook"
+        }
+      ],
+      "dependencies": [
+        "react",
+        "recharts"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)"
+        },
+        "dark": {
+          "foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)"
+        }
+      }
+    },
+    {
+      "name": "motion",
+      "type": "registry:component",
+      "title": "Motion (lazy)",
+      "description": "LazyMotion + domAnimation pattern with strict mode. Motion code is in a separate lazy chunk.",
+      "files": [
+        {
+          "path": "src/components/islands/MotionDemo.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": [
+        "motion",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "ring": "oklch(0.6 0.13 163)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "card": "oklch(0.205 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "ring": "oklch(0.78 0.155 164)"
+        }
+      }
+    },
+    {
+      "name": "pwa",
+      "type": "registry:component",
+      "title": "PWA prompts",
+      "description": "InstallButton + UpdateToast — driven by virtual:pwa-register events through Nano Stores.",
+      "files": [
+        {
+          "path": "src/components/islands/InstallButton.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/islands/UpdateToast.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": [
+        "@nanostores/react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "primary": "oklch(0.50 0.123 163)",
+          "primary-foreground": "oklch(0.99 0 0)",
+          "ring": "oklch(0.6 0.13 163)",
+          "border": "oklch(0.922 0 0)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)"
+        },
+        "dark": {
+          "primary": "oklch(0.78 0.155 164)",
+          "primary-foreground": "oklch(0.2 0.03 165)",
+          "ring": "oklch(0.78 0.155 164)",
+          "border": "oklch(1 0 0 / 12%)",
+          "card": "oklch(0.205 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)"
+        }
+      }
+    },
+    {
+      "name": "extras",
+      "type": "registry:ui",
+      "title": "Extras & data-viz",
+      "description": "Tree view, Timeline, Bar list, Sparkline, Gauge.",
+      "files": [
+        {
+          "path": "src/components/ui/tree-view.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/timeline.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/bar-list.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/sparkline.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/charts/gauge.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react",
+        "react",
+        "recharts"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "ring": "oklch(0.6 0.13 163)",
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "foreground": "oklch(0.145 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "ring": "oklch(0.78 0.155 164)",
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "foreground": "oklch(0.985 0 0)"
+        }
+      }
+    },
+    {
+      "name": "gen-ai",
+      "type": "registry:ui",
+      "title": "Generative AI",
+      "description": "Chat thread (stick-to-bottom scroll), prompt input, streaming + thinking states, AI output label (disclosure), citations, and response feedback.",
+      "files": [
+        {
+          "path": "src/components/ui/ai/ai-feedback.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/ai/ai-output-label.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/ai/chat-message.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/ai/citation.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/ai/prompt-input.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/components/ui/ai/streaming-text.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "background": "oklch(1 0 0)",
+          "destructive": "oklch(0.577 0.245 27.325)",
+          "foreground": "oklch(0.145 0 0)",
+          "input": "oklch(0.922 0 0)",
+          "muted": "oklch(0.97 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "ring": "oklch(0.6 0.13 163)",
+          "border": "oklch(0.922 0 0)",
+          "primary-foreground": "oklch(0.99 0 0)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "background": "oklch(0.145 0 0)",
+          "destructive": "oklch(0.704 0.191 22.216)",
+          "foreground": "oklch(0.985 0 0)",
+          "input": "oklch(1 0 0 / 15%)",
+          "muted": "oklch(0.269 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "ring": "oklch(0.78 0.155 164)",
+          "border": "oklch(1 0 0 / 12%)",
+          "primary-foreground": "oklch(0.2 0.03 165)"
+        }
+      }
+    },
+    {
+      "name": "error-boundary",
+      "type": "registry:component",
+      "title": "ErrorBoundary",
+      "description": "Throw an error inside an island — get a pre-filled GitHub issue with stack trace, component path, URL, and UA.",
+      "files": [
+        {
+          "path": "src/components/islands/ErrorBoundary.tsx",
+          "type": "registry:component"
+        }
+      ],
+      "dependencies": [
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "destructive": "oklch(0.577 0.245 27.325)"
+        },
+        "dark": {
+          "destructive": "oklch(0.704 0.191 22.216)"
+        }
+      }
+    },
+    {
+      "name": "splitter",
+      "type": "registry:ui",
+      "title": "Splitter",
+      "description": "Resizable master-detail panes on @zag-js/splitter (ADR 0009 — Base UI ships no equivalent). Drag or arrow-key resize, per-panel min/max size.",
+      "files": [
+        {
+          "path": "src/components/ui/splitter.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "@zag-js/react",
+        "@zag-js/splitter",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "background": "oklch(1 0 0)",
+          "border": "oklch(0.922 0 0)",
+          "foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "primary": "oklch(0.50 0.123 163)",
+          "ring": "oklch(0.6 0.13 163)"
+        },
+        "dark": {
+          "background": "oklch(0.145 0 0)",
+          "border": "oklch(1 0 0 / 12%)",
+          "foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "primary": "oklch(0.78 0.155 164)",
+          "ring": "oklch(0.78 0.155 164)"
+        }
+      }
+    },
+    {
+      "name": "action-bar",
+      "type": "registry:ui",
+      "title": "Action Bar",
+      "description": "Bottom-anchored, dismissible bulk-action toolbar — the \"N items selected\" pattern. Data-source agnostic: plugs into DataTable row selection or any other list.",
+      "files": [
+        {
+          "path": "src/components/ui/action-bar.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "accent": "oklch(0.96 0.02 163)",
+          "accent-foreground": "oklch(0.3 0.06 163)",
+          "border": "oklch(0.922 0 0)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.145 0 0)",
+          "muted-foreground": "oklch(0.49 0 0)",
+          "ring": "oklch(0.6 0.13 163)"
+        },
+        "dark": {
+          "accent": "oklch(0.28 0.04 165)",
+          "accent-foreground": "oklch(0.92 0.05 165)",
+          "border": "oklch(1 0 0 / 12%)",
+          "card": "oklch(0.205 0 0)",
+          "card-foreground": "oklch(0.985 0 0)",
+          "muted-foreground": "oklch(0.715 0 0)",
+          "ring": "oklch(0.78 0.155 164)"
+        }
+      }
+    }
+  ]
+}
