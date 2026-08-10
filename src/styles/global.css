@@ -26,88 +26,74 @@
 
 @layer base {
   /* `.light` shares :root's values, so a `.light` container forces light tokens
-     even when nested under `html.dark`. No duplication — one source of truth. */
+     even when nested under `html.dark`. No duplication — one source of truth.
+
+     Epic 25 (Generative theming): every themed token below is declared
+     ONCE via the native `light-dark(<light>, <dark>)` CSS function instead
+     of hand-duplicated `:root`/`.dark` blocks — same authoring surface Chakra
+     (semantic tokens), Astryx (`defineTheme()`), MUI (CSS-variables mode),
+     and Ant Design (Seed→Map→Alias) all converged on independently. Nothing
+     here needs a build step: `light-dark()` resolves per the `color-scheme`
+     in effect at the point of use, which is exactly what `:root`/`.light`
+     vs. `.dark` still toggle below — so the *existing* class-based, zero-
+     flash dark-mode script in BaseLayout.astro (sets `.dark` before first
+     paint) keeps working unchanged, and every CSS var name + resolved value
+     is unchanged. Browser support: Chromium 123+, Firefox 120+, Safari
+     17.5+ (broadly available well before this repo's supported baseline). */
   :root,
   .light {
     /* Tells native controls (selects, scrollbars, inputs) to render in
-       light mode when under this scope. Prevents dark scrollbars from
-       appearing in light mode and vice-versa. */
+       light mode when under this scope, and is what `light-dark()` reads
+       to pick its first argument for every var() below. */
     color-scheme: light;
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    /* Brand: emerald is the primary action color (deep enough for white text
-       to clear WCAG AA 4.5:1 — see src/tests/ux-contrast.test.ts). */
-    --primary: oklch(0.50 0.123 163);
-    --primary-foreground: oklch(0.99 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.49 0 0);
-    --accent: oklch(0.96 0.02 163);
-    --accent-foreground: oklch(0.3 0.06 163);
-    --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.985 0 0);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.6 0.13 163);
-    /* Cohesive palette — same hues across light/dark, only lightness shifts. */
-    --chart-1: oklch(0.6 0.14 163);
-    --chart-2: oklch(0.62 0.12 195);
-    --chart-3: oklch(0.55 0.16 255);
-    --chart-4: oklch(0.72 0.16 70);
-    --chart-5: oklch(0.58 0.2 300);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
   }
 
   .dark {
-    /* Tells native controls to render in dark mode under .dark scopes. */
+    /* Tells native controls to render in dark mode, and is what
+       `light-dark()` reads to pick its second argument for every var()
+       below (inherited scoping — same mechanism as color-scheme itself). */
     color-scheme: dark;
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    /* Bright emerald reads as luminous on the near-black canvas; dark text
-       on it clears AA comfortably. */
-    --primary: oklch(0.78 0.155 164);
-    --primary-foreground: oklch(0.2 0.03 165);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.715 0 0);
-    --accent: oklch(0.28 0.04 165);
-    --accent-foreground: oklch(0.92 0.05 165);
-    --destructive: oklch(0.704 0.191 22.216);
-    --destructive-foreground: oklch(0.145 0.02 25);
-    --border: oklch(1 0 0 / 12%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.78 0.155 164);
-    --chart-1: oklch(0.78 0.16 164);
-    --chart-2: oklch(0.72 0.13 195);
-    --chart-3: oklch(0.7 0.16 255);
-    --chart-4: oklch(0.8 0.16 75);
-    --chart-5: oklch(0.72 0.19 300);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+  }
+
+  :root {
+    --background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
+    --foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+    --card: light-dark(oklch(1 0 0), oklch(0.205 0 0));
+    --card-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+    --popover: light-dark(oklch(1 0 0), oklch(0.205 0 0));
+    --popover-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+    /* Brand: emerald is the primary action color (deep enough for white text
+       to clear WCAG AA 4.5:1 — see src/tests/ux-contrast.test.ts). Bright
+       emerald in dark mode reads as luminous on the near-black canvas; dark
+       text on it clears AA comfortably. */
+    --primary: light-dark(oklch(0.50 0.123 163), oklch(0.78 0.155 164));
+    --primary-foreground: light-dark(oklch(0.99 0 0), oklch(0.2 0.03 165));
+    --secondary: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+    --secondary-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
+    --muted: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+    --muted-foreground: light-dark(oklch(0.49 0 0), oklch(0.715 0 0));
+    --accent: light-dark(oklch(0.96 0.02 163), oklch(0.28 0.04 165));
+    --accent-foreground: light-dark(oklch(0.3 0.06 163), oklch(0.92 0.05 165));
+    --destructive: light-dark(oklch(0.577 0.245 27.325), oklch(0.704 0.191 22.216));
+    --destructive-foreground: light-dark(oklch(0.985 0 0), oklch(0.145 0.02 25));
+    --border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 12%));
+    --input: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 15%));
+    --ring: light-dark(oklch(0.6 0.13 163), oklch(0.78 0.155 164));
+    /* Cohesive palette — same hues across light/dark, only lightness shifts. */
+    --chart-1: light-dark(oklch(0.6 0.14 163), oklch(0.78 0.16 164));
+    --chart-2: light-dark(oklch(0.62 0.12 195), oklch(0.72 0.13 195));
+    --chart-3: light-dark(oklch(0.55 0.16 255), oklch(0.7 0.16 255));
+    --chart-4: light-dark(oklch(0.72 0.16 70), oklch(0.8 0.16 75));
+    --chart-5: light-dark(oklch(0.58 0.2 300), oklch(0.72 0.19 300));
+    --radius: 0.625rem;
+    --sidebar: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
+    --sidebar-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+    --sidebar-primary: light-dark(oklch(0.205 0 0), oklch(0.488 0.243 264.376));
+    --sidebar-primary-foreground: light-dark(oklch(0.985 0 0), oklch(0.985 0 0));
+    --sidebar-accent: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+    --sidebar-accent-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
+    --sidebar-border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 10%));
+    --sidebar-ring: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
   }
 }
 
