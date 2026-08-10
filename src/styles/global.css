@@ -183,6 +183,19 @@
   .mask-fade-b {
     mask-image: radial-gradient(120% 100% at 50% 0%, black 35%, transparent 80%);
   }
+  /* Top/bottom gradient mask for scrollable containers (e.g. ChatThread) —
+     signals "more content above/below" the visible viewport. Fixed to the
+     element's own box, not the scrolled content, so it reads as an edge
+     vignette rather than clipping messages. */
+  .scroll-fade-y {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 24px,
+      black calc(100% - 24px),
+      transparent
+    );
+  }
 }
 
 /* Base UI Toast stacking. Toasts are absolutely positioned inside the fixed
@@ -242,4 +255,30 @@
 .spin-slow { animation: inceptor-spin-slow 40s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
   .rise, .float-slow, .spin-slow { animation: none; }
+}
+
+/* Shimmer sweep — subtle gradient-band animation for AI "thinking"/loading
+   states (streaming-text.tsx's ThinkingIndicator). A moving highlight reads
+   as "still working" without implying literal, measurable progress. */
+@keyframes inceptor-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+.shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 35%,
+    color-mix(in oklch, var(--foreground) 14%, transparent) 50%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  animation: inceptor-shimmer 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Degrade to a static gradient — no motion, but still visually distinct
+     from the resting state so the affordance isn't lost entirely. */
+  .shimmer {
+    animation: none;
+    background-position: 50% 0;
+  }
 }

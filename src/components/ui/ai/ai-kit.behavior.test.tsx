@@ -1,14 +1,15 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
-import { ChatMessage, ChatThread } from './chat-message';
+import { ChatMessage, ChatThread, isScrolledNearBottom } from './chat-message';
 import { PromptInput } from './prompt-input';
 import { StreamingText, ThinkingIndicator } from './streaming-text';
 import { AIOutputLabel } from './ai-output-label';
 import { AIFeedback } from './ai-feedback';
+import { CitationRef, CitationList } from './citation';
 
 describe('ChatMessage', () => {
   it('marks role via data-role and renders the footer slot', () => {
@@ -44,6 +45,116 @@ describe('ChatMessage', () => {
       </ChatThread>,
     );
     expect(scrollIntoViewMock).toHaveBeenCalledTimes(2);
+  });
+
+  // jsdom has no layout engine — scrollHeight/clientHeight/scrollTop are
+  // always 0, so "near bottom" is trivially true for every element and a
+  // naive test would pass whether or not the stick-to-bottom logic actually
+  // reads those metrics. These tests stub the three metrics as own
+  // properties on the log element (shadowing jsdom's read-only getters) to
+  // exercise the real branch logic.
+  it('does not auto-scroll on new content once the user has scrolled away from the bottom', () => {
+    const scrollIntoViewMock = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    const { rerender } = render(
+      <ChatThread>
+        <div>first</div>
+      </ChatThread>,
+    );
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(1); // initial mount still scrolls
+
+    const log = screen.getByRole('log');
+    Object.defineProperty(log, 'scrollHeight', { value: 1000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 300, configurable: true });
+    Object.defineProperty(log, 'scrollTop', { value: 100, configurable: true }); // distance = 600 → far
+    fireEvent.scroll(log);
+
+    scrollIntoViewMock.mockClear();
+    rerender(
+      <ChatThread>
+        <div>first</div>
+        <div>second</div>
+      </ChatThread>,
+    );
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /nuevos mensajes/i })).toBeInTheDocument();
+  });
+
+  it('resumes auto-scroll once the user scrolls back near the bottom', () => {
+    const scrollIntoViewMock = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    const { rerender } = render(
+      <ChatThread>
+        <div>first</div>
+      </ChatThread>,
+    );
+    const log = screen.getByRole('log');
+    Object.defineProperty(log, 'scrollHeight', { value: 1000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 300, configurable: true });
+    Object.defineProperty(log, 'scrollTop', { value: 100, configurable: true }); // far from bottom
+    fireEvent.scroll(log);
+    scrollIntoViewMock.mockClear();
+    rerender(
+      <ChatThread>
+        <div>first</div>
+        <div>second</div>
+      </ChatThread>,
+    );
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
+
+    // User scrolls back down.
+    Object.defineProperty(log, 'scrollTop', { value: 650, configurable: true }); // distance = 50 → near
+    fireEvent.scroll(log);
+    expect(screen.queryByRole('button', { name: /nuevos mensajes/i })).not.toBeInTheDocument();
+
+    scrollIntoViewMock.mockClear();
+    rerender(
+      <ChatThread>
+        <div>first</div>
+        <div>second</div>
+        <div>third</div>
+      </ChatThread>,
+    );
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('the "jump to bottom" affordance scrolls down and clears itself', async () => {
+    const scrollIntoViewMock = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    const user = userEvent.setup();
+    render(
+      <ChatThread>
+        <div>first</div>
+      </ChatThread>,
+    );
+    const log = screen.getByRole('log');
+    Object.defineProperty(log, 'scrollHeight', { value: 1000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 300, configurable: true });
+    Object.defineProperty(log, 'scrollTop', { value: 100, configurable: true });
+    fireEvent.scroll(log);
+
+    const jumpButton = screen.getByRole('button', { name: /nuevos mensajes/i });
+    scrollIntoViewMock.mockClear();
+    await user.click(jumpButton);
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: /nuevos mensajes/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('isScrolledNearBottom — pure predicate, exercised without jsdom layout', () => {
+  it('is true when the scroll offset is within the threshold of the bottom', () => {
+    expect(isScrolledNearBottom({ scrollHeight: 1000, scrollTop: 900, clientHeight: 100 })).toBe(true); // 0px away
+    expect(
+      isScrolledNearBottom({ scrollHeight: 1000, scrollTop: 800, clientHeight: 100 }, 120),
+    ).toBe(true); // 100px away, threshold 120
+  });
+  it('is false once the user has scrolled well away from the bottom', () => {
+    expect(isScrolledNearBottom({ scrollHeight: 1000, scrollTop: 400, clientHeight: 100 })).toBe(false); // 500px away
+  });
+  it('respects a custom threshold', () => {
+    expect(
+      isScrolledNearBottom({ scrollHeight: 1000, scrollTop: 850, clientHeight: 100 }, 25),
+    ).toBe(false); // 50px away, threshold 25
   });
 });
 
@@ -120,5 +231,32 @@ describe('AIFeedback', () => {
     await user.type(box, 'wrong category');
     await user.click(screen.getByRole('button', { name: 'Enviar' }));
     expect(onSubmit).toHaveBeenCalledWith('down', 'wrong category');
+  });
+});
+
+describe('Citation', () => {
+  it('CitationRef renders a numbered inline marker', () => {
+    render(
+      <p>
+        claim<CitationRef index={2} />
+      </p>,
+    );
+    expect(screen.getByText('[2]')).toBeInTheDocument();
+  });
+  it('CitationList numbers sources and links the ones with a URL', () => {
+    render(
+      <CitationList
+        sources={[{ label: 'Estado de cuenta agosto' }, { label: 'API interna', url: 'https://example.com/api' }]}
+      />,
+    );
+    const list = screen.getByRole('list', { name: 'Fuentes' });
+    expect(list).toBeInTheDocument();
+    expect(screen.getByText('Estado de cuenta agosto')).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /API interna/ });
+    expect(link).toHaveAttribute('href', 'https://example.com/api');
+  });
+  it('CitationList renders nothing for an empty source list', () => {
+    const { container } = render(<CitationList sources={[]} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

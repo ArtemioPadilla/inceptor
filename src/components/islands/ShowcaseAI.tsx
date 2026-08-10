@@ -5,6 +5,7 @@ import { PromptInput } from '@/components/ui/ai/prompt-input';
 import { StreamingText, ThinkingIndicator } from '@/components/ui/ai/streaming-text';
 import { AIOutputLabel } from '@/components/ui/ai/ai-output-label';
 import { AIFeedback } from '@/components/ui/ai/ai-feedback';
+import { CitationRef, CitationList } from '@/components/ui/ai/citation';
 
 /**
  * Gallery showcase for the gen-AI UI kit (#204). Static composition of every
@@ -54,6 +55,24 @@ export default function ShowcaseAI() {
           <div className="rounded-lg border border-border p-4 text-sm">
             <p>No estoy seguro de esta categoría.</p>
             <AIOutputLabel confidence="low" className="mt-2" />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Citations</p>
+          <div className="rounded-lg border border-border p-4 text-sm">
+            <p>
+              Tu gasto en Comida subió 12%
+              <CitationRef index={1} /> respecto al mes pasado, impulsado por delivery
+              <CitationRef index={2} />.
+            </p>
+            <CitationList
+              className="mt-3"
+              sources={[
+                { label: 'Estado de cuenta — agosto 2026' },
+                { label: 'Categorización automática (API interna)', url: 'https://example.com/api/categorize' },
+              ]}
+            />
           </div>
         </section>
       </div>
