@@ -463,6 +463,23 @@ component that composes **TanStack Table v8** (sorting, filtering, column
 visibility, column resizing) on top of **TanStack Virtual** (row virtualization)
 and the shadcn `<Table>` primitives.
 
+### Power features (ROADMAP Epic 23)
+
+All of these are **opt-in** — the defaults preserve DataTable's original
+behavior, so no existing consumer needs to change.
+
+| Prop | What it adds |
+|---|---|
+| `enableSelection` | A "select all" header checkbox + per-row checkbox (TanStack's row-selection state). When on and 1+ rows are selected, renders Epic 22's `<ActionBar>`; `renderBulkActions(selectedRows)` injects bulk-action buttons. |
+| `enableColumnPinning` | A pin/unpin icon button per header cell; pinned-left columns get `position: sticky` in both header and body. |
+| `enableColumnFilters` | A filter row below the header — a text `<input>` per filterable column, or a `<select>` when the column def sets `meta.filterOptions`. Independent of, and composable with, the existing global filter. |
+| `renderSubRow` | An expand/collapse chevron column; clicking reveals a full-width detail row rendered by this callback. The detail row is folded into the same virtualized item list as data rows (not appended unmeasured) so scroll offsets stay accurate. |
+| `summaryRow` | An optional `<tfoot>` row (e.g. computed totals), keyed by column id. |
+| `stickyHeaderOffset` | Extra `top` offset (px) for the already-sticky header row — useful under a fixed page header. |
+| `persistColumnVisibility` | A `localStorage` key; restores hidden columns on mount (post-mount effect only — no SSR/hydration mismatch) and persists every change. |
+| `request` | Server-paginated/sorted/filtered data source: `(params) => Promise<{ data, total }>`. Switches TanStack Table to manual sorting/filtering and routes loading/error/empty states through `useListing` (§13) — `data` becomes optional and is ignored. See the `DataTableRequestFn` doc comment in the source for the full contract. |
+| `onExport` / `exportFilename` | Renders a `<DownloadTrigger>` (below) in the toolbar. |
+
 ### Props surface
 
 ```tsx
@@ -559,6 +576,15 @@ import IssuesDataTable from '../components/islands/IssuesDataTable';
 | **Column visibility** | "Columns" dropdown in the top-right. Uses `DropdownMenuCheckboxItem`. |
 | **Column resizing** | Drag the handle at the right edge of any header. `enableColumnResizing: true` + `columnResizeMode: 'onChange'`. |
 | **Row virtualization** | `useVirtualizer` renders only in-viewport rows + 10 overscan rows. Handles millions of rows without DOM overhead. |
+
+### DownloadTrigger
+
+`src/components/ui/download-trigger.tsx` exports a standalone `<DownloadTrigger
+onExport={() => Promise<Blob>} filename="report.csv" />` — an icon/label button
+that shows a loading spinner (`aria-busy`, disabled) while `onExport` runs, then
+downloads the resolved `Blob` via the standard object-URL + anchor-click trick.
+It isn't DataTable-specific; `<DataTable onExport={...} />` just renders one in
+its toolbar for the common "export the current table" case.
 
 ---
 

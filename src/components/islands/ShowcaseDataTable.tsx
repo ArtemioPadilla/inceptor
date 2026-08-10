@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
+import { Button } from '@/components/ui/button';
 import {
   PropertyFilter,
   filterByTokens,
@@ -36,6 +37,12 @@ const STATUS_STYLES: Record<Person['status'], string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
 };
 
+// Escape a value for a CSV cell — wraps in quotes and doubles embedded quotes
+// whenever the value itself contains a comma, quote, or newline.
+function csvCell(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
 const columns: ColumnDef<Person, string>[] = [
   { accessorKey: 'id', header: 'ID', size: 60, enableResizing: true },
   { accessorKey: 'name', header: 'Name', size: 200, enableResizing: true },
@@ -45,6 +52,15 @@ const columns: ColumnDef<Person, string>[] = [
     header: 'Status',
     size: 120,
     enableResizing: true,
+    meta: {
+      // Per-column filter row (Epic 23): renders a <select> instead of a
+      // text input for this column.
+      filterOptions: [
+        { label: 'Active', value: 'active' },
+        { label: 'Inactive', value: 'inactive' },
+        { label: 'Pending', value: 'pending' },
+      ],
+    },
     cell: ({ getValue }) => {
       const value = getValue() as Person['status'];
       return (
@@ -75,10 +91,11 @@ export default function ShowcaseDataTable() {
 
   return (
     <ErrorBoundary name="ShowcaseDataTable">
-    <div className="space-y-3">
+    <div className="space-y-3 pb-16">
       <p className="text-sm text-muted-foreground">
-        Structured token filtering (PropertyFilter) feeds the table; then sort,
-        toggle column visibility, and resize widths. Virtualization is active
+        Structured token filtering (PropertyFilter) feeds the table; then
+        sort, pin, per-column filter, expand a row for detail, select rows
+        for bulk actions, resize widths, and export. Virtualization is active
         even on this small dataset.
       </p>
       <PropertyFilter properties={FILTER_PROPERTIES} tokens={tokens} onChange={setTokens} />
@@ -87,6 +104,45 @@ export default function ShowcaseDataTable() {
         data={filtered}
         height="360px"
         estimateRowSize={48}
+        enableSelection
+        renderBulkActions={(selected) => (
+          <Button size="sm" variant="destructive" onClick={() => alert(`Would delete ${selected.length} row(s)`)}>
+            Delete
+          </Button>
+        )}
+        enableColumnPinning
+        enableColumnFilters
+        renderSubRow={(row) => (
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
+            <div>
+              <dt className="text-muted-foreground">Full name</dt>
+              <dd className="font-medium text-foreground">{row.name}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Role</dt>
+              <dd className="font-medium text-foreground">{row.role}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Status</dt>
+              <dd className="font-medium text-foreground">{row.status}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Joined</dt>
+              <dd className="font-medium text-foreground">{row.joined}</dd>
+            </div>
+          </dl>
+        )}
+        summaryRow={{ id: `${filtered.length} of ${PEOPLE.length}`, status: 'Totals →' }}
+        persistColumnVisibility="showcase-datatable-columns"
+        onExport={() => {
+          const header = ['id', 'name', 'role', 'status', 'joined'].join(',');
+          const rows = filtered.map((p) =>
+            [p.id, p.name, p.role, p.status, p.joined].map((v) => csvCell(String(v))).join(','),
+          );
+          const csv = [header, ...rows].join('\n');
+          return Promise.resolve(new Blob([csv], { type: 'text/csv' }));
+        }}
+        exportFilename="people.csv"
       />
     </div>
     </ErrorBoundary>

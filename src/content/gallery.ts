@@ -183,7 +183,7 @@ export const galleryManifest: GalleryEntry[] = [
     slug: 'data-table',
     name: 'DataTable',
     summary:
-      'Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility, resizing, virtualization, URL state sync.',
+      'Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility/pinning, resizing, virtualization, URL state sync, row selection + ActionBar, per-column filters, expandable rows, summary row, localStorage-persisted visibility, and a server-driven `request` contract wired through useListing.',
     source: 'src/components/ui/data-table.tsx',
     status: 'stable',
     category: 'data',
@@ -285,6 +285,17 @@ export const galleryManifest: GalleryEntry[] = [
     status: 'stable',
     category: 'feedback',
     island: 'ShowcaseActionBar',
+  },
+  // DataTable power features (ROADMAP Epic 23)
+  {
+    slug: 'download-trigger',
+    name: 'Download Trigger',
+    summary:
+      'Icon/label button with a loading state while an async export function runs, then downloads the resolved Blob. Standalone — pairs with DataTable\'s `onExport` prop but composes into any export flow.',
+    source: 'src/components/ui/download-trigger.tsx',
+    status: 'stable',
+    category: 'data',
+    island: 'ShowcaseDownloadTrigger',
   },
 ];
 
