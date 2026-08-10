@@ -73,6 +73,18 @@ export const galleryManifest: GalleryEntry[] = [
     category: 'advanced',
     island: 'ShowcaseAdvanced',
   },
+  // Universal input & utility primitives (ROADMAP Epic 21)
+  {
+    slug: 'input-primitives',
+    name: 'Input & utility primitives',
+    summary:
+      'Date picker, Date range picker, Time picker, Color picker, Editable, Password input, Clipboard, Toggle group (segmented).',
+    source: 'src/components/ui/',
+    status: 'stable',
+    category: 'advanced',
+    install: 'npm install react-day-picker @zag-js/editable @zag-js/react',
+    island: 'ShowcaseInputPrimitives',
+  },
   // Compound components — shared internal state, single-island only
   {
     slug: 'dialog',

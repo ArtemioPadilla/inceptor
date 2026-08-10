@@ -39,4 +39,14 @@ describe('advanced inputs', () => {
     expect(tagInput).toMatch(/onValueChange/);
     expect(inputOtp).toMatch(/onValueChange/);
   });
+
+  it('toggle-group ships a segmented sliding-indicator variant (Epic 21 polish)', () => {
+    expect(toggleGroup).toMatch(/variant.*segmented/s);
+    expect(toggleGroup).toMatch(/MutationObserver/);
+  });
+
+  it('toggle-group cleans up its resize listener and observer (island lifecycle discipline)', () => {
+    expect(toggleGroup).toMatch(/from ['"]@\/lib\/disposer['"]/);
+    expect(toggleGroup).toMatch(/d\.dispose/);
+  });
 });
