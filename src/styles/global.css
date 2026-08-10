@@ -183,6 +183,19 @@
   .mask-fade-b {
     mask-image: radial-gradient(120% 100% at 50% 0%, black 35%, transparent 80%);
   }
+  /* Top/bottom gradient mask for scrollable containers (e.g. ChatThread) —
+     signals "more content above/below" the visible viewport. Fixed to the
+     element's own box, not the scrolled content, so it reads as an edge
+     vignette rather than clipping messages. */
+  .scroll-fade-y {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 24px,
+      black calc(100% - 24px),
+      transparent
+    );
+  }
 }
 
 /* Base UI Toast stacking. Toasts are absolutely positioned inside the fixed
