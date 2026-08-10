@@ -1,0 +1,73 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const blocks = [
+  {
+    href: '/blocks/login/',
+    name: 'Login block',
+    summary:
+      'A branded, centered login form: email/password (PasswordInput), a "Forgot password?" link, and an optional "Sign up" link.',
+  },
+  {
+    href: '/blocks/settings/',
+    name: 'Settings block',
+    summary:
+      'Sectioned Tabs — Profile, Notifications, Appearance, and a destructive Danger zone gated by an AlertDialog confirmation.',
+  },
+  {
+    href: '/blocks/app-layout/',
+    name: 'App Layout sidebar variants',
+    summary:
+      'AppLayoutIsland with an icon-collapse rail and a dual (primary + contextual) sidebar — opt-in, backward compatible.',
+  },
+];
+---
+
+<BaseLayout
+  title="Blocks"
+  description="Installable, full page compositions — not single components. Each ships a live preview and a Preview/Code toggle, mirroring shadcn's /blocks pattern."
+>
+  <main class="mx-auto max-w-6xl px-4 py-12">
+    <header class="mb-10">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground" style="view-transition-name: page-title">
+        Blocks
+      </h1>
+      <p class="mt-2 text-muted-foreground">
+        Complete, installable page compositions — built from the primitives already in
+        <a href={withBase('/gallery/')} class="text-primary underline underline-offset-2 hover:text-primary/80">/gallery</a>,
+        not new ones. Each block below ships with a Preview/Code toggle so you can copy
+        the exact source.
+      </p>
+    </header>
+
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        blocks.map((block) => (
+          <li>
+            <a
+              href={withBase(block.href)}
+              class="group block rounded-lg border border-border bg-card p-5 transition-colors hover:bg-accent/40"
+            >
+              <h2 class="text-base font-semibold text-foreground group-hover:underline">
+                {block.name}
+              </h2>
+              <p class="mt-2 text-sm text-muted-foreground">{block.summary}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <footer class="mt-10 border-t border-border pt-6 text-sm text-muted-foreground">
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/pages/blocks/index.astro"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
