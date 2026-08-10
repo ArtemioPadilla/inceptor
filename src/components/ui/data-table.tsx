@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {
+  type Column,
   type ColumnDef,
+  type ColumnFiltersState,
   type ColumnPinningState,
   type ColumnSizingState,
   type RowSelectionState,
@@ -35,6 +37,18 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useDataTableUrlState } from '@/components/ui/use-data-table-url-state';
+
+// Module augmentation: lets column defs opt into a per-column <select> filter
+// (instead of the default text input) by supplying `meta.filterOptions`. Kept
+// here (not a separate .d.ts) so it's colocated with the one feature that
+// reads it — see the per-column filter row below.
+declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- TData/TValue are part of the augmented interface's generic signature
+  interface ColumnMeta<TData, TValue> {
+    /** Options for the per-column filter `<select>`; omit for a text input. */
+    filterOptions?: { label: string; value: string }[];
+  }
+}
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -73,6 +87,15 @@ export interface DataTableProps<TData, TValue> {
    * scroll. Uses TanStack Table's built-in column-pinning state.
    */
   enableColumnPinning?: boolean;
+  /**
+   * Opt-in per-column filter row, rendered below the sort-header row. Beyond
+   * the existing global text filter — each filterable column gets its own
+   * text `<input>`, or a `<select>` when its column def sets
+   * `meta.filterOptions`. Wired to TanStack Table's `columnFilters` state.
+   * Scoped deliberately simple; `PropertyFilter` covers token-based
+   * structured filtering when that's needed instead.
+   */
+  enableColumnFilters?: boolean;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -81,6 +104,51 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | false }) {
   if (direction === 'asc') return <ChevronUp className="ml-1 h-4 w-4 shrink-0" />;
   if (direction === 'desc') return <ChevronDown className="ml-1 h-4 w-4 shrink-0" />;
   return <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 text-muted-foreground" />;
+}
+
+const columnFilterInputClass = cn(
+  'h-8 w-full rounded-md border border-input bg-background px-2 text-xs',
+  'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+);
+
+// ColumnFilterInput renders one per-column filter control (Epic 23): a
+// text <input> by default, or a <select> when the column def opts in via
+// `meta.filterOptions`. Deliberately simple — PropertyFilter is the
+// token-based structured-filtering component for cases that need more.
+function ColumnFilterInput<TData>({ column }: { column: Column<TData, unknown> }) {
+  const label =
+    typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id;
+  const value = (column.getFilterValue() as string | undefined) ?? '';
+  const options = column.columnDef.meta?.filterOptions;
+
+  if (options) {
+    return (
+      <select
+        aria-label={`Filter ${label}`}
+        value={value}
+        onChange={(e) => column.setFilterValue(e.target.value || undefined)}
+        className={columnFilterInputClass}
+      >
+        <option value="">All</option>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  return (
+    <input
+      type="text"
+      aria-label={`Filter ${label}`}
+      value={value}
+      onChange={(e) => column.setFilterValue(e.target.value || undefined)}
+      placeholder="Filter…"
+      className={columnFilterInputClass}
+    />
+  );
 }
 
 export function DataTable<TData, TValue>({
@@ -94,6 +162,7 @@ export function DataTable<TData, TValue>({
   enableSelection = false,
   renderBulkActions,
   enableColumnPinning = false,
+  enableColumnFilters = false,
 }: DataTableProps<TData, TValue>) {
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
@@ -186,6 +255,7 @@ export function DataTable<TData, TValue>({
       enableSorting: false,
       enableHiding: false,
       enableResizing: false,
+      enableColumnFilter: false,
       header: ({ table: t }) => (
         <Checkbox
           checked={t.getIsAllRowsSelected()}
@@ -208,6 +278,11 @@ export function DataTable<TData, TValue>({
   // Column-pinning state (Epic 23 / Epic 8's deferred item).
   const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>({});
 
+  // Per-column filter state (Epic 23). Independent of `globalFilter` — both
+  // can be active simultaneously; TanStack Table ANDs them together via
+  // getFilteredRowModel.
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+
   const table = useReactTable({
     data,
     columns: tableColumns,
@@ -225,6 +300,7 @@ export function DataTable<TData, TValue>({
     onColumnSizingChange: onColumnSizing,
     onRowSelectionChange: setRowSelection,
     onColumnPinningChange: setColumnPinning,
+    onColumnFiltersChange: setColumnFilters,
     state: {
       sorting,
       globalFilter,
@@ -232,6 +308,7 @@ export function DataTable<TData, TValue>({
       columnSizing,
       rowSelection,
       columnPinning,
+      columnFilters,
     },
   });
 
@@ -448,6 +525,19 @@ export function DataTable<TData, TValue>({
                 })}
               </TableRow>
             ))}
+            {/* Per-column filter row (Epic 23) — one input/select per
+             * filterable leaf column, independent of the global filter. */}
+            {enableColumnFilters && (
+              <TableRow>
+                {(table.getHeaderGroups().at(-1)?.headers ?? []).map((header) => (
+                  <TableHead key={`${header.id}-filter`} className="py-1.5">
+                    {header.column.getCanFilter() && (
+                      <ColumnFilterInput column={header.column} />
+                    )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {/* Top spacer — pushes the visible virtual window down */}
