@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   type ColumnDef,
   type ColumnSizingState,
+  type RowSelectionState,
   type SortingState,
   type VisibilityState,
   flexRender,
@@ -13,6 +14,8 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 
+import { ActionBar } from '@/components/ui/action-bar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -50,6 +53,18 @@ export interface DataTableProps<TData, TValue> {
    * Defaults to false (no URL syncing).
    */
   syncToUrl?: boolean | { key: string };
+  /**
+   * Opt-in row-selection column: a "select all" checkbox in the header and a
+   * per-row checkbox. Off by default so existing tables are unaffected
+   * (ROADMAP Epic 23). Uses TanStack Table's built-in row-selection state.
+   */
+  enableSelection?: boolean;
+  /**
+   * Bulk-action buttons rendered inside Epic 22's `<ActionBar>` once 1+ rows
+   * are selected. Receives the currently-selected row data. Only meaningful
+   * when `enableSelection` is true.
+   */
+  renderBulkActions?: (selectedRows: TData[]) => React.ReactNode;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -68,6 +83,8 @@ export function DataTable<TData, TValue>({
   height = '500px',
   estimateRowSize = 40,
   syncToUrl = false,
+  enableSelection = false,
+  renderBulkActions,
 }: DataTableProps<TData, TValue>) {
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
@@ -145,12 +162,47 @@ export function DataTable<TData, TValue>({
     [urlEnabled, writeUrl],
   );
 
+  // Row-selection state (Epic 23). Kept as plain useState — it's local UI
+  // state, not synced to the URL (selections shouldn't survive a shared link).
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+
+  // Prepend a checkbox column when enableSelection is on. Memoized so the
+  // column array identity is stable across renders that don't change the
+  // inputs (avoids TanStack Table re-deriving column state every render).
+  const tableColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
+    if (!enableSelection) return columns;
+    const selectionColumn: ColumnDef<TData, TValue> = {
+      id: '__select',
+      size: 36,
+      enableSorting: false,
+      enableHiding: false,
+      enableResizing: false,
+      header: ({ table: t }) => (
+        <Checkbox
+          checked={t.getIsAllRowsSelected()}
+          indeterminate={!t.getIsAllRowsSelected() && t.getIsSomeRowsSelected()}
+          onCheckedChange={(value) => t.toggleAllRowsSelected(Boolean(value))}
+          aria-label="Select all rows"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
+          aria-label={`Select row ${row.id}`}
+        />
+      ),
+    };
+    return [selectionColumn, ...columns];
+  }, [columns, enableSelection]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: tableColumns,
     // Column resizing via TanStack Table's built-in resize handler
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
+    enableRowSelection: enableSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -158,13 +210,24 @@ export function DataTable<TData, TValue>({
     onGlobalFilterChange: onGlobalFilter,
     onColumnVisibilityChange: onColumnVisibility,
     onColumnSizingChange: onColumnSizing,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       globalFilter,
       columnVisibility,
       columnSizing,
+      rowSelection,
     },
   });
+
+  // Selected row data for the ActionBar + renderBulkActions callback.
+  const selectedRows = React.useMemo(
+    () => table.getSelectedRowModel().rows.map((r) => r.original),
+    // rowSelection is the actual dependency that changes selection — the
+    // getSelectedRowModel() call itself is derived from table state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [table, rowSelection],
+  );
 
   const rows = table.getRowModel().rows;
 
@@ -337,7 +400,7 @@ export function DataTable<TData, TValue>({
             {isDataEmpty ? (
               <tr>
                 <td
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center text-muted-foreground"
                 >
                   No results.
@@ -382,6 +445,17 @@ export function DataTable<TData, TValue>({
           Showing {virtualItems.length} of {rows.length} in viewport
         </span>
       </div>
+
+      {/* Bulk-action toolbar (Epic 22's ActionBar) — only rendered when rows
+       * are selectable and 1+ are currently selected. */}
+      {enableSelection && (
+        <ActionBar
+          selectedCount={selectedRows.length}
+          onClearSelection={() => setRowSelection({})}
+        >
+          {renderBulkActions?.(selectedRows)}
+        </ActionBar>
+      )}
     </div>
   );
 }
