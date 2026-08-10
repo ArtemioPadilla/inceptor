@@ -130,6 +130,16 @@ export interface DataTableProps<TData, TValue> {
    * Defaults to 0.
    */
   stickyHeaderOffset?: number;
+  /**
+   * Opt-in `localStorage` persistence for column visibility, keyed by this
+   * string. Reads happen only inside a post-mount `useEffect` (never during
+   * SSR/first client render) so there is no hydration mismatch — same
+   * guard-after-mount convention as `useClientPreference`
+   * (`src/lib/use-client-preference.ts`), just component-owned state instead
+   * of an external-store subscription. When both `syncToUrl` and this prop
+   * are set, the URL wins (it's already present on first paint).
+   */
+  persistColumnVisibility?: string;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -200,6 +210,7 @@ export function DataTable<TData, TValue>({
   renderSubRow,
   summaryRow,
   stickyHeaderOffset = 0,
+  persistColumnVisibility,
 }: DataTableProps<TData, TValue>) {
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
@@ -276,6 +287,37 @@ export function DataTable<TData, TValue>({
     },
     [urlEnabled, writeUrl],
   );
+
+  // Column-visibility persistence (Epic 23). Runs only in a post-mount
+  // effect — never during render/SSR — so there's no hydration mismatch;
+  // the first paint always uses initialColumnVisibility/URL state, matching
+  // what the server rendered. The URL (when synced) already reflects the
+  // restored value on first paint, so it takes precedence over localStorage.
+  React.useEffect(() => {
+    if (!persistColumnVisibility) return;
+    if (urlEnabled && Object.keys(urlState.columnVisibility).length > 0) return;
+    try {
+      const raw = localStorage.getItem(persistColumnVisibility);
+      if (!raw) return;
+      const stored = JSON.parse(raw) as VisibilityState;
+      setColumnVisibility(stored);
+    } catch {
+      // localStorage unavailable (private mode) or malformed JSON — ignore,
+      // the table just falls back to initialColumnVisibility.
+    }
+    // Intentionally mount-only: this is a one-time restore, not a live sync.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persistColumnVisibility]);
+
+  React.useEffect(() => {
+    if (!persistColumnVisibility) return;
+    try {
+      localStorage.setItem(persistColumnVisibility, JSON.stringify(columnVisibility));
+    } catch {
+      // localStorage unavailable (private mode, quota) — persistence is
+      // best-effort, never a hard requirement for the table to function.
+    }
+  }, [persistColumnVisibility, columnVisibility]);
 
   // Row-selection state (Epic 23). Kept as plain useState — it's local UI
   // state, not synced to the URL (selections shouldn't survive a shared link).
