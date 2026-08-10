@@ -38,6 +38,18 @@ export interface NavItem {
   active?: boolean;
 }
 
+/**
+ * Sidebar layout variants (ROADMAP Epic 27):
+ *   - 'default'      — unchanged shipped behavior (full-width nav, no toggle).
+ *   - 'icon-collapse' — the desktop nav rail can collapse to icon-only width
+ *                        via a toggle button, then re-expand.
+ *   - 'dual'          — a second, contextual sidebar (secondaryNavItems)
+ *                        renders alongside a fixed icon-only primary rail —
+ *                        e.g. VS Code / GitHub org-settings-style shells.
+ * Opt-in and backward compatible: omitting the prop preserves 'default'.
+ */
+export type SidebarVariant = 'default' | 'icon-collapse' | 'dual';
+
 export interface AppLayoutProps {
   /** Navigation items rendered in the left sidebar. */
   navItems?: NavItem[];
@@ -55,6 +67,16 @@ export interface AppLayoutProps {
   navLabel?: string;
   /** Called when a nav item is clicked. */
   onNavSelect?: (id: string) => void;
+  /** Sidebar layout variant. Defaults to 'default' (unchanged behavior). */
+  sidebarVariant?: SidebarVariant;
+  /** 'icon-collapse' only: whether the rail starts collapsed. Defaults to false. */
+  defaultSidebarCollapsed?: boolean;
+  /** 'dual' only: items rendered in the secondary/contextual sidebar. */
+  secondaryNavItems?: NavItem[];
+  /** 'dual' only: aria-label for the secondary nav landmark. */
+  secondaryNavLabel?: string;
+  /** 'dual' only: called when a secondary nav item is clicked. */
+  onSecondaryNavSelect?: (id: string) => void;
 }
 
 // ── Subcomponents ────────────────────────────────────────────────────────────
@@ -62,9 +84,12 @@ export interface AppLayoutProps {
 function NavItemButton({
   item,
   onSelect,
+  collapsed = false,
 }: {
   item: NavItem;
   onSelect?: (id: string) => void;
+  /** Icon-only rendering — label becomes visually hidden but stays accessible. */
+  collapsed?: boolean;
 }) {
   const Tag = item.href ? 'a' : 'button';
 
@@ -77,9 +102,11 @@ function NavItemButton({
             onClick: () => onSelect?.(item.id),
           })}
       aria-current={item.active ? 'page' : undefined}
+      title={collapsed ? item.label : undefined}
       className={cn(
         'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        collapsed && 'justify-center px-0',
         item.active
           ? 'bg-accent text-accent-foreground'
           : 'text-sidebar-foreground hover:bg-accent hover:text-accent-foreground',
@@ -90,7 +117,7 @@ function NavItemButton({
           {item.icon}
         </span>
       )}
-      <span className="truncate">{item.label}</span>
+      <span className={cn('truncate', collapsed && 'sr-only')}>{item.label}</span>
     </Tag>
   );
 }
@@ -100,11 +127,17 @@ function SideNav({
   label,
   onSelect,
   className,
+  collapsed = false,
+  footer,
 }: {
   items: NavItem[];
   label: string;
   onSelect?: (id: string) => void;
   className?: string;
+  /** Icon-only rendering for the whole rail (icon-collapse / dual variants). */
+  collapsed?: boolean;
+  /** Extra content pinned to the bottom of the nav — e.g. a collapse toggle. */
+  footer?: React.ReactNode;
 }) {
   return (
     <nav
@@ -114,13 +147,14 @@ function SideNav({
         className,
       )}
     >
-      <ul className="flex flex-col gap-0.5">
+      <ul className="flex flex-1 flex-col gap-0.5">
         {items.map((item) => (
           <li key={item.id}>
-            <NavItemButton item={item} onSelect={onSelect} />
+            <NavItemButton item={item} onSelect={onSelect} collapsed={collapsed} />
           </li>
         ))}
       </ul>
+      {footer}
     </nav>
   );
 }
@@ -221,10 +255,23 @@ function AppLayoutInner({
   logo,
   navLabel = 'Main navigation',
   onNavSelect,
+  sidebarVariant = 'default',
+  defaultSidebarCollapsed = false,
+  secondaryNavItems = [],
+  secondaryNavLabel = 'Contextual navigation',
+  onSecondaryNavSelect,
 }: AppLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
   const [isSplitOpen, setIsSplitOpen] = React.useState(defaultSplitOpen);
   const hasSplitPanel = splitPanelContent !== undefined;
+
+  // 'icon-collapse' only — the rail's collapsed/expanded state.
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(defaultSidebarCollapsed);
+  const isIconCollapse = sidebarVariant === 'icon-collapse';
+  const isDual = sidebarVariant === 'dual';
+  // In 'dual' mode the primary rail is always icon-only (fixed, no toggle);
+  // in 'icon-collapse' mode it tracks the toggle state.
+  const isPrimaryCollapsed = isDual || (isIconCollapse && isSidebarCollapsed);
 
   // Refs for focus management
   const drawerRef = React.useRef<HTMLDivElement>(null);
@@ -310,8 +357,42 @@ function AppLayoutInner({
         items={navItems}
         label={navLabel}
         onSelect={onNavSelect}
-        className="hidden w-64 shrink-0 md:flex"
+        collapsed={isPrimaryCollapsed}
+        className={cn(
+          'hidden shrink-0 md:flex',
+          isPrimaryCollapsed ? 'w-16' : 'w-64',
+        )}
+        footer={
+          isIconCollapse ? (
+            <button
+              type="button"
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              onClick={() => setIsSidebarCollapsed((v) => !v)}
+              className={cn(
+                'mt-1 flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium',
+                'text-sidebar-foreground hover:bg-accent hover:text-accent-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                isSidebarCollapsed && 'justify-center px-0',
+              )}
+            >
+              <span aria-hidden="true" className="text-sm leading-none">
+                {isSidebarCollapsed ? '»' : '«'}
+              </span>
+              {!isSidebarCollapsed && <span>Collapse</span>}
+            </button>
+          ) : undefined
+        }
       />
+
+      {/* ── Secondary (contextual) SideNav — 'dual' variant only ─── */}
+      {isDual && (
+        <SideNav
+          items={secondaryNavItems}
+          label={secondaryNavLabel}
+          onSelect={onSecondaryNavSelect}
+          className="hidden w-64 shrink-0 md:flex"
+        />
+      )}
 
       {/* ── Mobile SideNav overlay ──────────────────────────────── */}
       {isMobileNavOpen && (
