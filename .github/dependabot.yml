@@ -16,6 +16,17 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@astrojs/*"
         update-types: ["version-update:semver-major"]
+      # typescript@7 is peer-capped out by @astrojs/check@0.9.9 -> @astrojs/
+      # language-server -> @volar/kit (peer typescript ^5||^6). It's grouped
+      # under "tooling" below, so a bare typescript-major bump reliably breaks
+      # the whole group's npm ci (see closed #236).
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # eslint@10 is peer-capped out by eslint-plugin-jsx-a11y@6.10.2 (peer
+      # eslint ^3..^9). Ignore until jsx-a11y ships an eslint-10-compatible
+      # release (see closed #219).
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     groups:
       astro:
         patterns:
