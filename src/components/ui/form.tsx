@@ -59,8 +59,19 @@ function FormField<
   );
 }
 
+// Provides the per-FormItem id that FormLabel/FormControl/FormDescription/
+// FormMessage all derive their ids from, so htmlFor/id/aria-describedby stay
+// linked — the piece the file header always documented but never actually
+// defined until a real axe-core "select-name" critical failure on
+// ShowcaseFieldType's demo <select> exposed the gap (see form.test.ts).
+type FormItemContextValue = { id: string };
+const FormItemContext = React.createContext<FormItemContextValue>(
+  {} as FormItemContextValue,
+);
+
 function useFormField() {
   const fieldContext = React.useContext(FormFieldContext);
+  const itemContext = React.useContext(FormItemContext);
 
   // Guard BEFORE calling getFieldState — if fieldContext.name is undefined
   // (context was never provided), getFieldState would throw or produce garbage.
@@ -70,9 +81,14 @@ function useFormField() {
 
   const { getFieldState, formState } = useFormContext();
   const fieldState = getFieldState(fieldContext.name, formState);
+  const { id } = itemContext;
 
   return {
+    id,
     name: fieldContext.name,
+    formItemId: `${id}-form-item`,
+    formDescriptionId: `${id}-form-item-description`,
+    formMessageId: `${id}-form-item-message`,
     ...fieldState,
   };
 }
@@ -81,25 +97,33 @@ function useFormField() {
 const FormItem = React.forwardRef<
   React.ComponentRef<typeof Field.Root>,
   React.ComponentPropsWithoutRef<typeof Field.Root>
->(({ className, ...props }, ref) => (
-  <Field.Root
-    ref={ref}
-    className={cn('space-y-2', className)}
-    {...props}
-  />
-));
+>(({ className, ...props }, ref) => {
+  const id = React.useId();
+
+  return (
+    <FormItemContext.Provider value={{ id }}>
+      <Field.Root
+        ref={ref}
+        className={cn('space-y-2', className)}
+        {...props}
+      />
+    </FormItemContext.Provider>
+  );
+});
 FormItem.displayName = 'FormItem';
 
-// FormLabel uses our native Label + marks invalid fields
+// FormLabel uses our native Label + marks invalid fields, linked to its
+// control via htmlFor/id (see useFormField's formItemId).
 const FormLabel = React.forwardRef<
   React.ComponentRef<typeof Label>,
   React.ComponentPropsWithoutRef<typeof Label>
 >(({ className, ...props }, ref) => {
-  const { error } = useFormField();
+  const { error, formItemId } = useFormField();
 
   return (
     <Label
       ref={ref}
+      htmlFor={formItemId}
       className={cn(error && 'text-destructive', className)}
       {...props}
     />
@@ -115,10 +139,14 @@ const FormControl = React.forwardRef<
   HTMLElement,
   React.HTMLAttributes<HTMLElement> & { children: React.ReactElement }
 >(({ children, ...props }, ref) => {
-  const { error } = useFormField();
+  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
   const childProps = {
     ref,
+    id: formItemId,
+    'aria-describedby': error
+      ? `${formDescriptionId} ${formMessageId}`
+      : formDescriptionId,
     'aria-invalid': !!error,
     ...props,
     ...(children.props as Record<string, unknown>),
@@ -132,13 +160,18 @@ FormControl.displayName = 'FormControl';
 const FormDescription = React.forwardRef<
   React.ComponentRef<typeof Field.Description>,
   React.ComponentPropsWithoutRef<typeof Field.Description>
->(({ className, ...props }, ref) => (
-  <Field.Description
-    ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
-    {...props}
-  />
-));
+>(({ className, ...props }, ref) => {
+  const { formDescriptionId } = useFormField();
+
+  return (
+    <Field.Description
+      ref={ref}
+      id={formDescriptionId}
+      className={cn('text-sm text-muted-foreground', className)}
+      {...props}
+    />
+  );
+});
 FormDescription.displayName = 'FormDescription';
 
 // FormMessage shows the validation error message from react-hook-form
@@ -146,7 +179,7 @@ const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
-  const { error } = useFormField();
+  const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ?? '') : children;
 
   if (!body) {
@@ -156,6 +189,7 @@ const FormMessage = React.forwardRef<
   return (
     <p
       ref={ref}
+      id={formMessageId}
       className={cn('text-sm font-medium text-destructive', className)}
       {...props}
     >

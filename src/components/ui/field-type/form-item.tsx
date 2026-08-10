@@ -36,11 +36,20 @@ type EditableField = Pick<
 // Wraps DatePicker/DateRangePicker (plain function components, no
 // forwardRef) in a ref-able <div> so FormControl's React.cloneElement can
 // attach its ref without React's "function components cannot be given
-// refs" dev warning — see form.tsx's FormControl doc comment.
+// refs" dev warning — see form.tsx's FormControl doc comment. The a11y
+// props FormControl injects (id/aria-describedby/aria-invalid, see A11yProps
+// above) land on this wrapper too, and forward onto DatePicker's real
+// trigger button — not the div — so a screen reader announces them on the
+// actual interactive element, not an inert wrapper.
 const DateFieldControl = React.forwardRef<
   HTMLDivElement,
-  { value: Date | undefined; onChange: (date: Date | undefined) => void; minDate?: Date; maxDate?: Date }
->(({ value, onChange, minDate, maxDate }, ref) => {
+  {
+    value: Date | undefined;
+    onChange: (date: Date | undefined) => void;
+    minDate?: Date;
+    maxDate?: Date;
+  } & A11yProps
+>(({ value, onChange, minDate, maxDate, ...a11y }, ref) => {
   // react-day-picker v9's min/max bound is a `disabled` Matcher, not
   // fromDate/toDate (that was v8's API) — see calendar.tsx's own DayPicker
   // wrapping for the same convention.
@@ -54,6 +63,7 @@ const DateFieldControl = React.forwardRef<
         value={value}
         onValueChange={onChange}
         calendarProps={disabled.length > 0 ? { disabled } : undefined}
+        triggerProps={a11y}
       />
     </div>
   );
@@ -62,13 +72,27 @@ DateFieldControl.displayName = 'DateFieldControl';
 
 const DateRangeFieldControl = React.forwardRef<
   HTMLDivElement,
-  { value: DateRange | undefined; onChange: (range: DateRange | undefined) => void }
->(({ value, onChange }, ref) => (
+  { value: DateRange | undefined; onChange: (range: DateRange | undefined) => void } & A11yProps
+>(({ value, onChange, ...a11y }, ref) => (
   <div ref={ref}>
-    <DateRangePicker value={value} onValueChange={onChange} />
+    <DateRangePicker value={value} onValueChange={onChange} triggerProps={a11y} />
   </div>
 ));
 DateRangeFieldControl.displayName = 'DateRangeFieldControl';
+
+// The subset of DOM a11y attributes FormControl injects via cloneElement
+// (see form.tsx) — FieldEditControl is FormControl's direct child, but it's
+// a switch/render component, not a DOM element or a props-forwarding
+// wrapper, so those injected props land on FieldEditControl's own props and
+// go no further unless explicitly threaded down to whichever real widget it
+// renders. Without this, every fieldType-driven form field silently loses
+// its id/aria-describedby/aria-invalid — the same class of bug a real
+// axe-core "select-name" failure caught in CI on ShowcaseFieldType's demo.
+interface A11yProps {
+  id?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
+}
 
 /**
  * (c)'s widget half — given a fieldType and react-hook-form's Controller
@@ -77,7 +101,11 @@ DateRangeFieldControl.displayName = 'DateRangeFieldControl';
  * FormLabel/FormControl/FormMessage wiring around whichever widget this
  * returns).
  */
-function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: EditableField }) {
+function FieldEditControl({
+  fieldType,
+  field,
+  ...a11y
+}: { fieldType: FieldType; field: EditableField } & A11yProps) {
   switch (fieldType.type) {
     case 'text':
       return (
@@ -88,6 +116,7 @@ function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: E
           value={(field.value as string | undefined) ?? ''}
           disabled={field.disabled}
           placeholder={fieldType.placeholder}
+          {...a11y}
         />
       );
 
@@ -101,6 +130,7 @@ function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: E
           min={fieldType.min}
           max={fieldType.max}
           step={'step' in fieldType ? fieldType.step : undefined}
+          {...a11y}
         />
       );
 
@@ -110,6 +140,7 @@ function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: E
           checked={Boolean(field.value)}
           onCheckedChange={(checked) => field.onChange(Boolean(checked))}
           disabled={field.disabled}
+          {...a11y}
         />
       );
 
@@ -122,6 +153,7 @@ function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: E
           value={(field.value as string | undefined) ?? ''}
           disabled={field.disabled}
           className={selectClass}
+          {...a11y}
         >
           <option value="" disabled>
             Select…
@@ -143,6 +175,7 @@ function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: E
           value={(field.value as string | undefined) ?? ''}
           disabled={field.disabled}
           className={selectClass}
+          {...a11y}
         >
           <option value="" disabled>
             Select…
@@ -162,11 +195,18 @@ function FieldEditControl({ fieldType, field }: { fieldType: FieldType; field: E
           onChange={field.onChange}
           minDate={fieldType.minDate}
           maxDate={fieldType.maxDate}
+          {...a11y}
         />
       );
 
     case 'dateRange':
-      return <DateRangeFieldControl value={field.value as DateRange | undefined} onChange={field.onChange} />;
+      return (
+        <DateRangeFieldControl
+          value={field.value as DateRange | undefined}
+          onChange={field.onChange}
+          {...a11y}
+        />
+      );
   }
 }
 

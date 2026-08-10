@@ -32,6 +32,8 @@ export interface DatePickerProps {
   className?: string;
   /** Forwarded to the underlying react-day-picker Calendar (e.g. `disabled`, `fromDate`, `toDate`). */
   calendarProps?: Omit<React.ComponentProps<typeof Calendar>, 'mode' | 'selected' | 'onSelect'>;
+  /** Forwarded onto the Popover trigger button — e.g. `id`/`aria-describedby`/`aria-invalid` from a `<FormControl>` wrapper (see field-type/form-item.tsx). */
+  triggerProps?: React.ComponentPropsWithoutRef<'button'>;
 }
 
 /** Single-date picker: Popover trigger showing the formatted date + Calendar in `mode="single"`. */
@@ -43,6 +45,7 @@ function DatePicker({
   disabled,
   className,
   calendarProps,
+  triggerProps,
 }: DatePickerProps) {
   const [internalValue, setInternalValue] = React.useState<Date | undefined>(defaultValue);
   const [open, setOpen] = React.useState(false);
@@ -62,6 +65,7 @@ function DatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         disabled={disabled}
+        {...triggerProps}
         render={
           <Button
             variant="outline"
@@ -92,6 +96,8 @@ export interface DateRangePickerProps {
   disabled?: boolean;
   className?: string;
   calendarProps?: Omit<React.ComponentProps<typeof Calendar>, 'mode' | 'selected' | 'onSelect'>;
+  /** Forwarded onto the Popover trigger button — e.g. `id`/`aria-describedby`/`aria-invalid` from a `<FormControl>` wrapper (see field-type/form-item.tsx). */
+  triggerProps?: React.ComponentPropsWithoutRef<'button'>;
 }
 
 function formatRange(range: DateRange | undefined): string {
@@ -109,6 +115,7 @@ function DateRangePicker({
   disabled,
   className,
   calendarProps,
+  triggerProps,
 }: DateRangePickerProps) {
   const [internalValue, setInternalValue] = React.useState<DateRange | undefined>(defaultValue);
   const [open, setOpen] = React.useState(false);
@@ -130,6 +137,7 @@ function DateRangePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         disabled={disabled}
+        {...triggerProps}
         render={
           <Button
             variant="outline"

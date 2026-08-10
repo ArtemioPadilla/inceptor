@@ -73,4 +73,15 @@ describe('<FieldFormItem>', () => {
     expect(screen.getByRole('option', { name: 'Books' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Music' })).toBeInTheDocument();
   });
+
+  // Regression for a real axe-core "select-name" critical failure caught in
+  // CI on /gallery/ (ShowcaseFieldType's demo form): FormLabel and
+  // FormControl rendered as unassociated siblings — no htmlFor/id link — so
+  // a <select> control had no accessible name at all. getByLabelText is the
+  // same query axe's label-association check exercises under the hood.
+  it('associates FormLabel with its FormControl via htmlFor/id, so the select has an accessible name', () => {
+    render(<Harness />);
+    const bylabel = screen.getByLabelText('Category');
+    expect(bylabel.tagName).toBe('SELECT');
+  });
 });
