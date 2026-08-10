@@ -31,6 +31,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DownloadTrigger } from '@/components/ui/download-trigger';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { FieldDisplay } from '@/components/ui/field-type/display';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -52,16 +53,27 @@ import {
 import { cn } from '@/lib/utils';
 import { useDataTableUrlState } from '@/components/ui/use-data-table-url-state';
 import { useListing } from '@/lib/use-listing';
+import type { FieldType } from '@/lib/field-type';
 
 // Module augmentation: lets column defs opt into a per-column <select> filter
-// (instead of the default text input) by supplying `meta.filterOptions`. Kept
-// here (not a separate .d.ts) so it's colocated with the one feature that
-// reads it — see the per-column filter row below.
+// (instead of the default text input) by supplying `meta.filterOptions`, or a
+// shared fieldType-driven cell renderer via `meta.fieldType` (ROADMAP Epic
+// 24). Kept here (not a separate .d.ts) so it's colocated with the features
+// that read it.
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- TData/TValue are part of the augmented interface's generic signature
   interface ColumnMeta<TData, TValue> {
     /** Options for the per-column filter `<select>`; omit for a text input. */
     filterOptions?: { label: string; value: string }[];
+    /**
+     * A unified fieldType definition (ROADMAP Epic 24, src/lib/field-type.ts).
+     * When a column def omits its own `cell`, DataTable falls back to
+     * `<FieldDisplay fieldType={...} value={getValue()} />` — the same
+     * display renderer description-list rows use — so one field definition
+     * drives both surfaces. An explicit `cell` always wins (additive, not a
+     * replacement for the raw-cell-renderer API).
+     */
+    fieldType?: FieldType;
   }
 }
 
@@ -393,6 +405,18 @@ export function DataTable<TData, TValue>({
   // across renders that don't change the inputs (avoids TanStack Table
   // re-deriving column state every render).
   const tableColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
+    // fieldType-driven default cell (Epic 24): a column that supplies
+    // `meta.fieldType` but no explicit `cell` gets the shared display
+    // renderer for free. Columns that already specify `cell` are untouched.
+    const columnsWithFieldTypeCells = columns.map((col) => {
+      const fieldType = col.meta?.fieldType;
+      if (!fieldType || col.cell) return col;
+      return {
+        ...col,
+        cell: ({ getValue }) => <FieldDisplay fieldType={fieldType} value={getValue()} />,
+      } as ColumnDef<TData, TValue>;
+    });
+
     const extraColumns: ColumnDef<TData, TValue>[] = [];
 
     if (enableSelection) {
@@ -450,7 +474,9 @@ export function DataTable<TData, TValue>({
       });
     }
 
-    return extraColumns.length > 0 ? [...extraColumns, ...columns] : columns;
+    return extraColumns.length > 0
+      ? [...extraColumns, ...columnsWithFieldTypeCells]
+      : columnsWithFieldTypeCells;
   }, [columns, enableSelection, renderSubRow]);
 
   // Column-pinning state (Epic 23 / Epic 8's deferred item).
