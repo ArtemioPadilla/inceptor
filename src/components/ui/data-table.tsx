@@ -28,7 +28,10 @@ import {
 
 import { ActionBar } from '@/components/ui/action-bar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -47,6 +50,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { useDataTableUrlState } from '@/components/ui/use-data-table-url-state';
+import { useListing } from '@/lib/use-listing';
 
 // Module augmentation: lets column defs opt into a per-column <select> filter
 // (instead of the default text input) by supplying `meta.filterOptions`. Kept
@@ -60,9 +64,41 @@ declare module '@tanstack/react-table' {
   }
 }
 
+/** The sort/filter parameters passed to a `request` function each call. */
+export interface DataTableRequestParams {
+  sorting: SortingState;
+  globalFilter: string;
+  columnFilters: ColumnFiltersState;
+}
+
+/** What a `request` function must resolve with. */
+export interface DataTableRequestResult<TData> {
+  data: TData[];
+  /** Total matching row count (server-side), independent of `data.length`. */
+  total: number;
+}
+
+/**
+ * Server-paginated/sorted/filtered data source contract (ROADMAP Epic 23).
+ * Passing this via the `request` prop switches <DataTable> from client-side
+ * array filtering/sorting to manual mode: TanStack Table stops re-deriving
+ * rows locally and the table instead re-calls `request` (debounced) whenever
+ * sort/filter state changes, routing isLoading/error/data through
+ * `useListing` (see `src/lib/use-listing.ts`) for the loading/error/empty
+ * states. Memoize `request` (useCallback) in the consumer — it's a dependency
+ * of the internal fetch effect, so a new reference each render re-fetches.
+ */
+export type DataTableRequestFn<TData> = (
+  params: DataTableRequestParams,
+) => Promise<DataTableRequestResult<TData>>;
+
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  /**
+   * Row data for client-side mode. Ignored (and optional) when `request` is
+   * supplied — the table's internal request state is the data source then.
+   */
+  data?: TData[];
   /** Initial column visibility — column id to visible boolean. */
   initialColumnVisibility?: VisibilityState;
   /** Initial global filter string. */
@@ -140,6 +176,17 @@ export interface DataTableProps<TData, TValue> {
    * are set, the URL wins (it's already present on first paint).
    */
   persistColumnVisibility?: string;
+  /**
+   * Server-driven data source (ROADMAP Epic 23's most architecturally
+   * significant item). See `DataTableRequestFn`'s doc comment for the full
+   * contract. When set, `data` is ignored, sorting/filtering switch to
+   * TanStack Table's manual mode, and loading/error/empty states are routed
+   * through `useListing` instead of the always-array-based client path —
+   * existing client-side-array consumers are completely unaffected.
+   */
+  request?: DataTableRequestFn<TData>;
+  /** Debounce (ms) before calling `request` after sort/filter state changes. Defaults to 300. */
+  requestDebounceMs?: number;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -197,7 +244,7 @@ function ColumnFilterInput<TData>({ column }: { column: Column<TData, unknown> }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  data = [],
   initialColumnVisibility = {},
   initialGlobalFilter = '',
   height = '500px',
@@ -211,7 +258,12 @@ export function DataTable<TData, TValue>({
   summaryRow,
   stickyHeaderOffset = 0,
   persistColumnVisibility,
+  request,
+  requestDebounceMs = 300,
 }: DataTableProps<TData, TValue>) {
+  // Server-driven mode (Epic 23): request replaces the `data` prop as the
+  // source of truth, and TanStack Table switches to manual sorting/filtering.
+  const isServerDriven = typeof request === 'function';
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
   const urlKey = typeof syncToUrl === 'object' ? syncToUrl.key : undefined;
@@ -401,8 +453,68 @@ export function DataTable<TData, TValue>({
   // `renderSubRow` content is arbitrary JSX, not nested TData rows.
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
+  // Server-driven request state (Epic 23). Only ever written to when
+  // isServerDriven — client-array mode never touches this.
+  const [requestState, setRequestState] = React.useState<{
+    data: TData[];
+    total: number;
+    isLoading: boolean;
+    error: Error | null;
+  }>({ data: [], total: 0, isLoading: isServerDriven, error: null });
+  // Bumped by the ErrorState's Retry action to force a re-fetch without
+  // requiring sort/filter state to actually change.
+  const [retryNonce, setRetryNonce] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!isServerDriven || !request) return;
+    let cancelled = false;
+    setRequestState((prev) => ({ ...prev, isLoading: true, error: null }));
+    const timer = setTimeout(() => {
+      request({ sorting, globalFilter, columnFilters })
+        .then((result) => {
+          if (cancelled) return;
+          setRequestState({ data: result.data, total: result.total, isLoading: false, error: null });
+        })
+        .catch((err: unknown) => {
+          if (cancelled) return;
+          const normalized = err instanceof Error ? err : new Error(String(err));
+          setRequestState({ data: [], total: 0, isLoading: false, error: normalized });
+        });
+    }, requestDebounceMs);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [isServerDriven, request, sorting, globalFilter, columnFilters, requestDebounceMs, retryNonce]);
+
+  // The five-state loading/error/empty-zero/empty-filtered/ready model (see
+  // docs/COMPONENTS.md §13). Always computed (useListing is a pure function,
+  // not a hook that requires unconditional calls) but only *used* to drive
+  // rendering when isServerDriven — client-array mode keeps its existing,
+  // unconditional "No results." text so no current consumer's behavior
+  // changes. `allItemsForListing` fakes a non-empty array when the request
+  // returned zero rows while a filter was active, so useListing reports
+  // 'empty-filtered' instead of 'empty-zero' — its contract distinguishes
+  // "zero items in the source" from "filtered to zero" via array length,
+  // and a server response alone can't tell us the true unfiltered count.
+  const hasActiveRequestFilter = globalFilter.length > 0 || columnFilters.length > 0;
+  const allItemsForListing: TData[] =
+    requestState.data.length > 0
+      ? requestState.data
+      : hasActiveRequestFilter
+        ? ([{}] as TData[])
+        : [];
+  const listing = useListing<TData>({
+    isLoading: isServerDriven ? requestState.isLoading : false,
+    error: isServerDriven ? requestState.error : null,
+    allItems: isServerDriven ? allItemsForListing : data,
+    filteredItems: isServerDriven ? requestState.data : data,
+  });
+
+  const tableData = isServerDriven ? requestState.data : data;
+
   const table = useReactTable({
-    data,
+    data: tableData,
     columns: tableColumns,
     // Column resizing via TanStack Table's built-in resize handler
     enableColumnResizing: true,
@@ -410,6 +522,11 @@ export function DataTable<TData, TValue>({
     enableRowSelection: enableSelection,
     enableColumnPinning,
     enableExpanding: Boolean(renderSubRow),
+    // Server-driven mode: the request already sorted/filtered `data`, so
+    // TanStack Table must not re-derive rows locally — it just reflects the
+    // sorting/columnFilters/globalFilter state back into the header UI.
+    manualSorting: isServerDriven,
+    manualFiltering: isServerDriven,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -553,6 +670,42 @@ export function DataTable<TData, TValue>({
         </DropdownMenu>
       </div>
 
+      {/*
+       * Server-driven mode (Epic 23) routes loading/error/empty states
+       * through useListing's five-state model instead of the client-array
+       * path's always-rendered table + unconditional "No results." text —
+       * client-array consumers are unaffected (isServerDriven is false).
+       */}
+      {isServerDriven && listing.status === 'loading' ? (
+        <div className="space-y-2 rounded-md border border-border p-3" role="status" aria-label="Loading">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      ) : isServerDriven && listing.status === 'error' ? (
+        <ErrorState
+          title="Failed to load"
+          hint={listing.error.message}
+          action={
+            <button
+              type="button"
+              onClick={() => setRetryNonce((n) => n + 1)}
+              className={cn(
+                'inline-flex items-center justify-center rounded-md border border-input bg-background',
+                'px-3 py-2 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            >
+              Retry
+            </button>
+          }
+        />
+      ) : isServerDriven && listing.status === 'empty-zero' ? (
+        <EmptyState title="No items yet" description="Items you add will appear here." />
+      ) : isServerDriven && listing.status === 'empty-filtered' ? (
+        <EmptyState title="No results" description="Try a different search term." />
+      ) : (
+        <>
       {/* Scroll container measured by the virtualizer */}
       <div
         ref={parentRef}
@@ -783,6 +936,8 @@ export function DataTable<TData, TValue>({
           Showing {virtualItems.length} of {rows.length} in viewport
         </span>
       </div>
+        </>
+      )}
 
       {/* Bulk-action toolbar (Epic 22's ActionBar) — only rendered when rows
        * are selectable and 1+ are currently selected. */}
