@@ -35,6 +35,16 @@ export interface GalleryEntry {
    * Must be one of the keys in src/components/gallery/islands.ts.
    */
   island?: string;
+  /**
+   * Recommended hydration directive for real-world usage of this component
+   * (ROADMAP Epic 16 — inline hydration badges on the gallery detail page).
+   * Optional and backward-compatible: every entry below predates this field,
+   * so `src/lib/gallery-badges.ts`'s `getHydrationDirective()` falls back to
+   * `'client:visible'` — the directive every gallery demo island already
+   * uses in `[component].astro` — when omitted. Set explicitly only when a
+   * component's *documented* real-page usage differs from that default.
+   */
+  hydration?: 'client:load' | 'client:idle' | 'client:visible' | 'client:media' | 'client:only';
 }
 
 export const galleryManifest: GalleryEntry[] = [

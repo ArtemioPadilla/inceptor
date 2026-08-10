@@ -454,6 +454,65 @@ describe('MyComponent', () => {
 The vitest config (`vitest.config.ts`) includes `src/**/*.test.{ts,tsx}`, so all
 locations above are picked up automatically.
 
+### RTL / behavior-test setup — the `vitest.setup.ts` polyfill recipe
+
+The pattern above (`?raw` source-inspection) covers exports and forbidden
+imports without needing a DOM. Some components need more: an actual render +
+interaction test via `@testing-library/react` (RTL) — e.g. "does clicking
+this button call `onClick`", "does typing in this input update the value".
+Those tests run in jsdom (`// @vitest-environment jsdom` at the top of the
+file — see `src/components/ui/button.test.tsx` for the canonical example),
+and jsdom has no layout engine: several browser APIs components legitimately
+call either don't exist there at all, or exist but throw. Every test file
+that renders a component through RTL implicitly depends on the polyfill set
+in `vitest.setup.ts` (loaded once for the whole suite via `vitest.config.ts`'s
+`setupFiles`) — this is that recipe, documented once instead of
+rediscovered per-PR (closes the "still open" line in ROADMAP Epic 18's
+"Component documentation depth" section).
+
+**What's already polyfilled today** (`vitest.setup.ts`, in file order):
+
+| API | Why a component needs it | Polyfill shape |
+|---|---|---|
+| `window.matchMedia` | Any component that reads a media query on mount (dark-mode/reduced-motion checks, responsive islands). | A no-op object matching the `MediaQueryList` shape — `matches: false`, inert `add/removeEventListener` and legacy `add/removeListener`. |
+| `Element.prototype.scrollIntoView` | Chat-style auto-scroll effects that call it on every render (e.g. `ChatThread` in `src/components/ui/ai/chat-message.tsx`). jsdom never implements it — no layout engine, so "scroll into view" is meaningless there. | A no-op function. |
+| `window.ResizeObserver` | Anything that observes an element for size changes — e.g. `@zag-js/splitter`'s `trackRootResize` effect (Splitter), `DataTable`'s virtualizer re-measure effect. Without this, jsdom throws `ResizeObserver is not a constructor`. | A no-op class: `observe`/`unobserve`/`disconnect` do nothing. Tests that need real dimensions stub `getBoundingClientRect` explicitly instead of relying on this polyfill to report anything. |
+| `window.IntersectionObserver` | Visibility-triggered effects (lazy-mount patterns, scroll-fade utilities). Same rationale as `ResizeObserver` — jsdom has no layout engine to compute intersection. | A no-op class implementing the full interface shape (`root`, `rootMargin`, `thresholds`, `observe`/`unobserve`/`disconnect`/`takeRecords`). |
+| `@testing-library/jest-dom/vitest` | Custom matchers (`toBeInTheDocument`, `toHaveClass`, etc.) used across every RTL test. | Real import, not a hand-rolled stub — this one's just wiring up the library's global matchers once. |
+
+This list mirrors (and was directly inspired by) Chakra UI's own Testing
+docs, which document the same category of jsdom-gap polyfills
+(`ResizeObserver`, `matchMedia`, `IntersectionObserver`, `scrollIntoView`,
+`requestAnimationFrame`, clipboard) as a named, one-stop recipe rather than
+leaving each contributor to rediscover the gap component-by-component.
+
+**Adding a new polyfill.** If a new component throws a "X is not a
+constructor" / "X is not a function" error only inside RTL tests (never in
+`npm run dev`, since real browsers implement the API), the missing piece is
+almost always a jsdom gap, not a bug in the component. Add it to
+`vitest.setup.ts` following the existing pattern:
+
+```ts
+// Polyfill `SomeBrowserApi` for jsdom — <one-line reason this component needs it>.
+if (typeof window !== 'undefined' && typeof window.SomeBrowserApi === 'undefined') {
+  class SomeBrowserApiPolyfill {
+    /* smallest no-op shape that satisfies the component's usage */
+  }
+  (window as any).SomeBrowserApi = SomeBrowserApiPolyfill;
+  (globalThis as any).SomeBrowserApi = SomeBrowserApiPolyfill;
+}
+```
+
+Guard every addition with a `typeof window !== 'undefined' && typeof
+window.X === 'undefined'` check (as the existing four all do) so the file
+stays a no-op for Node-environment tests and never clobbers a real browser
+implementation if this setup file is ever loaded outside Vitest. Keep the
+polyfill the smallest shape that satisfies the component under test — these
+are jsdom-gap patches, not full spec implementations; a test that needs real
+measured dimensions or actual intersection data should stub the specific
+method it needs (e.g. `getBoundingClientRect`) rather than expecting the
+global polyfill to compute anything.
+
 ---
 
 ## 8. Data tables

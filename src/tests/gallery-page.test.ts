@@ -121,9 +121,46 @@ describe('gallery/[component].astro — props API section (#139)', () => {
   });
 });
 
+describe('gallery/[component].astro — inline maturity/hydration badges (ROADMAP Epic 16)', () => {
+  it('imports stabilityGlyph + getHydrationDirective from the shared lib', () => {
+    expect(component).toMatch(/stabilityGlyph/);
+    expect(component).toMatch(/getHydrationDirective/);
+    expect(component).toContain('gallery-badges');
+  });
+
+  it('renders the stability glyph inline near the title, not only the text status pill', () => {
+    expect(component).toMatch(/stabilityGlyph\(entry\.status\)/);
+  });
+
+  it('renders a hydration-directive badge derived from the entry', () => {
+    expect(component).toMatch(/getHydrationDirective\(entry\)/);
+  });
+});
+
+describe('gallery/[component].astro — live Playground (ROADMAP Epic 16)', () => {
+  it('imports the Playground island', () => {
+    expect(component).toMatch(/import\s+Playground\s+from/);
+  });
+
+  it('imports the per-slug playground code map', () => {
+    expect(component).toMatch(/galleryPlaygrounds/);
+  });
+
+  it('hydrates Playground with client:visible, never client:load', () => {
+    const idx = component.indexOf('<Playground');
+    expect(idx).toBeGreaterThan(-1);
+    const snippet = component.slice(idx, idx + 200);
+    expect(snippet).toMatch(/client:visible/);
+  });
+});
+
 describe('gallery manifest', () => {
   it('declares the GalleryEntry interface', () => {
     expect(manifestSrc).toMatch(/interface\s+GalleryEntry/);
+  });
+
+  it('declares an optional hydration field on GalleryEntry (ROADMAP Epic 16)', () => {
+    expect(manifestSrc).toMatch(/hydration\?:/);
   });
 
   it('lists at least 10 components', () => {
