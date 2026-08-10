@@ -36,6 +36,7 @@
     "new-issue": "bash scripts/new-issue.sh",
     "init": "node scripts/init.mjs",
     "gen:catalog": "node --experimental-strip-types scripts/gen-component-catalog.ts",
+    "gen:registry": "node --experimental-strip-types scripts/gen-registry.ts",
     "lint": "eslint .",
     "hooks:install": "git config core.hooksPath scripts/hooks && echo 'Pre-commit hooks installed. Run: git config --unset core.hooksPath to remove.'"
   },
