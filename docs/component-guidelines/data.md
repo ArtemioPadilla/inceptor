@@ -75,6 +75,55 @@ interface DataTableProps<TData, TValue> {
   every keystroke in the global filter. Memoize `data`/`columns` in the
   caller.
 
+### Keyboard
+
+Read directly from `src/components/ui/data-table.tsx` (ROADMAP Epic 18 —
+keyboard-navigation contract tables, MUI Data Grid's `Key | Description`
+format). **`DataTable` does not implement a roving-tabindex / arrow-key
+grid-cell navigation model** the way MUI Data Grid does — every interactive
+control (sort header, checkbox, pin toggle, expand chevron, filter input) is
+a plain, natively-focusable HTML element that participates in normal DOM tab
+order. There is no cell-to-cell arrow-key model to document because none
+exists; the table below is grouped by interaction context instead.
+
+**Sorting** (per sortable column — the header renders a real `<button>`):
+
+| Key | Description |
+|---|---|
+| <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Move focus to the next/previous sortable column header button (native tab order). |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | Cycle the focused column's sort: none → ascending → descending → none. |
+
+**Selection** (when `enableSelection`):
+
+| Key | Description |
+|---|---|
+| <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Move focus between the header "select all" checkbox and each row's checkbox. |
+| <kbd>Space</kbd> | Toggle the focused checkbox (select-all or single row). |
+
+**Column management**:
+
+| Key | Description |
+|---|---|
+| <kbd>Tab</kbd> | Move focus to the "Columns" visibility trigger, or (when `enableColumnPinning`) each header's pin/unpin button. |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | Activate the focused pin/unpin button, or open the "Columns" dropdown. |
+| <kbd>↓</kbd> / <kbd>↑</kbd> | Inside the open "Columns" menu, move the highlighted item — inherited unmodified from Base UI's `Menu` primitive (see [`compound.md`](./compound.md)'s DropdownMenu section), not custom `DataTable` code. |
+| <kbd>Esc</kbd> | Close the open "Columns" menu, return focus to its trigger. |
+| — | Column **resize** (the drag handle on each header's right edge) is **not** keyboard-operable — it's wired to `onMouseDown`/`onTouchStart` only and marked `aria-hidden="true"`. Known gap, not an oversight to route around; there is currently no keyboard equivalent for resizing a column. |
+
+**Filtering**:
+
+| Key | Description |
+|---|---|
+| <kbd>Tab</kbd> | Move focus into the global filter `<input>`, or (when `enableColumnFilters`) each per-column filter `<input>`/`<select>`. |
+| *(typing)* | Filters rows live as you type — client-side immediately, or debounced into a `request()` call in server-driven mode. No extra key required to apply the filter. |
+
+**Row expansion** (when `renderSubRow` is supplied):
+
+| Key | Description |
+|---|---|
+| <kbd>Tab</kbd> | Move focus to a row's expand/collapse chevron button. |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | Toggle that row's detail row open/closed. |
+
 ---
 
 ## PropertyFilter

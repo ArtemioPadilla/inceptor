@@ -24,15 +24,21 @@ component:
 ## Coverage — partial, expanding
 
 This library has ~70 gallery entries; these guidelines currently cover
-**15 components across 9 categories** — the most-used and most-structurally-
+**19 components across 10 categories** — the most-used and most-structurally-
 complex ones (compound components, the two Cloudscape-gap controls, the
-generic `DataTable`). Every prop name below was read directly from the
-current `src/components/ui/*.tsx` / `src/components/ui/ai/*.tsx` source, not
-guessed from the summary in `gallery.ts`. **Do not treat an uncovered
+generic `DataTable`), plus (as of ROADMAP Epic 18) the five components with
+a documented Keyboard subsection: `DataTable`, `Combobox`, `Command
+palette`, `Tree view`, `Menubar`. Every prop name below was read directly
+from the current `src/components/ui/*.tsx` / `src/components/ui/ai/*.tsx`
+source, not guessed from the summary in `gallery.ts`; every Keyboard table
+was verified against the installed `@base-ui-components/react` primitive
+source (or the component's own hand-rolled event handlers) rather than
+assumed from the general WAI-ARIA pattern. **Do not treat an uncovered
 component as unsupported** — check `docs/COMPONENTS.md` and
 `docs/component-catalog.md` first, then read the source directly. Extending
 coverage here (new category files, or new sections in an existing file) is
-welcome; follow the same four-heading format.
+welcome; follow the same four-heading format (add a `### Keyboard`
+subsection too when the component has non-trivial keyboard interaction).
 
 ## Files
 
@@ -40,12 +46,13 @@ welcome; follow the same four-heading format.
 |---|---|---|
 | [`primitives.md`](./primitives.md) | `primitives` | Button |
 | [`forms.md`](./forms.md) | `forms` | Select, FileUpload |
-| [`navmenu.md`](./navmenu.md) | `navmenu` | Combobox |
+| [`navmenu.md`](./navmenu.md) | `navmenu` | Combobox, Command palette, Menubar |
 | [`compound.md`](./compound.md) | `compound` | Dialog, Form, DropdownMenu, Tabs, Toast |
 | [`overlays.md`](./overlays.md) | `overlays` | Tooltip |
 | [`disclosure.md`](./disclosure.md) | `disclosure` | Accordion |
 | [`feedback.md`](./feedback.md) | `feedback` | Flashbar |
 | [`data.md`](./data.md) | `data` | DataTable, PropertyFilter |
+| [`extras.md`](./extras.md) | `extras` | Tree view |
 | [`gen-ai.md`](./gen-ai.md) | `gen-ai` | PromptInput, ChatMessage / ChatThread |
 
 ## Machine-readable alternative
