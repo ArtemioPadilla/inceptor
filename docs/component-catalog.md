@@ -108,8 +108,8 @@ Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entr
 
 | Component | Status | Summary | Source |
 |---|---|---|---|
-| **Generative AI** | ✅ stable | Chat thread, prompt input, streaming + thinking states, AI output label (disclosure), and response feedback. | [`src/components/ui/ai/`](../src/components/ui/ai/) |
+| **Generative AI** | ✅ stable | Chat thread (stick-to-bottom scroll), prompt input, streaming + thinking states, AI output label (disclosure), citations, and response feedback. | [`src/components/ui/ai/`](../src/components/ui/ai/) |
 
 ---
 
-_Last generated: 2026-06-13. Run `npm run gen:catalog` to refresh._
+_Last generated: 2026-08-10. Run `npm run gen:catalog` to refresh._

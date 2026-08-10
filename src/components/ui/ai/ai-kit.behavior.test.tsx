@@ -9,6 +9,7 @@ import { PromptInput } from './prompt-input';
 import { StreamingText, ThinkingIndicator } from './streaming-text';
 import { AIOutputLabel } from './ai-output-label';
 import { AIFeedback } from './ai-feedback';
+import { CitationRef, CitationList } from './citation';
 
 describe('ChatMessage', () => {
   it('marks role via data-role and renders the footer slot', () => {
@@ -230,5 +231,32 @@ describe('AIFeedback', () => {
     await user.type(box, 'wrong category');
     await user.click(screen.getByRole('button', { name: 'Enviar' }));
     expect(onSubmit).toHaveBeenCalledWith('down', 'wrong category');
+  });
+});
+
+describe('Citation', () => {
+  it('CitationRef renders a numbered inline marker', () => {
+    render(
+      <p>
+        claim<CitationRef index={2} />
+      </p>,
+    );
+    expect(screen.getByText('[2]')).toBeInTheDocument();
+  });
+  it('CitationList numbers sources and links the ones with a URL', () => {
+    render(
+      <CitationList
+        sources={[{ label: 'Estado de cuenta agosto' }, { label: 'API interna', url: 'https://example.com/api' }]}
+      />,
+    );
+    const list = screen.getByRole('list', { name: 'Fuentes' });
+    expect(list).toBeInTheDocument();
+    expect(screen.getByText('Estado de cuenta agosto')).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /API interna/ });
+    expect(link).toHaveAttribute('href', 'https://example.com/api');
+  });
+  it('CitationList renders nothing for an empty source list', () => {
+    const { container } = render(<CitationList sources={[]} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

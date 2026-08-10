@@ -235,7 +235,7 @@ export const galleryManifest: GalleryEntry[] = [
     slug: 'gen-ai',
     name: 'Generative AI',
     summary:
-      'Chat thread, prompt input, streaming + thinking states, AI output label (disclosure), and response feedback.',
+      'Chat thread (stick-to-bottom scroll), prompt input, streaming + thinking states, AI output label (disclosure), citations, and response feedback.',
     source: 'src/components/ui/ai/',
     status: 'stable',
     category: 'gen-ai',
