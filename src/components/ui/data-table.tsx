@@ -5,6 +5,8 @@ import {
   type ColumnFiltersState,
   type ColumnPinningState,
   type ColumnSizingState,
+  type ExpandedState,
+  type Row as TableRowModel,
   type RowSelectionState,
   type SortingState,
   type VisibilityState,
@@ -15,7 +17,14 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronDown, ChevronUp, ChevronsUpDown, PinIcon, PinOffIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  ChevronsUpDown,
+  PinIcon,
+  PinOffIcon,
+} from 'lucide-react';
 
 import { ActionBar } from '@/components/ui/action-bar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -96,6 +105,16 @@ export interface DataTableProps<TData, TValue> {
    * structured filtering when that's needed instead.
    */
   enableColumnFilters?: boolean;
+  /**
+   * Opt-in row expansion. When supplied, an expand/collapse chevron column
+   * is prepended and clicking it reveals a full-width detail row rendered
+   * by this callback. Uses TanStack Table's row-expansion state (a plain
+   * `expanded` boolean map, not the tree-data `subRows` API — `renderSubRow`
+   * content is arbitrary, not a nested TData[]). The detail row is folded
+   * into the same virtualized item list as the data rows so scroll offsets
+   * stay accurate while rows are expanded.
+   */
+  renderSubRow?: (row: TData) => React.ReactNode;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -163,6 +182,7 @@ export function DataTable<TData, TValue>({
   renderBulkActions,
   enableColumnPinning = false,
   enableColumnFilters = false,
+  renderSubRow,
 }: DataTableProps<TData, TValue>) {
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
@@ -244,36 +264,70 @@ export function DataTable<TData, TValue>({
   // state, not synced to the URL (selections shouldn't survive a shared link).
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
-  // Prepend a checkbox column when enableSelection is on. Memoized so the
-  // column array identity is stable across renders that don't change the
-  // inputs (avoids TanStack Table re-deriving column state every render).
+  // Prepend a checkbox column (enableSelection) and/or an expand-chevron
+  // column (renderSubRow). Memoized so the column array identity is stable
+  // across renders that don't change the inputs (avoids TanStack Table
+  // re-deriving column state every render).
   const tableColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
-    if (!enableSelection) return columns;
-    const selectionColumn: ColumnDef<TData, TValue> = {
-      id: '__select',
-      size: 36,
-      enableSorting: false,
-      enableHiding: false,
-      enableResizing: false,
-      enableColumnFilter: false,
-      header: ({ table: t }) => (
-        <Checkbox
-          checked={t.getIsAllRowsSelected()}
-          indeterminate={!t.getIsAllRowsSelected() && t.getIsSomeRowsSelected()}
-          onCheckedChange={(value) => t.toggleAllRowsSelected(Boolean(value))}
-          aria-label="Select all rows"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
-          aria-label={`Select row ${row.id}`}
-        />
-      ),
-    };
-    return [selectionColumn, ...columns];
-  }, [columns, enableSelection]);
+    const extraColumns: ColumnDef<TData, TValue>[] = [];
+
+    if (enableSelection) {
+      extraColumns.push({
+        id: '__select',
+        size: 36,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        enableColumnFilter: false,
+        header: ({ table: t }) => (
+          <Checkbox
+            checked={t.getIsAllRowsSelected()}
+            indeterminate={!t.getIsAllRowsSelected() && t.getIsSomeRowsSelected()}
+            onCheckedChange={(value) => t.toggleAllRowsSelected(Boolean(value))}
+            aria-label="Select all rows"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
+            aria-label={`Select row ${row.id}`}
+          />
+        ),
+      });
+    }
+
+    if (renderSubRow) {
+      extraColumns.push({
+        id: '__expand',
+        size: 32,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        enableColumnFilter: false,
+        header: () => null,
+        cell: ({ row }) => (
+          <button
+            type="button"
+            onClick={() => row.toggleExpanded()}
+            aria-label={row.getIsExpanded() ? 'Collapse row' : 'Expand row'}
+            aria-expanded={row.getIsExpanded()}
+            className={cn(
+              'inline-flex items-center justify-center rounded-sm p-0.5 text-muted-foreground',
+              'hover:bg-accent hover:text-accent-foreground',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            )}
+          >
+            <ChevronRight
+              className={cn('h-4 w-4 transition-transform', row.getIsExpanded() && 'rotate-90')}
+            />
+          </button>
+        ),
+      });
+    }
+
+    return extraColumns.length > 0 ? [...extraColumns, ...columns] : columns;
+  }, [columns, enableSelection, renderSubRow]);
 
   // Column-pinning state (Epic 23 / Epic 8's deferred item).
   const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>({});
@@ -283,6 +337,11 @@ export function DataTable<TData, TValue>({
   // getFilteredRowModel.
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
+  // Row-expansion state (Epic 23). A plain `{ [rowId]: boolean }` map — we
+  // don't use TanStack's tree-data `getExpandedRowModel`/`subRows` since
+  // `renderSubRow` content is arbitrary JSX, not nested TData rows.
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
+
   const table = useReactTable({
     data,
     columns: tableColumns,
@@ -291,6 +350,7 @@ export function DataTable<TData, TValue>({
     columnResizeMode: 'onChange',
     enableRowSelection: enableSelection,
     enableColumnPinning,
+    enableExpanding: Boolean(renderSubRow),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -301,6 +361,7 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     onColumnPinningChange: setColumnPinning,
     onColumnFiltersChange: setColumnFilters,
+    onExpandedChange: setExpanded,
     state: {
       sorting,
       globalFilter,
@@ -308,6 +369,7 @@ export function DataTable<TData, TValue>({
       columnSizing,
       rowSelection,
       columnPinning,
+      expanded,
       columnFilters,
     },
   });
@@ -323,13 +385,37 @@ export function DataTable<TData, TValue>({
 
   const rows = table.getRowModel().rows;
 
+  // Flatten data rows + any expanded "detail" rows into one list so the
+  // virtualizer treats each as an independent, individually-measured item —
+  // this keeps scroll offsets accurate while rows are expanded/collapsed
+  // instead of the virtualizer silently under-counting expanded content's
+  // height (see the DataTableProps.renderSubRow doc comment).
+  type FlatItem =
+    | { kind: 'row'; row: TableRowModel<TData> }
+    | { kind: 'detail'; row: TableRowModel<TData> };
+
+  const flatItems = React.useMemo<FlatItem[]>(() => {
+    if (!renderSubRow) return rows.map((row) => ({ kind: 'row' as const, row }));
+    const items: FlatItem[] = [];
+    for (const row of rows) {
+      items.push({ kind: 'row', row });
+      if (row.getIsExpanded()) items.push({ kind: 'detail', row });
+    }
+    return items;
+    // `expanded` isn't read directly here, but row.getIsExpanded() reflects
+    // it via the `table` instance recreated each render — include it so this
+    // memo recomputes exactly when expansion state (or the row set) changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, renderSubRow, expanded]);
+
   // parentRef is the scrollable container — TanStack Virtual measures its clientHeight
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
-    count: rows.length,
+    count: flatItems.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => estimateRowSize,
+    estimateSize: (index) =>
+      flatItems[index]?.kind === 'detail' ? estimateRowSize * 3 : estimateRowSize,
     overscan: 10,
   });
 
@@ -557,9 +643,25 @@ export function DataTable<TData, TValue>({
               </tr>
             ) : (
               virtualItems.map((virtualRow) => {
-                // Non-null: virtualRow.index is always within rows bounds (virtualizer
-                // is constructed with count = rows.length).
-                const row = rows[virtualRow.index]!;
+                // Non-null: virtualRow.index is always within flatItems bounds
+                // (virtualizer is constructed with count = flatItems.length).
+                const item = flatItems[virtualRow.index]!;
+
+                if (item.kind === 'detail') {
+                  return (
+                    <tr
+                      key={`${item.row.id}-detail`}
+                      data-index={virtualRow.index}
+                      ref={rowVirtualizer.measureElement}
+                    >
+                      <td colSpan={tableColumns.length} className="bg-muted/30 p-3">
+                        {renderSubRow?.(item.row.original)}
+                      </td>
+                    </tr>
+                  );
+                }
+
+                const row = item.row;
                 return (
                   <TableRow
                     key={row.id}
