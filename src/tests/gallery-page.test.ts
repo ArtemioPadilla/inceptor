@@ -137,6 +137,23 @@ describe('gallery/[component].astro — inline maturity/hydration badges (ROADMA
   });
 });
 
+describe('gallery/[component].astro — live Playground (ROADMAP Epic 16)', () => {
+  it('imports the Playground island', () => {
+    expect(component).toMatch(/import\s+Playground\s+from/);
+  });
+
+  it('imports the per-slug playground code map', () => {
+    expect(component).toMatch(/galleryPlaygrounds/);
+  });
+
+  it('hydrates Playground with client:visible, never client:load', () => {
+    const idx = component.indexOf('<Playground');
+    expect(idx).toBeGreaterThan(-1);
+    const snippet = component.slice(idx, idx + 200);
+    expect(snippet).toMatch(/client:visible/);
+  });
+});
+
 describe('gallery manifest', () => {
   it('declares the GalleryEntry interface', () => {
     expect(manifestSrc).toMatch(/interface\s+GalleryEntry/);
