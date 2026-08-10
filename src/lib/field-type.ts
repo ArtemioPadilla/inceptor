@@ -205,7 +205,7 @@ export function formatFieldValue(fieldType: FieldType, value: unknown): string {
     }
 
     case 'boolean':
-      return Boolean(value) ? (fieldType.trueLabel ?? 'Yes') : (fieldType.falseLabel ?? 'No');
+      return value ? (fieldType.trueLabel ?? 'Yes') : (fieldType.falseLabel ?? 'No');
   }
 }
 

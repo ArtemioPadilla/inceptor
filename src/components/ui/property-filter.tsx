@@ -177,22 +177,21 @@ export function PropertyFilter({
             ))}
           </select>
           {current?.fieldType ? (
-            <span
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addToken();
-                }
-              }}
-              className="flex flex-1 items-center"
-            >
+            // A fieldType-driven widget (select/date-picker/number input) is
+            // itself a real interactive control, so the Enter-to-add
+            // shortcut is wired inside FieldFilterControl's own elements
+            // rather than a synthetic keydown wrapper here (which would
+            // need its own role+tabIndex to stay accessible — simpler to
+            // not introduce one).
+            <div className="flex flex-1 items-center">
               <FieldFilterControl
                 fieldType={current.fieldType}
                 value={value}
                 onChange={setValue}
                 placeholder={placeholder}
+                onEnter={addToken}
               />
-            </span>
+            </div>
           ) : (
             <input
               aria-label="Filter value"

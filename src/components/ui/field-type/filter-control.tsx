@@ -55,6 +55,17 @@ export interface FieldFilterControlProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** Called on Enter — PropertyFilter wires this to "add the token", mirroring the plain text-input's behavior. */
+  onEnter?: () => void;
+}
+
+function enterKeyDown(onEnter: (() => void) | undefined): React.KeyboardEventHandler {
+  return (e) => {
+    if (e.key === 'Enter' && onEnter) {
+      e.preventDefault();
+      onEnter();
+    }
+  };
 }
 
 /**
@@ -65,7 +76,7 @@ export interface FieldFilterControlProps {
  * string internally so the rest of PropertyFilter never needs to know which
  * widget produced the string.
  */
-export function FieldFilterControl({ fieldType, value, onChange, placeholder }: FieldFilterControlProps) {
+export function FieldFilterControl({ fieldType, value, onChange, placeholder, onEnter }: FieldFilterControlProps) {
   switch (fieldType.type) {
     case 'select':
       return (
@@ -73,6 +84,7 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder }: 
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
         >
           <option value="">{placeholder ?? 'Select…'}</option>
@@ -90,6 +102,7 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder }: 
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
         >
           <option value="">{placeholder ?? 'Select…'}</option>
@@ -107,6 +120,7 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder }: 
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
         >
           <option value="">{placeholder ?? 'Select…'}</option>
@@ -124,6 +138,7 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder }: 
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={enterKeyDown(onEnter)}
           placeholder={placeholder}
           className={filterControlClass}
         />
@@ -157,6 +172,7 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder }: 
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={enterKeyDown(onEnter)}
           placeholder={placeholder}
           className={filterControlClass}
         />
