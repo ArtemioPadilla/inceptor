@@ -5,10 +5,13 @@ import { fileURLToPath } from 'node:url';
 /**
  * WCAG AA contrast guard (Epic 12, criterion #5).
  *
- * Parses global.css's `:root` and `.dark` blocks, extracts every CSS-var
- * value, then verifies that the foreground/background pairs we actually
- * use (e.g. --foreground/--background, --card-foreground/--card,
- * --primary-foreground/--primary) hit ≥ 4.5:1 contrast.
+ * Epic 25 (Generative theming) collapsed global.css's hand-duplicated
+ * `:root` / `.dark` blocks into single `--token: light-dark(<light>, <dark>)`
+ * declarations (one source of truth per token — see global.css). This test
+ * extracts both branches of every `light-dark()` call and verifies that the
+ * foreground/background pairs we actually use (e.g. --foreground/
+ * --background, --card-foreground/--card, --primary-foreground/--primary)
+ * hit ≥ 4.5:1 contrast in both the light and dark branch.
  *
  * Uses the WCAG 2.1 relative luminance formula. OKLCH values are first
  * converted to sRGB via a (best-effort) conversion since native browser
@@ -24,25 +27,27 @@ interface Vars {
   [name: string]: string;
 }
 
-/** Extracts the `--name: value;` declarations from a CSS block delimited by selector. */
-function extractVars(blockSelector: RegExp): Vars {
-  const m = css.match(blockSelector);
-  if (!m) return {};
-  // Non-null: the regex has exactly one capture group, so m[1] is always present when m is truthy.
-  const body = m[1]!;
-  const out: Vars = {};
-  for (const line of body.split(/[;\n]/)) {
-    const declMatch = line.match(/^\s*(--[a-z0-9-]+):\s*(.+?)\s*$/);
-    // Non-null: m[1] and m[2] are the two capture groups of the declaration regex.
-    if (declMatch) out[declMatch[1]!] = declMatch[2]!;
+/**
+ * Extracts every `--name: light-dark(<light>, <dark>);` declaration in the
+ * file and splits it into a light-branch map and a dark-branch map. Each
+ * token is declared exactly once (single source of truth); resolving which
+ * branch applies is CSS's job at paint time, not this test's — we just need
+ * both values to assert contrast against.
+ */
+function extractLightDarkVars(): { light: Vars; dark: Vars } {
+  const light: Vars = {};
+  const dark: Vars = {};
+  const re = /(--[a-z0-9-]+):\s*light-dark\(\s*([^,]+?)\s*,\s*(.+?)\s*\)\s*;/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(css))) {
+    const [, name, lightVal, darkVal] = m;
+    light[name!] = lightVal!;
+    dark[name!] = darkVal!;
   }
-  return out;
+  return { light, dark };
 }
 
-// `:root` may be grouped with `.light` (the alias used to force light tokens
-// inside a `.dark` page — see global.css). Match either form.
-const lightVars = extractVars(/:root(?:\s*,\s*\.light)?\s*\{([\s\S]*?)\}/);
-const darkVars = extractVars(/\.dark\s*\{([\s\S]*?)\}/);
+const { light: lightVars, dark: darkVars } = extractLightDarkVars();
 
 /** Parse an oklch(L C H) string to sRGB. Best-effort, sufficient for AA contrast. */
 function oklchToSrgb(value: string): [number, number, number] | null {

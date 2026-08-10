@@ -101,11 +101,15 @@ describe('audit wave 2 — trust & polish', () => {
       expect(css).toContain('color-scheme: dark');
     });
 
-    it('defines --destructive-foreground in both light and dark scopes', () => {
+    it('defines --destructive-foreground once via light-dark() (single source, Epic 25)', () => {
       const css = read('src/styles/global.css');
-      // The token must appear at least twice (light + dark declarations)
+      // Epic 25 collapsed the hand-duplicated :root/.dark blocks into one
+      // light-dark(<light>, <dark>) declaration per token — the token name
+      // must appear exactly once, and that declaration must carry both
+      // branches.
       const occurrences = (css.match(/--destructive-foreground:/g) ?? []).length;
-      expect(occurrences).toBeGreaterThanOrEqual(2);
+      expect(occurrences).toBe(1);
+      expect(css).toMatch(/--destructive-foreground:\s*light-dark\(\s*oklch\([^,]+\),\s*oklch\([^)]+\)\s*\)/);
     });
 
     it('maps --color-destructive-foreground in the @theme inline block', () => {

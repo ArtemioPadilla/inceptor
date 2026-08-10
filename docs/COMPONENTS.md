@@ -218,30 +218,67 @@ This repo uses a two-layer theming model.
 ### Layer 1 — design tokens in `global.css`
 
 All color and radius tokens live in `src/styles/global.css` under
-`@layer base`:
+`@layer base`. As of Epic 25 (Generative theming), each token is declared
+**once** via the native `light-dark(<light>, <dark>)` CSS function — not as
+two hand-duplicated `:root`/`.dark` blocks:
 
 ```css
 @layer base {
-  :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --border: oklch(0.922 0 0);
-    /* ... full list in global.css ... */
-    --radius: 0.625rem;
+  :root,
+  .light {
+    color-scheme: light;
   }
 
   .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    /* dark overrides ... */
+    color-scheme: dark;
+  }
+
+  :root {
+    --background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
+    --foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+    --primary: light-dark(oklch(0.205 0 0), oklch(0.78 0.155 164));
+    --primary-foreground: light-dark(oklch(0.985 0 0), oklch(0.2 0.03 165));
+    --border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 12%));
+    /* ... full list in global.css ... */
+    --radius: 0.625rem;
   }
 }
 ```
 
+`light-dark()` resolves its first argument when the *used* `color-scheme` is
+`light` and its second when `dark`. Since `color-scheme` is an inherited CSS
+property and `:root`/`.light` set it to `light` while `.dark` sets it to
+`dark`, every token below correctly flips wherever the DOM tree crosses a
+`.light`/`.dark` boundary — this is the same class-based toggle
+`ThemeToggle.astro` and the zero-flash head script already drive (see §6),
+just resolved by the CSS engine instead of two copy-pasted blocks. No build
+step, no JS at runtime, and every CSS variable name + resolved value is
+unchanged from before Epic 25.
+
 Tokens use `oklch()` color space for perceptual uniformity. Do not use hex or
 rgb values for semantic tokens.
+
+### Generating a whole palette from one accent color
+
+`src/lib/define-theme.ts` exports `defineTheme(accentColor)` — a pure
+function that derives a full light+dark palette (background, foreground,
+primary/primary-foreground, accent/accent-foreground, border) from a single
+`#hex` or `oklch(L C H)` accent color, reusing the exact lightness/chroma
+magnitudes already vetted for WCAG AA in the shipped emerald palette and
+only rotating hue to the caller's accent:
+
+```ts
+import { defineTheme } from '@/lib/define-theme';
+
+const theme = defineTheme('#2563eb'); // a blue brand color
+theme.light.primary; // oklch(0.5 0.123 262.88)
+theme.dark.primary; // oklch(0.78 0.155 262.88)
+```
+
+This isn't wired into a build step — it exists so a future
+`create-inceptor-app` setup script can call it once with a project's brand
+color instead of a human hand-tuning ~20 CSS variables, per the "re-brand
+when instantiating" workflow this file documents elsewhere.
 
 ### Layer 2 — Tailwind utility mapping via `@theme inline`
 
@@ -299,7 +336,9 @@ them for existing usages; new components should prefer `--primary` and
 
 ### Adding a new token
 
-1. Add the raw value under `:root { }` and its dark override under `.dark { }` in `global.css`.
+1. Add `--token: light-dark(<light-value>, <dark-value>);` under the single
+   `:root { }` token block in `global.css` (see above — one declaration,
+   both branches, no separate `.dark { }` override to keep in sync).
 2. Map it in `@theme inline { }` so Tailwind generates the utility.
 3. Use the utility class in components.
 
