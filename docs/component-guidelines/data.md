@@ -1,13 +1,14 @@
 # Data
 
 `gallery.ts` category: `data` — the generic `<DataTable>` built on TanStack
-Table + Virtual. **Coverage in this file: DataTable and PropertyFilter.**
-PropertyFilter isn't yet linked into `gallery.ts`'s manifest (it shipped
-after this category's entry was written — see
+Table + Virtual. **Coverage in this file: DataTable, PropertyFilter, and
+fieldType.** PropertyFilter isn't yet linked into `gallery.ts`'s manifest on
+its own (it shipped after this category's entry was written — see
 `src/components/ui/property-filter.tsx`); it's documented here as the best
 category fit (structured data filtering, the natural DataTable companion)
-pending that link-up. See also `docs/COMPONENTS.md` §8 for a longer,
-narrative walkthrough of DataTable — this entry is the condensed,
+pending that link-up — it does appear, wired via `fieldType`, in the
+`field-type` gallery entry below. See also `docs/COMPONENTS.md` §8 for a
+longer, narrative walkthrough of DataTable — this entry is the condensed,
 agent-facing API reference version.
 
 ---
@@ -151,3 +152,102 @@ function filterByTokens<T extends object>(rows: T[], tokens: FilterToken[]): T[]
   changes — `PropertyFilter` only manages the token UI; it does **not**
   filter your data for you. Wire `tokens` into `filterByTokens(rows, tokens)`
   yourself, typically feeding the result into `<DataTable data={...} />`.
+
+---
+
+## fieldType
+
+Source: [`src/lib/field-type.ts`](../../src/lib/field-type.ts) (union +
+pure formatting/Zod-schema helpers) and
+[`src/components/ui/field-type/`](../../src/components/ui/field-type/)
+(the JSX renderers). Gallery entry: `field-type` (slug), island
+`ShowcaseFieldType`.
+
+**Purpose**: One field-data-type definition (money, date, select-with-
+options, status-badge…) drives FOUR previously-independent surfaces —
+`DataTable` cell rendering, `PropertyFilter` filter-widget input, `Form`
+field (react-hook-form `Controller` + Zod), and `description-list` row
+display. Inspired by Ant Design ProComponents' `ProField` `valueType`
+system (ROADMAP Epic 24).
+
+**When to use**: Any data field whose meaning (formatting, validation,
+filter widget) needs to stay consistent across 2+ of those four surfaces —
+e.g. an "amount" column that also appears in a create/edit form and a
+detail panel. For a one-off value that only ever needs a single surface
+(a DataTable column with fully custom rendering and no form/filter/detail
+equivalent), the raw per-surface APIs (`cell`, `render={...}`, hand-written
+children) are still simpler and remain fully supported — fieldType wiring
+is additive everywhere it touches.
+
+**API overview**:
+
+```ts
+// src/lib/field-type.ts — the union + pure helpers
+type FieldType =
+  | { type: 'text'; label: string; placeholder?: string; minLength?: number; maxLength?: number }
+  | { type: 'number'; label: string; min?: number; max?: number; step?: number }
+  | { type: 'money'; label: string; currency: string; locale?: string; min?: number; max?: number }
+  | { type: 'percent'; label: string; decimals?: number; min?: number; max?: number }
+  | { type: 'date'; label: string; minDate?: Date; maxDate?: Date }
+  | { type: 'dateRange'; label: string }
+  | { type: 'select'; label: string; options: { label: string; value: string }[] }
+  | { type: 'status'; label: string; statuses: { value: string; label: string; tone: StatusTone }[] }
+  | { type: 'boolean'; label: string; trueLabel?: string; falseLabel?: string };
+
+function formatFieldValue(fieldType: FieldType, value: unknown): string;
+function fieldTypeZodSchema(fieldType: FieldType): z.ZodTypeAny;
+```
+
+- Define field defs **once**, typically as a `satisfies Record<string,
+  FieldType>` object near the data model, and reuse the same object
+  literals across every surface — see `ShowcaseFieldType.tsx` for the
+  canonical worked example (`fieldDefs.amount`/`.status`/`.category` each
+  feed a DataTable column, a Form field, a description-list row, and — for
+  `status`/`category` — a PropertyFilter property).
+- **DataTable**: give a `ColumnDef` `meta: { fieldType }` and omit `cell` —
+  `data-table.tsx`'s `tableColumns` memo fills in
+  `<FieldDisplay fieldType={...} value={getValue()} />` automatically. An
+  explicit `cell` always wins (additive, not a replacement).
+- **Form**: `<FieldFormItem control={form.control} name="amount"
+  fieldType={fieldDefs.amount} />` (`src/components/ui/field-type/form-
+  item.tsx`) renders the right widget (Input/NumberField/Checkbox/native
+  `<select>`/DatePicker/DateRangePicker) wired to react-hook-form's
+  `Controller`, wrapped in the existing `FormItem`/`FormLabel`/
+  `FormControl`/`FormMessage` pieces. Build the Zod schema with
+  `fieldTypeZodSchema` per field (Spec-DD, `docs/PRINCIPLES.md` §3) — full
+  manual `<FormField render={...}>` usage still works everywhere.
+- **description-list**: `<DescriptionItem term="Amount" fieldType={...}
+  value={selected.amount} />` renders through the same `FieldDisplay` as
+  DataTable cells. Omit `fieldType`/`value` and `children` renders exactly
+  as before.
+- **PropertyFilter**: give a `FilterProperty` a `fieldType` and
+  `PropertyFilter` swaps its plain text `<input>` for a `<select>`
+  (select/status/boolean), a date picker (date/dateRange), or a number
+  input (money/number/percent), via `FieldFilterControl`
+  (`src/components/ui/field-type/filter-control.tsx`), and derives
+  `operators` from `defaultOperatorsForFieldType` when the property doesn't
+  specify its own.
+- `status`'s `tone` (`'success' | 'warning' | 'danger' | 'info' |
+  'neutral'`) maps to a colored `<Badge>` in `FieldDisplay` — the same
+  visual language as `ShowcaseDataTable.tsx`'s hand-rolled `STATUS_STYLES`
+  map, just derived from data instead of a per-consumer switch statement.
+
+**Common mistakes**:
+
+- Expecting `PropertyFilter`'s `date`/`dateRange` fieldType filtering to do
+  date-aware comparison — `filterByTokens` (the pure predicate
+  `PropertyFilter` itself doesn't call automatically) coerces both sides via
+  `Number(...)` for `'>'`/`'<'`/`'>='`/`'<='`, which isn't date-aware. Wire
+  your own date-aware predicate for those operators if you need correct
+  date-range filtering; `ShowcaseFieldType.tsx` deliberately leaves
+  `createdAt` out of its `FILTER_PROPERTIES` for this reason.
+- Forgetting `fieldTypeZodSchema`'s `'select'`/`'status'` case returns a
+  `z.enum(...)` typed as plain `string` (not a literal union) at the
+  TypeScript level — the cast to `[string, ...string[]]` needed to build
+  the enum from a runtime `options`/`statuses` array loses the literal
+  types. Runtime validation is still fully correct (only the configured
+  values pass); if you need the narrower TypeScript type, declare it
+  separately.
+- Using `FieldFormItem` outside the same island as its surrounding `<Form>`
+  — the compound-component gotcha (`CLAUDE.md`) applies here exactly as it
+  does to every other `<Form>` usage.

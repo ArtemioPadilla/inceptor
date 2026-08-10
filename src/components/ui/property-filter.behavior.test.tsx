@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { PropertyFilter, filterByTokens, type FilterToken, type FilterProperty } from './property-filter';
+import type { FieldType } from '@/lib/field-type';
 
 interface Row extends Record<string, unknown> {
   name: string;
@@ -77,5 +78,35 @@ describe('<PropertyFilter>', () => {
   it('Add is disabled with an empty value', () => {
     render(<PropertyFilter properties={properties} tokens={[]} onChange={() => {}} />);
     expect(screen.getByLabelText('Add filter')).toBeDisabled();
+  });
+});
+
+describe('<PropertyFilter> fieldType integration (ROADMAP Epic 24)', () => {
+  const statusFieldType: FieldType = {
+    type: 'status',
+    label: 'Status',
+    statuses: [
+      { value: 'open', label: 'Open', tone: 'info' },
+      { value: 'closed', label: 'Closed', tone: 'success' },
+    ],
+  };
+  const propertiesWithFieldType: FilterProperty[] = [
+    { key: 'status', label: 'Status', fieldType: statusFieldType },
+  ];
+
+  it('renders a <select> populated from fieldType.statuses instead of the plain text input', () => {
+    render(<PropertyFilter properties={propertiesWithFieldType} tokens={[]} onChange={vi.fn()} />);
+    const valueControl = screen.getByLabelText('Filter value');
+    expect(valueControl.tagName).toBe('SELECT');
+    expect(screen.getByRole('option', { name: 'Open' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Closed' })).toBeInTheDocument();
+  });
+
+  it('derives the operator choices from the fieldType when the property specifies none', () => {
+    render(<PropertyFilter properties={propertiesWithFieldType} tokens={[]} onChange={vi.fn()} />);
+    const opSelect = screen.getByLabelText('Filter operator') as HTMLSelectElement;
+    const optionValues = Array.from(opSelect.options).map((o) => o.value);
+    // 'status' fieldTypes default to equality-style operators only.
+    expect(optionValues).toEqual(['=', '!=']);
   });
 });
