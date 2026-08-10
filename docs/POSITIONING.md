@@ -72,6 +72,40 @@ defensible center, and it's genuinely rare. It shows up concretely as:
 
 Do **not** compete on "generate faster." Compete on "governed by default."
 
+### The component library, compared
+
+The governance wedge above is about process. This is the separate,
+narrower claim about the UI kit itself — grounded in a 2026-08 comparison
+against Astryx, Material UI (+ MUI X), shadcn/ui, Chakra UI, Ant Design (+
+ProComponents), and Ark UI. Two concrete, checkable claims, not marketing
+language:
+
+- **What MUI X charges for, we ship free.** Column pinning, multi-filter,
+  row grouping + aggregation, tree drag-and-drop, and date-range pickers sit
+  behind MUI X's Pro ($299/dev/yr) and Premium ($599/dev/yr) tiers. Inceptor
+  is MIT. This claim becomes honest to make in marketing copy once
+  `ROADMAP.md` Epic 21 (date/range pickers) and Epic 23 (DataTable power
+  features — column pinning, per-column filters) actually ship — it is not
+  true yet, it is the reason those epics exist.
+- **Accessibility as an enforced gate, not a claim.** Ant Design's own
+  GitHub discussion #55332 documents invalid ARIA attributes and
+  inconsistent keyboard support with no dedicated a11y roadmap. Inceptor's
+  `npm run a11y` (axe-core) + `npm run keyboard-nav` (Playwright focus-walk)
+  already exist and already run in CI — but **advisory only**
+  (`continue-on-error`, tracked in Epic 12/18). The differentiator is real
+  once that flips to blocking, not before; don't claim it as shipped until
+  it is.
+
+Against **shadcn/ui** specifically — the closest architectural cousin (same
+"open code, you own the file" philosophy, and Inceptor's own Base UI
+variant of that philosophy per ADR 0002) — the wedge isn't "better
+components," it's coverage: shadcn's core registry has no direct
+equivalent of `DataTable` + `PropertyFilter`'s token-based filtering,
+`KpiCard`/`Metric`/chart primitives, or the Cloudscape-style service shell
+(`AppLayout`, `ResourceDetails`, `Wizard`) — Inceptor is closer to "shadcn
+plus the enterprise-admin layer it doesn't ship," not a competing primitive
+philosophy.
+
 ---
 
 ## 3. The audience bet: multi-audience, unified by depth not kind
