@@ -28,6 +28,7 @@ import {
 
 import { ActionBar } from '@/components/ui/action-bar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DownloadTrigger } from '@/components/ui/download-trigger';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Input } from '@/components/ui/input';
@@ -187,6 +188,16 @@ export interface DataTableProps<TData, TValue> {
   request?: DataTableRequestFn<TData>;
   /** Debounce (ms) before calling `request` after sort/filter state changes. Defaults to 300. */
   requestDebounceMs?: number;
+  /**
+   * When supplied, renders a `<DownloadTrigger>` in the toolbar that calls
+   * this function on click and downloads the resolved Blob. DownloadTrigger
+   * is a standalone primitive (`src/components/ui/download-trigger.tsx`) —
+   * this is just DataTable's opt-in wiring for the common "export the
+   * current table" case.
+   */
+  onExport?: () => Promise<Blob>;
+  /** Filename for the file downloaded via `onExport`. Defaults to 'export'. */
+  exportFilename?: string;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -260,6 +271,8 @@ export function DataTable<TData, TValue>({
   persistColumnVisibility,
   request,
   requestDebounceMs = 300,
+  onExport,
+  exportFilename = 'export',
 }: DataTableProps<TData, TValue>) {
   // Server-driven mode (Epic 23): request replaces the `data` prop as the
   // source of truth, and TanStack Table switches to manual sorting/filtering.
@@ -668,6 +681,8 @@ export function DataTable<TData, TValue>({
               ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        {/* Export trigger (Epic 23) — only rendered when the consumer wires onExport. */}
+        {onExport && <DownloadTrigger onExport={onExport} filename={exportFilename} />}
       </div>
 
       {/*
