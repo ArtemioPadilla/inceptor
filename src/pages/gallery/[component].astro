@@ -6,6 +6,7 @@ import { galleryManifest, type GalleryEntry } from '../../content/gallery';
 import { galleryRecipes } from '../../content/gallery-recipes';
 import CodeSnippet from '../../components/gallery/CodeSnippet.astro';
 import { extractPropsForSource } from '../../lib/component-docs';
+import { stabilityGlyph, getHydrationDirective } from '../../lib/gallery-badges';
 
 // Import every gallery island statically so Astro can wire hydration.
 // (Dynamic lookups via a registry don't work for `client:*` directives.)
@@ -73,19 +74,33 @@ const propsTables = extractPropsForSource(entry.source, repoRoot);
           </h1>
           <p class="mt-2 text-muted-foreground">{entry.summary}</p>
         </div>
-        <span
-          class:list={[
-            'shrink-0 rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide',
-            entry.status === 'stable' &&
-              'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
-            entry.status === 'beta' &&
-              'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30',
-            entry.status === 'experimental' &&
-              'bg-orange-500/15 text-orange-300 border border-orange-500/30',
-          ]}
-        >
-          {entry.status}
-        </span>
+        <div class="flex shrink-0 items-center gap-2">
+          {/* Stability glyph (ROADMAP Epic 16) — same ✅/🔵/🧪 legend as docs/component-catalog.md,
+              now inline at the point of use instead of only in the standalone doc table. */}
+          <span
+            class:list={[
+              'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide',
+              entry.status === 'stable' &&
+                'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
+              entry.status === 'beta' &&
+                'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30',
+              entry.status === 'experimental' &&
+                'bg-orange-500/15 text-orange-300 border border-orange-500/30',
+            ]}
+            title={`Stability: ${entry.status}`}
+          >
+            <span aria-hidden="true">{stabilityGlyph(entry.status)}</span>
+            {entry.status}
+          </span>
+          {/* Hydration-cost badge (ROADMAP Epic 16) — falls back to client:visible
+              (getHydrationDirective) when the manifest entry doesn't set one. */}
+          <span
+            class="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-1 font-mono text-[11px] text-muted-foreground"
+            title="Recommended hydration directive for real-page usage"
+          >
+            {getHydrationDirective(entry)}
+          </span>
+        </div>
       </div>
 
       <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
