@@ -5,7 +5,7 @@
 
 Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entry here is rendered live at `/gallery`.
 
-**Total:** 23 gallery entries across 15 categories.
+**Total:** 24 gallery entries across 15 categories.
 
 **Legend**
 
@@ -74,7 +74,8 @@ Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entr
 
 | Component | Status | Summary | Source |
 |---|---|---|---|
-| **DataTable** | ✅ stable | Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility, resizing, virtualization, URL state sync. | [`src/components/ui/data-table.tsx`](../src/components/ui/data-table.tsx) |
+| **DataTable** | ✅ stable | Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility/pinning, resizing, virtualization, URL state sync, row selection + ActionBar, per-column filters, expandable rows, summary row, localStorage-persisted visibility, and a server-driven `request` contract wired through useListing. | [`src/components/ui/data-table.tsx`](../src/components/ui/data-table.tsx) |
+| **Download Trigger** | ✅ stable | Icon/label button with a loading state while an async export function runs, then downloads the resolved Blob. Standalone — pairs with DataTable's `onExport` prop but composes into any export flow. | [`src/components/ui/download-trigger.tsx`](../src/components/ui/download-trigger.tsx) |
 
 ## 10. KPIs & charts
 

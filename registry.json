@@ -332,6 +332,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "src/components/ui/download-trigger.tsx",
+          "type": "registry:ui"
+        },
+        {
           "path": "src/components/ui/dropdown-menu.tsx",
           "type": "registry:ui"
         },
@@ -536,6 +540,7 @@
         "@zag-js/react",
         "@zag-js/splitter",
         "class-variance-authority",
+        "filtered to zero",
         "lucide-react",
         "react",
         "react-day-picker",
@@ -1000,7 +1005,7 @@
       "name": "data-table",
       "type": "registry:ui",
       "title": "DataTable",
-      "description": "Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility, resizing, virtualization, URL state sync.",
+      "description": "Generic <DataTable> on TanStack Table + Virtual. Sort, filter, column visibility/pinning, resizing, virtualization, URL state sync, row selection + ActionBar, per-column filters, expandable rows, summary row, localStorage-persisted visibility, and a server-driven `request` contract wired through useListing.",
       "files": [
         {
           "path": "src/components/ui/data-table.tsx",
@@ -1014,11 +1019,16 @@
       "dependencies": [
         "@tanstack/react-table",
         "@tanstack/react-virtual",
+        "filtered to zero",
         "lucide-react",
         "react"
       ],
       "registryDependencies": [
+        "action-bar",
+        "disclosure",
+        "download-trigger",
         "dropdown-menu",
+        "feedback",
         "input-primitives"
       ],
       "cssVars": {
@@ -1029,6 +1039,7 @@
           "border": "oklch(0.922 0 0)",
           "foreground": "oklch(0.145 0 0)",
           "input": "oklch(0.922 0 0)",
+          "muted": "oklch(0.97 0 0)",
           "muted-foreground": "oklch(0.49 0 0)",
           "primary": "oklch(0.50 0.123 163)",
           "ring": "oklch(0.6 0.13 163)"
@@ -1040,6 +1051,7 @@
           "border": "oklch(1 0 0 / 12%)",
           "foreground": "oklch(0.985 0 0)",
           "input": "oklch(1 0 0 / 15%)",
+          "muted": "oklch(0.269 0 0)",
           "muted-foreground": "oklch(0.715 0 0)",
           "primary": "oklch(0.78 0.155 164)",
           "ring": "oklch(0.78 0.155 164)"
@@ -1460,6 +1472,27 @@
           "ring": "oklch(0.78 0.155 164)"
         }
       }
+    },
+    {
+      "name": "download-trigger",
+      "type": "registry:ui",
+      "title": "Download Trigger",
+      "description": "Icon/label button with a loading state while an async export function runs, then downloads the resolved Blob. Standalone — pairs with DataTable's `onExport` prop but composes into any export flow.",
+      "files": [
+        {
+          "path": "src/components/ui/download-trigger.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "feedback",
+        "input-primitives"
+      ],
+      "cssVars": {}
     }
   ]
 }

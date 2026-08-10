@@ -32,6 +32,7 @@ import ShowcasePWA from '../../components/islands/ShowcasePWA';
 import ShowcaseErrorBoundary from '../../components/islands/ShowcaseErrorBoundary';
 import ShowcaseSplitter from '../../components/islands/ShowcaseSplitter';
 import ShowcaseActionBar from '../../components/islands/ShowcaseActionBar';
+import ShowcaseDownloadTrigger from '../../components/islands/ShowcaseDownloadTrigger';
 
 // Counts derived from the manifest so the header stays self-maintaining.
 const populatedCategoryCount = categoryOrder.filter((cat) => getByCategory(cat).length > 0).length;
@@ -116,6 +117,7 @@ const populatedCategoryCount = categoryOrder.filter((cat) => getByCategory(cat).
                     {entry.island === 'ShowcaseErrorBoundary' && <ShowcaseErrorBoundary client:visible />}
                     {entry.island === 'ShowcaseSplitter' && <ShowcaseSplitter client:visible />}
                     {entry.island === 'ShowcaseActionBar' && <ShowcaseActionBar client:visible />}
+                    {entry.island === 'ShowcaseDownloadTrigger' && <ShowcaseDownloadTrigger client:visible />}
                   </div>
                 </article>
               ))}
