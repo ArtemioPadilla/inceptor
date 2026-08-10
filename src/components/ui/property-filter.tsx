@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { XIcon, PlusIcon } from 'lucide-react';
+import { FieldFilterControl, defaultOperatorsForFieldType } from '@/components/ui/field-type/filter-control';
+import type { FieldType } from '@/lib/field-type';
 import { cn } from '@/lib/utils';
 
 /**
@@ -17,8 +19,23 @@ export interface FilterProperty {
   /** Row key this token filters on. */
   key: string;
   label: string;
-  /** Operators offered for this property. Defaults to `['=', ':']`. */
+  /**
+   * Operators offered for this property. Defaults to `['=', ':']`, or to
+   * `defaultOperatorsForFieldType(fieldType)` when `fieldType` is set and
+   * this is omitted.
+   */
   operators?: Operator[];
+  /**
+   * A unified fieldType definition (ROADMAP Epic 24, `src/lib/field-type.ts`)
+   * — when set, PropertyFilter derives the token-value builder's input
+   * widget from it (a `<select>` for select/status/boolean, a date picker
+   * for date/dateRange, a number input for money/number/percent) instead of
+   * the plain text `<input>`, and falls back to
+   * `defaultOperatorsForFieldType` for `operators` when the property doesn't
+   * specify its own. Fully additive — properties without `fieldType` behave
+   * exactly as before.
+   */
+  fieldType?: FieldType;
 }
 
 export interface FilterToken {
@@ -85,7 +102,9 @@ export function PropertyFilter({
 }: PropertyFilterProps) {
   const [prop, setProp] = React.useState(properties[0]?.key ?? '');
   const current = properties.find((p) => p.key === prop) ?? properties[0];
-  const ops = current?.operators ?? (['=', ':'] as Operator[]);
+  const ops =
+    current?.operators ??
+    (current?.fieldType ? defaultOperatorsForFieldType(current.fieldType) : (['=', ':'] as Operator[]));
   const [op, setOp] = React.useState<Operator>(ops[0] ?? '=');
   const [value, setValue] = React.useState('');
 
@@ -157,19 +176,38 @@ export function PropertyFilter({
               </option>
             ))}
           </select>
-          <input
-            aria-label="Filter value"
-            value={value}
-            placeholder={placeholder}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addToken();
-              }
-            }}
-            className="min-w-[8rem] flex-1 bg-transparent py-1 text-xs outline-none placeholder:text-muted-foreground"
-          />
+          {current?.fieldType ? (
+            <span
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addToken();
+                }
+              }}
+              className="flex flex-1 items-center"
+            >
+              <FieldFilterControl
+                fieldType={current.fieldType}
+                value={value}
+                onChange={setValue}
+                placeholder={placeholder}
+              />
+            </span>
+          ) : (
+            <input
+              aria-label="Filter value"
+              value={value}
+              placeholder={placeholder}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addToken();
+                }
+              }}
+              className="min-w-[8rem] flex-1 bg-transparent py-1 text-xs outline-none placeholder:text-muted-foreground"
+            />
+          )}
           <button
             type="button"
             aria-label="Add filter"
