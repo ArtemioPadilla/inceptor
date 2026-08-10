@@ -1,0 +1,47 @@
+---
+import { withBase } from '@/lib/href';
+import { SITE } from '@/lib/site-meta';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LoginForm from '../components/islands/LoginForm';
+---
+
+<BaseLayout
+  title="Sign in"
+  description={`Sign in to ${SITE.name}.`}
+>
+  <main class="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4 py-12">
+    <div class="w-full space-y-6">
+      <header class="text-center">
+        <a
+          href={withBase('/')}
+          class="inline-flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-foreground"
+          aria-label={`${SITE.name} — home`}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" class="text-primary">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 3" opacity="0.55"></circle>
+            <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+          </svg>
+          {SITE.name}
+        </a>
+        <p class="mt-2 text-sm text-muted-foreground">
+          An installable login block — Form + react-hook-form + zod, no auth backend wired.
+        </p>
+      </header>
+
+      <div class="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <LoginForm signUpHref={withBase('/contact/')} client:visible />
+      </div>
+    </div>
+
+    <footer class="mt-8 text-sm text-muted-foreground">
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/pages/login.astro"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
