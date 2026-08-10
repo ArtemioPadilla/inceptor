@@ -25,6 +25,26 @@ describe('ChatMessage', () => {
     const log = screen.getByRole('log');
     expect(log).toHaveAttribute('aria-live', 'polite');
   });
+  it('ChatThread auto-scrolls to bottom on mount and whenever its content changes', () => {
+    const scrollIntoViewMock = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    const { rerender } = render(
+      <ChatThread>
+        <div>first</div>
+      </ChatThread>,
+    );
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+
+    // A new turn (or a streamed token appending to the last turn) re-renders
+    // ChatThread with different children — it must scroll again, not just once.
+    rerender(
+      <ChatThread>
+        <div>first</div>
+        <div>second</div>
+      </ChatThread>,
+    );
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('PromptInput', () => {

@@ -60,6 +60,18 @@ export function ChatThread({
   className?: string;
   label?: string;
 }) {
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+
+  // Runs after every render (new turn, or a streamed token appending to the
+  // last turn) — `scrollIntoView` scrolls the nearest scrollable ancestor,
+  // i.e. this container when the caller applies `overflow-y-auto` to it (see
+  // AIChatDemo). No `behavior: 'smooth'` on purpose: streaming re-renders as
+  // often as every ~80ms, and queuing a smooth-scroll animation per token
+  // makes the thread visibly stutter instead of tracking the last line.
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ block: 'end' });
+  });
+
   return (
     <div
       role="log"
@@ -69,6 +81,7 @@ export function ChatThread({
       className={cn('flex flex-col gap-4', className)}
     >
       {children}
+      <div ref={bottomRef} aria-hidden="true" />
     </div>
   );
 }

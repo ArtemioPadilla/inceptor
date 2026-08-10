@@ -16,5 +16,12 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
   });
 }
 
+// Polyfill `scrollIntoView` for jsdom — jsdom doesn't implement layout, so
+// this never exists on Element.prototype. Needed by chat-style auto-scroll
+// effects (e.g. ChatThread) that call it on every render.
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 // Make @testing-library/jest-dom's custom matchers available everywhere.
 import '@testing-library/jest-dom/vitest';
