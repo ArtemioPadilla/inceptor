@@ -126,9 +126,10 @@ function listDirFiles(source: string): string[] {
 
 /** Resolve the real file paths (repo-relative) a gallery entry's registry item covers. */
 function resolveFiles(entry: GalleryEntry): string[] {
-  if (MANUAL_FILES[entry.slug]) {
+  const manual = MANUAL_FILES[entry.slug];
+  if (manual) {
     const base = baseDirOf(entry.source);
-    return MANUAL_FILES[entry.slug].map((f) => base + f);
+    return manual.map((f) => base + f);
   }
   if (!entry.source.endsWith('/')) return [entry.source];
   return listDirFiles(entry.source);
@@ -155,11 +156,11 @@ function extractPackageDeps(source: string): Set<string> {
   const deps = new Set<string>();
   for (const m of source.matchAll(IMPORT_RE)) {
     const spec = m[1];
-    if (spec.startsWith('.') || spec.startsWith('@/') || spec.startsWith('node:')) continue;
+    if (!spec || spec.startsWith('.') || spec.startsWith('@/') || spec.startsWith('node:')) continue;
     // Scoped package (@scope/pkg[/subpath]) vs unscoped (pkg[/subpath]).
     const parts = spec.split('/');
     const pkg = spec.startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
-    deps.add(pkg);
+    if (pkg) deps.add(pkg);
   }
   return deps;
 }
@@ -170,6 +171,7 @@ function extractInternalComponentImports(source: string): string[] {
   const re = /from\s+['"]@\/components\/([^'"]+)['"]/g;
   for (const m of source.matchAll(re)) {
     const frag = m[1];
+    if (!frag) continue;
     const path = /\.[jt]sx?$/.test(frag) ? `src/components/${frag}` : `src/components/${frag}.tsx`;
     out.push(path);
   }
@@ -239,7 +241,8 @@ const UTILITY_TOKEN_RE =
 function extractReferencedTokens(source: string, knownTokens: Set<string>): string[] {
   const found = new Set<string>();
   for (const m of source.matchAll(UTILITY_TOKEN_RE)) {
-    if (knownTokens.has(m[1])) found.add(m[1]);
+    const token = m[1];
+    if (token && knownTokens.has(token)) found.add(token);
   }
   return [...found].sort();
 }
