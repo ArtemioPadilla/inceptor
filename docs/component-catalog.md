@@ -5,7 +5,7 @@
 
 Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entry here is rendered live at `/gallery`.
 
-**Total:** 22 gallery entries across 15 categories.
+**Total:** 23 gallery entries across 15 categories.
 
 **Legend**
 
@@ -32,6 +32,7 @@ Generated from [`src/content/gallery.ts`](../src/content/gallery.ts). Every entr
 | Component | Status | Summary | Source |
 |---|---|---|---|
 | **Advanced inputs** | ✅ stable | Toggle, Toggle group, Number field, Toolbar, Sheet, Rating, Tag input, Input OTP. | [`src/components/ui/`](../src/components/ui/) |
+| **Input & utility primitives** | ✅ stable | Date picker, Date range picker, Time picker, Color picker, Editable, Password input, Clipboard, Toggle group (segmented). | [`src/components/ui/`](../src/components/ui/) |
 
 ## 4. Navigation & menus
 
