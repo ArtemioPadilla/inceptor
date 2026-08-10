@@ -26,6 +26,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import type { GalleryEntry } from '../src/content/gallery.ts';
+import { stabilityGlyph } from '../src/lib/gallery-badges.ts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const repoRoot = join(__dirname, '..');
@@ -42,12 +43,6 @@ async function loadManifest(): Promise<{
     categoryLabels: mod.categoryLabels,
     categoryOrder: mod.categoryOrder,
   };
-}
-
-function statusIcon(s: GalleryEntry['status']): string {
-  if (s === 'stable') return '✅';
-  if (s === 'beta') return '🔵';
-  return '🧪';
 }
 
 /**
@@ -107,7 +102,7 @@ export async function generateCatalog(): Promise<string> {
     lines.push('| Component | Status | Summary | Source |');
     lines.push('|---|---|---|---|');
     for (const e of entries) {
-      const icon = statusIcon(e.status);
+      const icon = stabilityGlyph(e.status);
       lines.push(
         `| **${e.name}** | ${icon} ${e.status} | ${e.summary} | [\`${e.source}\`](../${e.source}) |`,
       );
