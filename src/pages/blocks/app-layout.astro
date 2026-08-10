@@ -1,0 +1,66 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlockPreviewToggle from '../../components/gallery/BlockPreviewToggle.astro';
+import { BlockAppLayoutIconCollapse, BlockAppLayoutDual } from '../../components/islands/BlockAppLayoutVariants';
+import blockAppLayoutVariantsSource from '../../components/islands/BlockAppLayoutVariants.tsx?raw';
+---
+
+<BaseLayout
+  title="App Layout sidebar variants — inceptor"
+  description="Two AppLayoutIsland sidebar variants: icon-collapse (a toggleable icon-only rail) and dual (a fixed icon rail plus a secondary contextual sidebar)."
+>
+  <main class="mx-auto max-w-5xl px-4 py-12 space-y-10">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">
+        App Layout — sidebar variants
+      </h1>
+      <p class="mt-2 text-muted-foreground max-w-2xl">
+        Opt-in <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">sidebarVariant</code>
+        prop on the existing
+        <a href={withBase('/showcase/app-layout/')} class="text-primary underline underline-offset-2 hover:text-primary/80">AppLayoutIsland</a>
+        — omitting it preserves the original shipped behavior exactly.
+      </p>
+    </header>
+
+    <section aria-labelledby="icon-collapse-heading">
+      <h2 id="icon-collapse-heading" class="text-xl font-semibold mb-1">Icon-collapse</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        A footer toggle button in the desktop rail shrinks it to an icon-only strip
+        and back. Try it below.
+      </p>
+      <BlockPreviewToggle id="app-layout-icon-collapse" code={blockAppLayoutVariantsSource} lang="tsx">
+        <div class="rounded-xl border border-border overflow-hidden" style="height: 380px">
+          <BlockAppLayoutIconCollapse client:load />
+        </div>
+      </BlockPreviewToggle>
+    </section>
+
+    <section aria-labelledby="dual-heading">
+      <h2 id="dual-heading" class="text-xl font-semibold mb-1">Dual sidebar</h2>
+      <p class="text-sm text-muted-foreground mb-4">
+        A fixed icon-only primary rail alongside a full secondary/contextual
+        sidebar — a VS Code / GitHub-org-settings-style shell.
+      </p>
+      <BlockPreviewToggle id="app-layout-dual" code={blockAppLayoutVariantsSource} lang="tsx">
+        <div class="rounded-xl border border-border overflow-hidden" style="height: 380px">
+          <BlockAppLayoutDual client:load />
+        </div>
+      </BlockPreviewToggle>
+    </section>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
+      <a href={withBase('/blocks/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Back to blocks
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/AppLayoutIsland.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View AppLayoutIsland source ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>

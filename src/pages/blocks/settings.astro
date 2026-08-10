@@ -1,0 +1,45 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlockPreviewToggle from '../../components/gallery/BlockPreviewToggle.astro';
+import SettingsDemo from '../../components/islands/SettingsDemo';
+import settingsDemoSource from '../../components/islands/SettingsDemo.tsx?raw';
+---
+
+<BaseLayout
+  title="Settings block — inceptor"
+  description="An installable settings-page block: sectioned Tabs (Profile, Notifications, Appearance, Danger zone) over Select, Switch, RadioGroup, Slider, Textarea, Avatar, and a destructive AlertDialog-gated Delete account flow."
+>
+  <main class="mx-auto max-w-3xl px-4 py-12 space-y-6">
+    <header>
+      <h1 class="text-3xl font-bold tracking-tight" style="view-transition-name: page-title">
+        Settings block
+      </h1>
+      <p class="mt-2 text-muted-foreground">
+        A sectioned settings surface — Profile, Notifications, Appearance, and a
+        destructive Danger zone gated behind an AlertDialog confirmation — composed
+        as one reusable island. The same component powers the live
+        <a href={withBase('/demos/settings/')} class="text-primary underline underline-offset-2 hover:text-primary/80">/demos/settings</a>
+        demo.
+      </p>
+    </header>
+
+    <BlockPreviewToggle id="settings" code={settingsDemoSource} lang="tsx">
+      <SettingsDemo client:visible />
+    </BlockPreviewToggle>
+
+    <footer class="border-t border-border pt-6 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
+      <a href={withBase('/blocks/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Back to blocks
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/blob/main/src/components/islands/SettingsDemo.tsx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>

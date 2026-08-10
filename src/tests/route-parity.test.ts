@@ -56,6 +56,12 @@ const EN_ONLY_ALLOWLIST = new Set([
   '/contact',
   '/how-it-works',
   '/404',
+  // Installable page blocks (ROADMAP Epic 27) — English-only, like /demos
+  '/login',
+  '/blocks',
+  '/blocks/login',
+  '/blocks/settings',
+  '/blocks/app-layout',
   // Gallery — shared across locales; individual component pages are EN-only
   '/gallery',
   '/gallery/[component]',

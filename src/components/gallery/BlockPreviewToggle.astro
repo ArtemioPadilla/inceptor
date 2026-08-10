@@ -1,0 +1,96 @@
+---
+/**
+ * Preview/Code toggle for installable page blocks (ROADMAP Epic 27, feeding
+ * off Epic 16's "Blocks-style Preview/Code toggle" note). Mirrors shadcn's
+ * /blocks pattern: a live rendered composition plus a toggle to view its
+ * source, reusing the existing CodeSnippet (Shiki + copy button).
+ *
+ * Deliberately Astro-only (no React) — the toggle itself is a couple of
+ * buttons swapping a `hidden` class, following the exact idempotent-binding
+ * pattern CodeSnippet.astro already uses for its copy button. This sidesteps
+ * the compound-component-in-island problem entirely: the <slot /> preview
+ * content can be (and is) itself a hydrated React island without needing to
+ * nest it inside another island just to drive two tabs.
+ */
+import CodeSnippet from './CodeSnippet.astro';
+
+interface Props {
+  /** Raw source code shown in the "Code" panel. */
+  code: string;
+  /** Shiki language id (e.g. 'tsx', 'astro'). */
+  lang: string;
+  /** Disambiguates multiple toggles on one page — must be unique per page. */
+  id: string;
+}
+
+const { code, lang, id } = Astro.props;
+---
+
+<div class="block-preview-toggle" data-toggle-id={id}>
+  <div
+    class="mb-4 inline-flex rounded-md border border-border p-1"
+    role="tablist"
+    aria-label="Preview or code view"
+  >
+    <button
+      type="button"
+      class="toggle-btn rounded px-3 py-1.5 text-sm font-medium bg-accent text-accent-foreground"
+      data-view="preview"
+      aria-selected="true"
+      role="tab"
+    >
+      Preview
+    </button>
+    <button
+      type="button"
+      class="toggle-btn rounded px-3 py-1.5 text-sm font-medium text-muted-foreground"
+      data-view="code"
+      aria-selected="false"
+      role="tab"
+    >
+      Code
+    </button>
+  </div>
+
+  <div class="toggle-panel" data-view-panel="preview" role="tabpanel">
+    <slot />
+  </div>
+  <div class="toggle-panel hidden" data-view-panel="code" role="tabpanel">
+    <CodeSnippet code={code} lang={lang} />
+  </div>
+</div>
+
+<script>
+  // Idempotent: guards against double-binding, mirroring CodeSnippet.astro's
+  // copy-button script (view transitions / astro:page-load re-run this).
+  function bindPreviewToggles() {
+    document.querySelectorAll<HTMLElement>('.block-preview-toggle').forEach((root) => {
+      if (root.dataset.bound === 'true') return;
+      root.dataset.bound = 'true';
+
+      const buttons = root.querySelectorAll<HTMLButtonElement>('.toggle-btn');
+      const panels = root.querySelectorAll<HTMLElement>('.toggle-panel');
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const view = btn.dataset.view;
+
+          buttons.forEach((b) => {
+            const active = b === btn;
+            b.setAttribute('aria-selected', String(active));
+            b.classList.toggle('bg-accent', active);
+            b.classList.toggle('text-accent-foreground', active);
+            b.classList.toggle('text-muted-foreground', !active);
+          });
+
+          panels.forEach((panel) => {
+            panel.classList.toggle('hidden', panel.dataset.viewPanel !== view);
+          });
+        });
+      });
+    });
+  }
+
+  bindPreviewToggles();
+  document.addEventListener('astro:page-load', bindPreviewToggles);
+</script>
