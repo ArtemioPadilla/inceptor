@@ -16,6 +16,7 @@ import ShowcaseOverlays from '../../components/islands/ShowcaseOverlays';
 import ShowcaseDisclosure from '../../components/islands/ShowcaseDisclosure';
 import ShowcaseFeedback from '../../components/islands/ShowcaseFeedback';
 import ShowcaseAdvanced from '../../components/islands/ShowcaseAdvanced';
+import ShowcaseInputPrimitives from '../../components/islands/ShowcaseInputPrimitives';
 import ShowcaseNav from '../../components/islands/ShowcaseNav';
 import ShowcaseExtras from '../../components/islands/ShowcaseExtras';
 import ShowcaseDialog from '../../components/islands/ShowcaseDialog';
@@ -99,6 +100,7 @@ const populatedCategoryCount = categoryOrder.filter((cat) => getByCategory(cat).
                     {entry.island === 'ShowcaseDisclosure' && <ShowcaseDisclosure client:visible />}
                     {entry.island === 'ShowcaseFeedback' && <ShowcaseFeedback client:visible />}
                     {entry.island === 'ShowcaseAdvanced' && <ShowcaseAdvanced client:visible />}
+                    {entry.island === 'ShowcaseInputPrimitives' && <ShowcaseInputPrimitives client:visible />}
                     {entry.island === 'ShowcaseNav' && <ShowcaseNav client:visible />}
                     {entry.island === 'ShowcaseExtras' && <ShowcaseExtras client:visible />}
                     {entry.island === 'ShowcaseDialog' && <ShowcaseDialog client:visible />}
