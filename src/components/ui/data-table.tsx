@@ -40,6 +40,7 @@ import {
 import {
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -115,6 +116,20 @@ export interface DataTableProps<TData, TValue> {
    * stay accurate while rows are expanded.
    */
   renderSubRow?: (row: TData) => React.ReactNode;
+  /**
+   * Optional footer/summary row (e.g. computed totals), keyed by column id.
+   * Rendered as one `<tfoot>` cell per visible leaf column; columns absent
+   * from the map render an empty cell.
+   */
+  summaryRow?: Record<string, React.ReactNode>;
+  /**
+   * Extra top offset (px) for the sticky header row, e.g. when the table
+   * sits below a fixed page header inside its own scroll container. The
+   * header is already `position: sticky` relative to the internal scroll
+   * container (co-existing with virtualization); this just shifts `top`.
+   * Defaults to 0.
+   */
+  stickyHeaderOffset?: number;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -183,6 +198,8 @@ export function DataTable<TData, TValue>({
   enableColumnPinning = false,
   enableColumnFilters = false,
   renderSubRow,
+  summaryRow,
+  stickyHeaderOffset = 0,
 }: DataTableProps<TData, TValue>) {
   // Derive the URL-sync config from the syncToUrl prop.
   const urlEnabled = Boolean(syncToUrl);
@@ -511,7 +528,11 @@ export function DataTable<TData, TValue>({
         <table className="w-full caption-bottom text-sm">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="sticky top-0 z-10 bg-background">
+              <TableRow
+                key={headerGroup.id}
+                className="sticky z-10 bg-background"
+                style={{ top: stickyHeaderOffset }}
+              >
                 {headerGroup.headers.map((header) => {
                   // aria-sort belongs on the <th> element (TableHead), not on an inner div.
                   const sortDir = header.column.getIsSorted();
@@ -696,6 +717,18 @@ export function DataTable<TData, TValue>({
               </tr>
             )}
           </TableBody>
+          {/* Optional summary/footer row (Epic 23) — e.g. computed totals. */}
+          {summaryRow && (
+            <TableFooter>
+              <TableRow>
+                {table.getVisibleLeafColumns().map((col) => (
+                  <TableCell key={col.id} className="font-medium">
+                    {summaryRow[col.id] ?? null}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableFooter>
+          )}
         </table>
       </div>
 
