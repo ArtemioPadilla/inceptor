@@ -42,6 +42,11 @@ Timeline so far (≈100 merged PRs):
 - GitHub API token, `ANTHROPIC_API_KEY`, custom-domain DNS — user secrets
 - Real (non-algorithmic) brand artwork — needs a designer
 - `@base-ui-components/react` stable + Astro 6 — upstream-gated
+- Nightly `vibe-test` cron — the harness itself is built and manually
+  invokable today (`npm run vibe-test`, `docs/vibe-test.md`); wiring it into
+  a scheduled GitHub Actions workflow is a recurring Anthropic API cost
+  commitment that needs explicit human sign-off, not something to silently
+  enable
 
 See [`README.md`](./README.md) for the pitch, [`CLAUDE.md`](./CLAUDE.md) for the
 stack + workflow, [`docs/component-catalog.md`](./docs/component-catalog.md) for
@@ -458,11 +463,14 @@ fit for a template whose entire premise is "Claude builds the UI."
     Kanban/Carousel — even a "primitive-light" top-level component can
     smuggle Radix in through `registryDependencies` you never asked for,
     and neither the CLI nor a filename check alone will catch it.
-- [ ] *(stretch, validates the whole forja/centinela premise)* A "vibe-test"
-  harness — spawn subagents that build a working component from
-  `docs/COMPONENTS.md` alone, score success nightly. Astryx runs exactly this
-  against its own docs; Inceptor's entire workflow depends on the same
-  property holding, but nothing currently measures it.
+- [x] *(stretch, validates the whole forja/centinela premise)* A "vibe-test"
+  harness — spawn a fresh model session, give it ONLY one component's
+  `docs/component-guidelines/` section (no source access), ask it to build a
+  working usage example, type-check the result for real against the actual
+  component. Astryx runs exactly this against its own docs; Inceptor's
+  entire workflow depends on the same property holding.
+  `npm run vibe-test` (manual today — see `docs/vibe-test.md`, and "Still
+  genuinely deferred" below re: nightly automation).
 
 ## Epic 27 — Installable page blocks — ✅ shipped (#249)
 

@@ -37,6 +37,7 @@
     "init": "node scripts/init.mjs",
     "gen:catalog": "node --experimental-strip-types scripts/gen-component-catalog.ts",
     "gen:registry": "node --experimental-strip-types scripts/gen-registry.ts",
+    "vibe-test": "node --experimental-strip-types scripts/vibe-test.ts",
     "lint": "eslint .",
     "hooks:install": "git config core.hooksPath scripts/hooks && echo 'Pre-commit hooks installed. Run: git config --unset core.hooksPath to remove.'"
   },
@@ -73,6 +74,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
     "@astrojs/check": "^0.9.10",
     "@astrojs/sitemap": "^3.7.3",
     "@axe-core/playwright": "^4.11.3",

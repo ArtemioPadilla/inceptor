@@ -29,6 +29,7 @@ Core visual and interaction principles every Inceptor contributor must know.
 | Build a surface (listing, create, details, delete, states)      | [`src/content/docs/patterns/`](../src/content/docs/patterns/) — live at `/docs/patterns/`                                  |
 | Look up the ethics checklist                                    | [`docs/ETHICS.md`](./ETHICS.md)                                                                                            |
 | Add a new component                                             | [`docs/COMPONENTS.md`](./COMPONENTS.md)                                                                                    |
+| Check whether a component guideline doc alone builds working code (vibe-test) | [`docs/vibe-test.md`](./vibe-test.md) — `npm run vibe-test`                                                |
 | Compare Inceptor to Cloudscape and see the gap roadmap          | [`docs/CLOUDSCAPE-GAP-ROADMAP.md`](./CLOUDSCAPE-GAP-ROADMAP.md)                                                            |
 | Build auth + DB, an AI feature, or host a backend               | [`docs/recipes/`](./recipes/) (Supabase, BYOK, hosting, CI migrations)                                                     |
 | Improve the DX (FinSight learnings)                             | [`docs/DX-IMPROVEMENT-PLAN.md`](./DX-IMPROVEMENT-PLAN.md)                                                                  |
