@@ -107,6 +107,23 @@ const MANUAL_FILES: Record<string, string[]> = {
   pwa: ['InstallButton.tsx', 'UpdateToast.tsx'],
   // data-table's URL-state hook is a distinct file closely coupled to it.
   'data-table': ['data-table.tsx', 'use-data-table-url-state.ts'],
+  // Universal input & utility primitives (ROADMAP Epic 21). calendar.tsx has
+  // no gallery entry of its own — it's the rendering engine date-picker.tsx
+  // composes DatePicker/DateRangePicker from — so, like data-table's coupled
+  // hook file above, it's bundled here rather than left unreachable in the
+  // registry. toggle-group.tsx is NOT listed here: it already has its own
+  // gallery entry (`advanced`, added in PR #96) — duplicating it here would
+  // violate the "no gallery entry of its own" rule above and cause the
+  // auto dependency-scan to pull all of `advanced`'s files in transitively.
+  'input-primitives': [
+    'date-picker.tsx',
+    'calendar.tsx',
+    'time-picker.tsx',
+    'color-picker.tsx',
+    'editable.tsx',
+    'password-input.tsx',
+    'clipboard.tsx',
+  ],
 };
 
 /** Directory entries with no MANUAL_FILES override are auto-listed (flat, non-recursive). */
