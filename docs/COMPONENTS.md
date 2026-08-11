@@ -925,6 +925,20 @@ anonymous FAB-filed issues wait until a maintainer applies the
 the triage prompt; never weaken either layer when touching
 `.github/workflows/claude.yml` or the FAB.
 
+## 15. Does the guideline doc alone actually work? — the vibe-test harness
+
+`docs/component-guidelines/` (ROADMAP Epic 26) is written for a coding agent
+to build correct usage code from the doc **without** reading the
+component's real source. That's a testable claim, not just an aspiration —
+`npm run vibe-test` (`scripts/vibe-test.ts`) spawns a fresh model session,
+gives it ONLY one component's guideline section, and type-checks whatever
+it builds against the real component. Run it after writing or editing a
+guideline doc to sanity-check it actually teaches what you think it does.
+Requires `ANTHROPIC_API_KEY` in the environment (same var name
+`.github/workflows/claude.yml` uses) — see **`docs/vibe-test.md`** for the
+full write-up, including how the scoring works and the (currently
+unactivated, human-opt-in-only) path to a nightly scheduled run.
+
 ## Checklist for new components
 
 Use this before opening a PR:
