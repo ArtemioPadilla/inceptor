@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
@@ -83,5 +83,58 @@ describe('<FieldFormItem>', () => {
     render(<Harness />);
     const bylabel = screen.getByLabelText('Category');
     expect(bylabel.tagName).toBe('SELECT');
+  });
+});
+
+// Regression for the SAME class of a11y bug commit 3721d1a fixed
+// (FormControl's cloneElement-injected id/aria-describedby/aria-invalid not
+// reaching the real focusable control), reintroduced for the number/money/
+// percent branch specifically: FieldEditControl spreads `{...a11y}` onto
+// `<NumberField>` (Base UI's `NumberField.Root`), which renders a `<div>`
+// group wrapper — not the focusable `<input>` — so Base UI's NumberFieldRoot
+// forwards `id` to the real input via its own internal context but drops
+// `aria-describedby` entirely and computes the real input's own
+// `aria-invalid` purely from Base UI's internal Field-validity state (never
+// wired up here), which is always `undefined` regardless of what's passed.
+describe('<FieldFormItem> number/money/percent a11y (regression for the class of bug commit 3721d1a fixed)', () => {
+  const amountFieldType: FieldType = { type: 'number', label: 'Amount', min: 10 };
+  const amountSchema = z.object({ amount: fieldTypeZodSchema(amountFieldType) });
+  type AmountValues = z.infer<typeof amountSchema>;
+
+  function NumberHarness() {
+    const form = useForm<AmountValues>({
+      resolver: zodResolver(amountSchema),
+      // Violates `min: 10` — validated on mount below to produce a
+      // deterministic error without needing a submit button in the harness.
+      defaultValues: { amount: 1 },
+    });
+    React.useEffect(() => {
+      void form.trigger('amount');
+    }, [form]);
+    return (
+      <Form {...form}>
+        <form>
+          <FieldFormItem control={form.control} name="amount" fieldType={amountFieldType} />
+        </form>
+      </Form>
+    );
+  }
+
+  it('puts aria-invalid="true" and a matching aria-describedby on the real <input>, not a wrapper div', async () => {
+    render(<NumberHarness />);
+
+    // The hidden native <input type="number" aria-hidden> Base UI renders
+    // alongside the visible one is excluded from the accessibility tree, so
+    // this resolves to the one real, focusable, screen-reader-visible input.
+    const input = await screen.findByRole('textbox');
+    expect(input.tagName).toBe('INPUT');
+
+    await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'));
+
+    const describedBy = input.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    const describer = document.getElementById(describedBy!.split(' ')[0]!);
+    expect(describer).toBeInTheDocument();
+    expect(describer).toHaveTextContent(/./);
   });
 });
