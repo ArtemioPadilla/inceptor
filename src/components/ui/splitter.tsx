@@ -124,12 +124,28 @@ export interface SplitterResizeTriggerProps {
   id: `${string}:${string}`;
   disabled?: boolean;
   className?: string;
+  /**
+   * Accessible name for the handle. `@zag-js/splitter`'s `getResizeTriggerProps()`
+   * sets `role="separator"` plus full keyboard/ARIA-value wiring but never an
+   * accessible name — without one, keyboard/screen-reader users hear only
+   * "separator, N percent" with no indication of what it resizes. Required for
+   * any real (non-decorative-demo) usage; see `docs/component-guidelines/`.
+   */
+  'aria-label'?: string;
+  /** Alternative to `aria-label` when a visible label element already exists. */
+  'aria-labelledby'?: string;
 }
 
 // The state-machine already exposes `data-dragging` / `data-focus` /
 // `data-disabled` (see @zag-js/splitter's connect.ts) — present-when-true,
 // absent otherwise, same convention Base UI's `data-[state]` selectors use.
-export function SplitterResizeTrigger({ id, disabled, className }: SplitterResizeTriggerProps) {
+export function SplitterResizeTrigger({
+  id,
+  disabled,
+  className,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
+}: SplitterResizeTriggerProps) {
   const api = useSplitterApi();
   const horizontal = api.orientation === 'horizontal';
   const Icon = horizontal ? GripVerticalIcon : GripHorizontalIcon;
@@ -137,6 +153,8 @@ export function SplitterResizeTrigger({ id, disabled, className }: SplitterResiz
   return (
     <div
       {...api.getResizeTriggerProps({ id, disabled })}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
       className={cn(
         'group relative flex shrink-0 items-center justify-center bg-border transition-colors',
         'hover:bg-primary/40 data-[focus]:bg-primary/50 data-[dragging]:bg-primary/60',

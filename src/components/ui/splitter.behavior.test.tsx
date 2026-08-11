@@ -80,4 +80,22 @@ describe('Splitter', () => {
   it('does not import from @ark-ui/react (ADR 0009: scoped @zag-js/* only)', () => {
     expect(source).not.toMatch(/from\s+['"]@ark-ui\/react/);
   });
+
+  // Accessibility bug fix: @zag-js/splitter's getResizeTriggerProps() sets
+  // role="separator" and full keyboard/ARIA-value wiring, but never an
+  // accessible name (no aria-label/aria-labelledby). Without a caller-supplied
+  // label, a keyboard/screen-reader user tabbing to the handle hears only
+  // "separator, N percent" with no indication of what it resizes.
+  it('accepts an aria-label and exposes it as the resize trigger\'s accessible name', () => {
+    render(
+      <Splitter panels={PANELS}>
+        <SplitterPanel id="a">Left pane</SplitterPanel>
+        <SplitterResizeTrigger id="a:b" aria-label="Resize left and right panes" />
+        <SplitterPanel id="b">Right pane</SplitterPanel>
+      </Splitter>,
+    );
+
+    const trigger = screen.getByRole('separator', { name: 'Resize left and right panes' });
+    expect(trigger).toBeInTheDocument();
+  });
 });
