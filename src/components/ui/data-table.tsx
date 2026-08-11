@@ -247,6 +247,30 @@ const columnFilterInputClass = cn(
   'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
 );
 
+/**
+ * Shared sticky-position styling for a pinned column (Epic 23). Reused by
+ * the sort-header cell, the per-column filter cell directly beneath it, and
+ * the body cell so the three call sites can't drift out of sync — they
+ * previously duplicated this object inline (adversarial-review finding),
+ * which is exactly how the filter row ended up missing pin styling
+ * entirely. Callers pass their own `zIndex` since the header/filter row (20)
+ * must stack above the body (10).
+ */
+function getPinStyle<TData>(
+  column: Column<TData, unknown>,
+  zIndex: number,
+): React.CSSProperties {
+  const pinnedSide = column.getIsPinned();
+  if (!pinnedSide) return {};
+  return {
+    position: 'sticky',
+    left: pinnedSide === 'left' ? column.getStart('left') : undefined,
+    right: pinnedSide === 'right' ? column.getAfter('right') : undefined,
+    zIndex,
+    background: 'var(--background)',
+  };
+}
+
 // ColumnFilterInput renders one per-column filter control (Epic 23): a
 // text <input> by default, or a <select> when the column def opts in via
 // `meta.filterOptions`. Deliberately simple — PropertyFilter is the
@@ -823,15 +847,7 @@ export function DataTable<TData, TValue>({
                   // Column-pinning (Epic 23): sticky-position pinned-left/right
                   // columns so they stay visible during horizontal scroll.
                   const pinnedSide = header.column.getIsPinned();
-                  const pinStyle: React.CSSProperties = pinnedSide
-                    ? {
-                        position: 'sticky',
-                        left: pinnedSide === 'left' ? header.column.getStart('left') : undefined,
-                        right: pinnedSide === 'right' ? header.column.getAfter('right') : undefined,
-                        zIndex: 20,
-                        background: 'var(--background)',
-                      }
-                    : {};
+                  const pinStyle = getPinStyle(header.column, 20);
                   const headerLabel =
                     typeof header.column.columnDef.header === 'string'
                       ? header.column.columnDef.header
@@ -912,16 +928,28 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
             {/* Per-column filter row (Epic 23) — one input/select per
-             * filterable leaf column, independent of the global filter. */}
+             * filterable leaf column, independent of the global filter.
+             * Pinned columns get the same sticky styling (via getPinStyle)
+             * as the sort-header row directly above, so a pinned column's
+             * filter input doesn't visually detach from its header on
+             * horizontal scroll. */}
             {enableColumnFilters && (
               <TableRow>
-                {(table.getHeaderGroups().at(-1)?.headers ?? []).map((header) => (
-                  <TableHead key={`${header.id}-filter`} className="py-1.5">
-                    {header.column.getCanFilter() && (
-                      <ColumnFilterInput column={header.column} />
-                    )}
-                  </TableHead>
-                ))}
+                {(table.getHeaderGroups().at(-1)?.headers ?? []).map((header) => {
+                  const pinnedSide = header.column.getIsPinned();
+                  return (
+                    <TableHead
+                      key={`${header.id}-filter`}
+                      style={getPinStyle(header.column, 20)}
+                      className="py-1.5"
+                      data-pinned={pinnedSide || undefined}
+                    >
+                      {header.column.getCanFilter() && (
+                        <ColumnFilterInput column={header.column} />
+                      )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             )}
           </TableHeader>
@@ -970,15 +998,7 @@ export function DataTable<TData, TValue>({
                   >
                     {row.getVisibleCells().map((cell) => {
                       const pinnedSide = cell.column.getIsPinned();
-                      const cellPinStyle: React.CSSProperties = pinnedSide
-                        ? {
-                            position: 'sticky',
-                            left: pinnedSide === 'left' ? cell.column.getStart('left') : undefined,
-                            right: pinnedSide === 'right' ? cell.column.getAfter('right') : undefined,
-                            zIndex: 10,
-                            background: 'var(--background)',
-                          }
-                        : {};
+                      const cellPinStyle = getPinStyle(cell.column, 10);
                       return (
                         <TableCell key={cell.id} style={cellPinStyle} data-pinned={pinnedSide || undefined}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
