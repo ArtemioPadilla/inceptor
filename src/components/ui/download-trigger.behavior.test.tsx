@@ -61,4 +61,29 @@ describe('DownloadTrigger', () => {
     expect(button).not.toBeDisabled();
     expect(button).not.toHaveAttribute('aria-busy', 'true');
   });
+
+  it('stays disabled while loading even when the caller passes disabled={false}, preventing a re-entrant onExport click', async () => {
+    let resolveExport: (b: Blob) => void = () => {};
+    const onExport = vi.fn(
+      () => new Promise<Blob>((resolve) => { resolveExport = resolve; }),
+    );
+    const user = userEvent.setup();
+    render(<DownloadTrigger onExport={onExport} disabled={false} />);
+
+    const button = screen.getByRole('button', { name: 'Export' });
+    await user.click(button);
+
+    // isLoading must win over a caller's disabled={false} — a loading button
+    // must never be clickable, or a second concurrent onExport() can fire.
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
+
+    resolveExport(new Blob(['a']));
+    await waitFor(() => expect(button).not.toBeDisabled());
+  });
+
+  it('is disabled when the caller passes disabled={true} while not loading', () => {
+    render(<DownloadTrigger onExport={() => Promise.resolve(new Blob(['x']))} disabled />);
+    expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled();
+  });
 });
