@@ -144,35 +144,63 @@ describe('registry.json generation (Epic 26)', () => {
     }
   });
 
-  it('input-primitives does not duplicate a file already owned by another gallery entry', async () => {
-    // Regression test for a second, subtler recurrence of the same bug class:
-    // toggle-group.tsx has its own gallery entry (`advanced`, PR #96), but was
-    // ALSO added to MANUAL_FILES['input-primitives']. That duplicate ownership
-    // doesn't blow up the file count (still ~8 files) but it does make
-    // resolveFiles()'s auto dependency-scan see toggle-group.tsx -> toggle.tsx
-    // and add `advanced` as a whole-item registryDependency on input-primitives
-    // — transitively pulling in advanced's entire file set. Generic version of
-    // the file-count check above: no file input-primitives claims may already
-    // be claimed by a different item.
+  it('no registry item duplicates a file already owned by another item, except a documented allowlist', async () => {
+    // Generic, all-pairs version of the original input-primitives-only regression
+    // test (PR #255): a file claimed by two DIFFERENT gallery entries is almost
+    // always an accidental duplicate-ownership bug, not a feature. It doesn't
+    // necessarily blow up the file count, but it does make resolveFiles()'s auto
+    // dependency-scan see the shared file's own internal imports and add the
+    // OTHER owner as a whole-item registryDependency — transitively pulling in
+    // that item's entire file set. That's exactly what happened when
+    // toggle-group.tsx (already owned by `advanced`, PR #96) was accidentally
+    // also added to MANUAL_FILES['input-primitives'].
+    //
+    // Unlike the narrow test this replaces, this one scans every pair of items
+    // (not just input-primitives vs. the rest), so it catches the same bug class
+    // regardless of which two items are involved in a future regression.
+    //
+    // The one legitimate exception, called out in gen-registry.ts's own comment
+    // above the `extras` MANUAL_FILES entry: "extras reuses two components that
+    // physically live under ui/charts/" — gauge.tsx and sparkline.tsx are
+    // deliberately listed in both `charts` and `extras`. Anything not on this
+    // allowlist sharing a file across items is treated as a bug.
+    const DUPLICATE_FILE_ALLOWLIST: Record<string, string[]> = {
+      'src/components/ui/charts/gauge.tsx': ['charts', 'extras'],
+      'src/components/ui/charts/sparkline.tsx': ['charts', 'extras'],
+    };
+
     const registry = await generateRegistry();
-    const inputPrimitives = registry.items.find((i) => i.name === 'input-primitives');
-    expect(inputPrimitives, 'expected an "input-primitives" item in the generated registry').toBeDefined();
 
-    const inputPrimitivesPaths = new Set(inputPrimitives!.files.map((f) => f.path));
-    const conflicts: string[] = [];
-
+    // path -> item names that claim it
+    const owners = new Map<string, string[]>();
     for (const item of registry.items) {
-      if (item.name === 'input-primitives') continue;
       for (const file of item.files) {
-        if (inputPrimitivesPaths.has(file.path)) {
-          conflicts.push(`${file.path} (also owned by "${item.name}")`);
-        }
+        const arr = owners.get(file.path) ?? [];
+        arr.push(item.name);
+        owners.set(file.path, arr);
+      }
+    }
+
+    const violations: string[] = [];
+    for (const [path, itemNames] of owners) {
+      if (itemNames.length < 2) continue; // uniquely owned — fine
+
+      const allowedOwners = DUPLICATE_FILE_ALLOWLIST[path];
+      const sameSet =
+        allowedOwners !== undefined &&
+        allowedOwners.length === itemNames.length &&
+        allowedOwners.every((name) => itemNames.includes(name));
+
+      if (!sameSet) {
+        violations.push(`${path} -> owned by [${itemNames.join(', ')}]`);
       }
     }
 
     expect(
-      conflicts,
-      `input-primitives duplicates file(s) already owned by another item:\n${conflicts.join('\n')}`,
+      violations,
+      'registry.json has file(s) claimed by more than one item without a documented, ' +
+        'allowlisted reason (see DUPLICATE_FILE_ALLOWLIST in this test):\n' +
+        violations.join('\n'),
     ).toEqual([]);
   });
 
