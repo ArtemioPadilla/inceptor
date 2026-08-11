@@ -141,3 +141,53 @@ describe('<FieldFormItem> number/money/percent a11y (regression for the class of
     expect(describedBy!.split(' ')).toContain(message.id);
   });
 });
+
+// Bug 2 (functional verification, not just a build-output inspection): the
+// 'date' fieldType branch renders DatePicker via React.lazy + Suspense
+// (lazy-date-picker.tsx) so react-day-picker only loads for consumers that
+// actually configure a date fieldType. If it were still a static/eager
+// import, DatePicker's real trigger button would be present synchronously on
+// the very first render and the Suspense fallback would never be observable.
+describe('<FieldFormItem> date fieldType (Bug 2 — lazy DatePicker)', () => {
+  const createdFieldType: FieldType = { type: 'date', label: 'Created' };
+  const dateSchema = z.object({ created: fieldTypeZodSchema(createdFieldType) });
+  type DateValues = z.infer<typeof dateSchema>;
+
+  function DateHarness() {
+    const form = useForm<DateValues>({
+      resolver: zodResolver(dateSchema),
+      defaultValues: { created: new Date('2026-01-01T00:00:00Z') },
+    });
+    return (
+      <Form {...form}>
+        <form>
+          <FieldFormItem control={form.control} name="created" fieldType={createdFieldType} />
+        </form>
+      </Form>
+    );
+  }
+
+  it(
+    'renders the Suspense fallback before the lazy-loaded DatePicker trigger resolves',
+    async () => {
+      render(<DateHarness />);
+
+      // Synchronously after the initial render, React.lazy's dynamic
+      // import() hasn't resolved yet — the Skeleton fallback is what's
+      // actually in the DOM, not DatePicker's trigger <button>.
+      expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+
+      // The lazy chunk resolves shortly after — the real trigger button
+      // (rendered by DatePicker/PopoverTrigger) eventually replaces it. A
+      // generous timeout: this is the first time anything in this test file
+      // actually resolves the date-picker chunk (transitively pulling in
+      // react-day-picker), which is measurably slower than an already-warm
+      // module cache.
+      const trigger = await screen.findByRole('button', {}, { timeout: 15000 });
+      expect(trigger).toBeInTheDocument();
+      expect(document.querySelector('.animate-pulse')).not.toBeInTheDocument();
+    },
+    20000,
+  );
+});

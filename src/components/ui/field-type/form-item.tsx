@@ -3,7 +3,6 @@ import type { DateRange } from 'react-day-picker';
 import type { Control, ControllerRenderProps, FieldPath, FieldValues } from 'react-hook-form';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import { DatePicker, DateRangePicker } from '@/components/ui/date-picker';
 import {
   FormControl,
   FormDescription,
@@ -13,7 +12,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { LazyDatePicker, LazyDateRangePicker } from '@/components/ui/field-type/lazy-date-picker';
 import { NumberField } from '@/components/ui/number-field';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { FieldType } from '@/lib/field-type';
 import { cn } from '@/lib/utils';
 
@@ -41,6 +42,13 @@ type EditableField = Pick<
 // above) land on this wrapper too, and forward onto DatePicker's real
 // trigger button — not the div — so a screen reader announces them on the
 // actual interactive element, not an inert wrapper.
+//
+// DatePicker/DateRangePicker are lazy (lazy-date-picker.tsx) — react-day-picker
+// is a real dependency only the 'date'/'dateRange' fieldType cases need, so
+// every other fieldType-driven FieldFormItem consumer shouldn't pay for it.
+// Suspense's fallback is a same-sized Skeleton so the layout doesn't jump
+// once the chunk resolves (near-instant after the first date field on a
+// page, since the chunk is then cached).
 const DateFieldControl = React.forwardRef<
   HTMLDivElement,
   {
@@ -59,12 +67,14 @@ const DateFieldControl = React.forwardRef<
   ];
   return (
     <div ref={ref}>
-      <DatePicker
-        value={value}
-        onValueChange={onChange}
-        calendarProps={disabled.length > 0 ? { disabled } : undefined}
-        triggerProps={a11y}
-      />
+      <React.Suspense fallback={<Skeleton className="h-10 w-[240px]" />}>
+        <LazyDatePicker
+          value={value}
+          onValueChange={onChange}
+          calendarProps={disabled.length > 0 ? { disabled } : undefined}
+          triggerProps={a11y}
+        />
+      </React.Suspense>
     </div>
   );
 });
@@ -75,7 +85,9 @@ const DateRangeFieldControl = React.forwardRef<
   { value: DateRange | undefined; onChange: (range: DateRange | undefined) => void } & A11yProps
 >(({ value, onChange, ...a11y }, ref) => (
   <div ref={ref}>
-    <DateRangePicker value={value} onValueChange={onChange} triggerProps={a11y} />
+    <React.Suspense fallback={<Skeleton className="h-10 w-[280px]" />}>
+      <LazyDateRangePicker value={value} onValueChange={onChange} triggerProps={a11y} />
+    </React.Suspense>
   </div>
 ));
 DateRangeFieldControl.displayName = 'DateRangeFieldControl';

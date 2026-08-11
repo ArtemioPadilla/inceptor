@@ -1,8 +1,9 @@
 import * as React from 'react';
 import type { DateRange } from 'react-day-picker';
 
-import { DatePicker, DateRangePicker } from '@/components/ui/date-picker';
+import { LazyDatePicker, LazyDateRangePicker } from '@/components/ui/field-type/lazy-date-picker';
 import type { Operator } from '@/components/ui/property-filter';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { FieldType } from '@/lib/field-type';
 import { cn } from '@/lib/utils';
 
@@ -145,23 +146,29 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder, on
       );
 
     case 'date':
+      // Lazy — react-day-picker (via DatePicker → Calendar) is only needed
+      // by this and the dateRange case below; see lazy-date-picker.tsx.
       return (
-        <DatePicker
-          value={value ? new Date(value) : undefined}
-          onValueChange={(date) => onChange(date ? date.toISOString().slice(0, 10) : '')}
-          placeholder={placeholder ?? 'Pick a date'}
-          className="h-7 w-auto min-w-[9rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
-        />
+        <React.Suspense fallback={<Skeleton className="h-7 w-[9rem]" />}>
+          <LazyDatePicker
+            value={value ? new Date(value) : undefined}
+            onValueChange={(date) => onChange(date ? date.toISOString().slice(0, 10) : '')}
+            placeholder={placeholder ?? 'Pick a date'}
+            className="h-7 w-auto min-w-[9rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
+          />
+        </React.Suspense>
       );
 
     case 'dateRange':
       return (
-        <DateRangePicker
-          value={parseRangeValue(value)}
-          onValueChange={(range) => onChange(serializeRangeValue(range))}
-          placeholder={placeholder ?? 'Pick a date range'}
-          className="h-7 w-auto min-w-[11rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
-        />
+        <React.Suspense fallback={<Skeleton className="h-7 w-[11rem]" />}>
+          <LazyDateRangePicker
+            value={parseRangeValue(value)}
+            onValueChange={(range) => onChange(serializeRangeValue(range))}
+            placeholder={placeholder ?? 'Pick a date range'}
+            className="h-7 w-auto min-w-[11rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
+          />
+        </React.Suspense>
       );
 
     case 'text':
