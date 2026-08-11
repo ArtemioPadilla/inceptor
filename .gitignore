@@ -20,6 +20,11 @@ playwright-report/
 .lighthouseci/
 coverage/
 
+# vibe-test harness scratch dir (scripts/vibe-test/score.ts) — per-run
+# temp files it always cleans up itself, but ignore the parent in case a
+# run is killed mid-flight
+.vibe-test-tmp/
+
 # OS / editor artifacts
 .DS_Store
 Thumbs.db
