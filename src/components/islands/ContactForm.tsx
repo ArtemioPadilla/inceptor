@@ -86,8 +86,16 @@ function ContactFormInner() {
   return (
     <Form {...form}>
       {/* `relative` is required so the absolute-positioned honeypot stays
-          within this stacking context and never causes horizontal scroll. */}
-      <form onSubmit={form.handleSubmit(onSubmit)} className="relative space-y-4 max-w-md">
+          within this stacking context and never causes horizontal scroll.
+          noValidate: cede all validation to zod/react-hook-form. Without it,
+          the browser's (and jsdom's) native constraint validation for
+          type="email" silently blocks the submit event before React ever
+          sees it, so our own FormMessage never renders. */}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        noValidate
+        className="relative space-y-4 max-w-md"
+      >
         <FormField
           control={form.control}
           name="name"

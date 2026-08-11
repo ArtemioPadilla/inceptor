@@ -70,7 +70,15 @@ function NewsletterFormInner() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+      {/* noValidate: cede all validation to zod/react-hook-form. Without it,
+          the browser's (and jsdom's) native constraint validation for
+          type="email" silently blocks the submit event before React ever
+          sees it, so our own FormMessage never renders. */}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        noValidate
+        className="flex flex-col gap-2 sm:flex-row sm:items-start"
+      >
         <FormField
           control={form.control}
           name="email"
