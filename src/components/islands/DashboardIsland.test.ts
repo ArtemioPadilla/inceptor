@@ -33,4 +33,13 @@ describe('DashboardIsland', () => {
     expect(source).toMatch(/useQueryClient/);
     expect(source).toMatch(/Retry/);
   });
+
+  it('promotes card-section titles to h2 (no h1→h3 heading-order skip)', () => {
+    // Regression: the 5 card-section titles (charts + recent-issues table)
+    // used to be <h3>, but /demos/dashboard/ never renders an <h2> before
+    // them — a straight <h1> → <h3> skip caught by Lighthouse's
+    // heading-order audit. They must render <h2> and never fall back to <h3>.
+    expect((source.match(/<h2\b/g) ?? []).length).toBe(5);
+    expect(source).not.toMatch(/<h3\b/);
+  });
 });

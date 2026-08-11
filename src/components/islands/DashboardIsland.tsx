@@ -375,9 +375,9 @@ function DashboardInner() {
       {/* Charts */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2" aria-label="Issue analytics">
         <KpiCard>
-          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">
             Issues by label (top 8)
-          </h3>
+          </h2>
           {loading ? (
             <ChartSkeleton height={260} />
           ) : byLabel.length === 0 ? (
@@ -388,7 +388,7 @@ function DashboardInner() {
           )}
         </KpiCard>
         <KpiCard>
-          <h3 className="mb-3 text-sm font-medium text-muted-foreground">Open vs closed</h3>
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Open vs closed</h2>
           {loading ? (
             <ChartSkeleton height={260} />
           ) : bothEmpty ? (
@@ -408,9 +408,9 @@ function DashboardInner() {
         aria-label="Derived metrics"
       >
         <KpiCard>
-          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">
             Issue close rate
-          </h3>
+          </h2>
           {loading ? (
             <ChartSkeleton height={180} />
           ) : bothEmpty ? (
@@ -420,9 +420,9 @@ function DashboardInner() {
           )}
         </KpiCard>
         <KpiCard>
-          <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">
             Issues by label (top 5)
-          </h3>
+          </h2>
           {loading ? (
             <ChartSkeleton height={180} />
           ) : topLabels.length > 0 ? (
@@ -438,7 +438,7 @@ function DashboardInner() {
           the table's own empty state ("No results") would show while 0 rows
           are available, conflating loading with empty. */}
       <section aria-label="Recent issues">
-        <h3 className="mb-3 text-sm font-medium text-muted-foreground">Recent issues</h3>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Recent issues</h2>
         {loading ? (
           <TableSkeleton />
         ) : (
