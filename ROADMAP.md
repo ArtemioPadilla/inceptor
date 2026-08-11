@@ -414,14 +414,50 @@ fit for a template whose entire premise is "Claude builds the UI."
 - [x] Per-component guideline docs in Ant Pro's format — Purpose / When to use
   / API overview / Common mistakes — `docs/component-guidelines/`, covering
   15 of the most-used/most-complex components to start (#245)
-- [ ] *(unverified hypothesis, not a decided plan)* Evaluate whether
-  Inceptor projects could `npx shadcn add` components **from** the broader
-  shadcn ecosystem (Kibo UI, Magic UI, Origin UI) once this registry exists —
-  the protocol doesn't require Radix, but several pre-Base-UI-era registries
-  (Kibo UI confirmed) have components whose source reaches past the swappable
-  primitive layer straight into Radix. Verify with one real cross-registry
-  install (e.g. Kibo's Kanban) before relying on this as a strategy for
-  avoiding owned builds of Kanban/Splitter/etc.
+- [x] **Verified (2026-08-10) — cross-registry `npx shadcn add` is a
+  targeted tactic, not a blanket strategy.** Real installs against a
+  `components.json`/Tailwind v4 setup matching Inceptor's own, using live
+  Kibo UI registry URLs:
+  - Primitive-free items install clean: `kibo-ui.com/r/marquee.json` added
+    `src/components/kibo-ui/marquee/index.tsx` with zero `@radix-ui`/`radix-ui`
+    imports and its real npm dependency (`react-fast-marquee`) resolved and
+    installed.
+  - Primitive-coupled items pull Radix straight in, with **no warning from
+    the CLI**: `kibo-ui.com/r/dialog-stack.json` added a file importing
+    `@radix-ui/react-use-controllable-state` and the consolidated `radix-ui`
+    package directly.
+  - **The sharper, unanticipated risk**: `kibo-ui.com/r/kanban.json` itself
+    is Radix-free (dnd-kit-based), but its own `registryDependencies` —
+    `["card", "scroll-area"]` — are bare names, which shadcn resolves against
+    the *default Radix-based* shadcn/ui registry since Kibo doesn't redefine
+    them. The CLI wrote `src/components/ui/scroll-area.tsx` (Radix) straight
+    over the filename Inceptor's own hand-built Base UI `ScrollArea`
+    occupies. `card.tsx` happened to land byte-identical (no primitive
+    involved, so no damage); `scroll-area.tsx` is a **silent destructive
+    overwrite** of an owned file with a real consumer
+    (`ShowcaseDisclosure.tsx`) — worse than "adds an unwanted dependency,"
+    it swaps the accessibility primitive under an existing import without
+    tripping a type error, because both versions export a same-shaped
+    `<ScrollArea>` component.
+  - **Gap found in centinela's own safety net**: its forbidden-import grep
+    (`from ['"]@radix-ui/`) catches `@radix-ui/react-use-controllable-state`
+    but misses the bare `from "radix-ui"` form used by `dialog-stack` — the
+    pattern should check both.
+  - **Reverse direction** (third parties installing *from* Inceptor):
+    Inceptor's `registry.json` validates cleanly against the real
+    `registry-item.json` JSON Schema for 24 of 25 items; `field-type` fails
+    one rule (a `registry:file`-typed entry needs an explicit `target`,
+    which it's missing) — a one-line fix, not a structural blocker, so this
+    direction would work once hosted.
+  - **Verdict**: use cross-registry installs case by case for genuinely
+    primitive-free components (icons-style, layout-style, data-viz-style),
+    always grepping the installed file for *both* `@radix-ui/` and bare
+    `radix-ui` afterward, and always diffing/renaming before letting
+    anything land under a `src/components/ui/` filename Inceptor already
+    owns. Do **not** treat it as a blanket strategy for filling gaps like
+    Kanban/Carousel — even a "primitive-light" top-level component can
+    smuggle Radix in through `registryDependencies` you never asked for,
+    and neither the CLI nor a filename check alone will catch it.
 - [ ] *(stretch, validates the whole forja/centinela premise)* A "vibe-test"
   harness — spawn subagents that build a working component from
   `docs/COMPONENTS.md` alone, score success nightly. Astryx runs exactly this

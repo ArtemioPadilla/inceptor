@@ -40,10 +40,17 @@ function importsOf(pattern: string): RegExp {
 }
 
 describe('forbidden imports (single source: .claude/checklists/forbidden-imports.json)', () => {
-  it('the checklist lists the four banned specifiers', () => {
+  it('the checklist lists the known banned specifiers', () => {
     const pats = checklist.banned.map((b) => b.pattern);
     expect(pats).toEqual(
-      expect.arrayContaining(['@radix-ui/', '@tremor/react', 'framer-motion', '@astrojs/tailwind']),
+      expect.arrayContaining([
+        '@radix-ui/',
+        'radix-ui',
+        '@tremor/react',
+        'framer-motion',
+        '@astrojs/tailwind',
+        '@ark-ui/react',
+      ]),
     );
   });
 

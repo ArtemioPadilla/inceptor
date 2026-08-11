@@ -85,9 +85,16 @@ These are non-negotiable; they enforce CLAUDE.md's warnings:
 grep -rE "from ['\"]@astrojs/tailwind['\"]"   src/  package.json && echo "FAIL: @astrojs/tailwind banned" || true
 grep -rE "React\.createContext"               src/                && echo "FAIL: React Context across islands banned" || true
 grep -rE "from ['\"]@radix-ui/"               src/                && echo "FAIL: Radix banned (use Base UI)" || true
+grep -rE "from ['\"]radix-ui['\"]"            src/                && echo "FAIL: radix-ui (unscoped) banned (use Base UI)" || true
 grep -rE "from ['\"]@tremor/react['\"]"       src/                && echo "FAIL: @tremor/react banned (use Tremor Raw)" || true
 grep -rE "from ['\"]framer-motion['\"]"       src/                && echo "FAIL: framer-motion banned (use motion/react)" || true
+grep -rE "from ['\"]@ark-ui/react['\"]"       src/                && echo "FAIL: @ark-ui/react banned (ADR 0009 — use @zag-js/<component> only)" || true
 ```
+
+> This block is a duplicate, hand-maintained view of
+> `.claude/checklists/forbidden-imports.json` (the actual single source of
+> truth — see its `purpose` field). If you add or change a rule, edit the
+> JSON first, then mirror the change here.
 
 If any FAIL appears, REJECT.
 

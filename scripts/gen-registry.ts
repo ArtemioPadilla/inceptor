@@ -267,6 +267,19 @@ function extractReferencedTokens(source: string, knownTokens: Set<string>): stri
 interface RegistryFile {
   path: string;
   type: string;
+  target?: string;
+}
+
+/**
+ * shadcn's CLI infers an install destination from `type` for the
+ * convention-based kinds (registry:ui, registry:hook, registry:component…),
+ * but `registry:file` is the catch-all for everything outside those
+ * conventions (e.g. src/lib/field-type.ts) — the schema requires an explicit
+ * `target` for it, or the CLI has nowhere to put the file.
+ */
+function registryFile(path: string): RegistryFile {
+  const type = fileType(path);
+  return type === 'registry:file' ? { path, type, target: path } : { path, type };
 }
 
 interface RegistryItem {
@@ -347,7 +360,7 @@ export async function generateRegistry(): Promise<{
       type: itemType(entry, files),
       title: entry.name,
       description: entry.summary,
-      files: files.map((f) => ({ path: f, type: fileType(f) })),
+      files: files.map(registryFile),
       dependencies: [...deps].sort(),
       registryDependencies: [...registryDeps].sort(),
       cssVars,

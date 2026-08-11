@@ -715,7 +715,8 @@
       "files": [
         {
           "path": "src/lib/field-type.ts",
-          "type": "registry:file"
+          "type": "registry:file",
+          "target": "src/lib/field-type.ts"
         }
       ],
       "dependencies": [
