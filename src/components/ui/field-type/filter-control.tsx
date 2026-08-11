@@ -1,8 +1,10 @@
 import * as React from 'react';
 import type { DateRange } from 'react-day-picker';
 
-import { DatePicker, DateRangePicker } from '@/components/ui/date-picker';
+import { LazyDatePicker, LazyDateRangePicker } from '@/components/ui/field-type/lazy-date-picker';
+import { OptionSelect } from '@/components/ui/field-type/option-select';
 import type { Operator } from '@/components/ui/property-filter';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { FieldType } from '@/lib/field-type';
 import { cn } from '@/lib/utils';
 
@@ -80,53 +82,44 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder, on
   switch (fieldType.type) {
     case 'select':
       return (
-        <select
+        <OptionSelect
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
-        >
-          <option value="">{placeholder ?? 'Select…'}</option>
-          {fieldType.options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          items={fieldType.options}
+          placeholder={placeholder ?? 'Select…'}
+        />
       );
 
     case 'status':
       return (
-        <select
+        <OptionSelect
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
-        >
-          <option value="">{placeholder ?? 'Select…'}</option>
-          {fieldType.statuses.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          items={fieldType.statuses}
+          placeholder={placeholder ?? 'Select…'}
+        />
       );
 
     case 'boolean':
       return (
-        <select
+        <OptionSelect
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
-        >
-          <option value="">{placeholder ?? 'Select…'}</option>
-          <option value="true">{fieldType.trueLabel ?? 'Yes'}</option>
-          <option value="false">{fieldType.falseLabel ?? 'No'}</option>
-        </select>
+          items={[
+            { value: 'true', label: fieldType.trueLabel ?? 'Yes' },
+            { value: 'false', label: fieldType.falseLabel ?? 'No' },
+          ]}
+          placeholder={placeholder ?? 'Select…'}
+        />
       );
 
     case 'number':
@@ -145,23 +138,29 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder, on
       );
 
     case 'date':
+      // Lazy — react-day-picker (via DatePicker → Calendar) is only needed
+      // by this and the dateRange case below; see lazy-date-picker.tsx.
       return (
-        <DatePicker
-          value={value ? new Date(value) : undefined}
-          onValueChange={(date) => onChange(date ? date.toISOString().slice(0, 10) : '')}
-          placeholder={placeholder ?? 'Pick a date'}
-          className="h-7 w-auto min-w-[9rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
-        />
+        <React.Suspense fallback={<Skeleton className="h-7 w-[9rem]" />}>
+          <LazyDatePicker
+            value={value ? new Date(value) : undefined}
+            onValueChange={(date) => onChange(date ? date.toISOString().slice(0, 10) : '')}
+            placeholder={placeholder ?? 'Pick a date'}
+            className="h-7 w-auto min-w-[9rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
+          />
+        </React.Suspense>
       );
 
     case 'dateRange':
       return (
-        <DateRangePicker
-          value={parseRangeValue(value)}
-          onValueChange={(range) => onChange(serializeRangeValue(range))}
-          placeholder={placeholder ?? 'Pick a date range'}
-          className="h-7 w-auto min-w-[11rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
-        />
+        <React.Suspense fallback={<Skeleton className="h-7 w-[11rem]" />}>
+          <LazyDateRangePicker
+            value={parseRangeValue(value)}
+            onValueChange={(range) => onChange(serializeRangeValue(range))}
+            placeholder={placeholder ?? 'Pick a date range'}
+            className="h-7 w-auto min-w-[11rem] border-none bg-transparent px-1 py-0 text-xs shadow-none"
+          />
+        </React.Suspense>
       );
 
     case 'text':
