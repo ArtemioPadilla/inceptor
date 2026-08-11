@@ -210,6 +210,28 @@ export interface DataTableProps<TData, TValue> {
   onExport?: () => Promise<Blob>;
   /** Filename for the file downloaded via `onExport`. Defaults to 'export'. */
   exportFilename?: string;
+  /**
+   * Row-identity function passed through to TanStack Table's `getRowId`.
+   * Omit it and TanStack Table falls back to its own default — keying each
+   * row by its index in the current `data`/request-result array — which is
+   * exactly the pre-existing, backward-compatible behavior every consumer
+   * that doesn't pass this prop keeps getting. Index-keying is harmless for
+   * static, in-place-edited `data`, but it's actively dangerous once the
+   * *entire* row set can be replaced wholesale — most notably a
+   * server-driven `request()` resolving a new page after a debounced
+   * filter/sort change: `rowSelection`/`expanded` state keyed by that same
+   * index silently "carries over" onto whatever row now happens to sit at
+   * the same position, so a user's checked row can silently become a
+   * different row's data. Supply a stable per-row key (e.g. `(row) =>
+   * row.id`) to key selection/expansion by row identity instead. Note: even
+   * with `getRowId` supplied, a new server-driven result set still clears
+   * `rowSelection`/`expanded` (see the `isServerDriven` reset effect in the
+   * component body) — a full result-set replacement is treated as a new
+   * "page", not a partial edit, so selections don't quietly persist across
+   * it. This keeps the fix simple and honest instead of attempting a
+   * partial-preservation heuristic.
+   */
+  getRowId?: (row: TData, index: number) => string;
 }
 
 // SortIcon renders a plain SVG caret — no framer-motion, no JS animation library.
@@ -224,6 +246,30 @@ const columnFilterInputClass = cn(
   'h-8 w-full rounded-md border border-input bg-background px-2 text-xs',
   'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
 );
+
+/**
+ * Shared sticky-position styling for a pinned column (Epic 23). Reused by
+ * the sort-header cell, the per-column filter cell directly beneath it, and
+ * the body cell so the three call sites can't drift out of sync — they
+ * previously duplicated this object inline (adversarial-review finding),
+ * which is exactly how the filter row ended up missing pin styling
+ * entirely. Callers pass their own `zIndex` since the header/filter row (20)
+ * must stack above the body (10).
+ */
+function getPinStyle<TData>(
+  column: Column<TData, unknown>,
+  zIndex: number,
+): React.CSSProperties {
+  const pinnedSide = column.getIsPinned();
+  if (!pinnedSide) return {};
+  return {
+    position: 'sticky',
+    left: pinnedSide === 'left' ? column.getStart('left') : undefined,
+    right: pinnedSide === 'right' ? column.getAfter('right') : undefined,
+    zIndex,
+    background: 'var(--background)',
+  };
+}
 
 // ColumnFilterInput renders one per-column filter control (Epic 23): a
 // text <input> by default, or a <select> when the column def opts in via
@@ -285,6 +331,7 @@ export function DataTable<TData, TValue>({
   requestDebounceMs = 300,
   onExport,
   exportFilename = 'export',
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   // Server-driven mode (Epic 23): request replaces the `data` prop as the
   // source of truth, and TanStack Table switches to manual sorting/filtering.
@@ -552,9 +599,29 @@ export function DataTable<TData, TValue>({
 
   const tableData = isServerDriven ? requestState.data : data;
 
+  // Bug fix (adversarial finding): without `getRowId`, TanStack Table keys
+  // rows by their index in `tableData`. In server-driven mode, `requestState.data`
+  // is wholesale-replaced every time a debounced filter/sort change resolves
+  // a new page — a full result-set swap, not a partial edit — so any prior
+  // index-based (or even identity-based, see the `getRowId` doc comment)
+  // rowSelection/expanded association is invalidated. Reset both whenever a
+  // new server-driven result set lands; this is the "keep it simple" fix
+  // called out in the getRowId doc comment rather than a partial-preservation
+  // heuristic. Client-array mode (`data` prop) never touches this — its rows
+  // are only re-derived by TanStack Table's own filtering/sorting, not
+  // wholesale-replaced by us.
+  React.useEffect(() => {
+    if (!isServerDriven) return;
+    setRowSelection({});
+    setExpanded({});
+    // requestState.data's *identity* is what marks "a new result set landed"
+    // — isServerDriven is effectively constant for a given DataTable instance.
+  }, [isServerDriven, requestState.data]);
+
   const table = useReactTable({
     data: tableData,
     columns: tableColumns,
+    getRowId,
     // Column resizing via TanStack Table's built-in resize handler
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
@@ -780,15 +847,7 @@ export function DataTable<TData, TValue>({
                   // Column-pinning (Epic 23): sticky-position pinned-left/right
                   // columns so they stay visible during horizontal scroll.
                   const pinnedSide = header.column.getIsPinned();
-                  const pinStyle: React.CSSProperties = pinnedSide
-                    ? {
-                        position: 'sticky',
-                        left: pinnedSide === 'left' ? header.column.getStart('left') : undefined,
-                        right: pinnedSide === 'right' ? header.column.getAfter('right') : undefined,
-                        zIndex: 20,
-                        background: 'var(--background)',
-                      }
-                    : {};
+                  const pinStyle = getPinStyle(header.column, 20);
                   const headerLabel =
                     typeof header.column.columnDef.header === 'string'
                       ? header.column.columnDef.header
@@ -869,16 +928,28 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
             {/* Per-column filter row (Epic 23) — one input/select per
-             * filterable leaf column, independent of the global filter. */}
+             * filterable leaf column, independent of the global filter.
+             * Pinned columns get the same sticky styling (via getPinStyle)
+             * as the sort-header row directly above, so a pinned column's
+             * filter input doesn't visually detach from its header on
+             * horizontal scroll. */}
             {enableColumnFilters && (
               <TableRow>
-                {(table.getHeaderGroups().at(-1)?.headers ?? []).map((header) => (
-                  <TableHead key={`${header.id}-filter`} className="py-1.5">
-                    {header.column.getCanFilter() && (
-                      <ColumnFilterInput column={header.column} />
-                    )}
-                  </TableHead>
-                ))}
+                {(table.getHeaderGroups().at(-1)?.headers ?? []).map((header) => {
+                  const pinnedSide = header.column.getIsPinned();
+                  return (
+                    <TableHead
+                      key={`${header.id}-filter`}
+                      style={getPinStyle(header.column, 20)}
+                      className="py-1.5"
+                      data-pinned={pinnedSide || undefined}
+                    >
+                      {header.column.getCanFilter() && (
+                        <ColumnFilterInput column={header.column} />
+                      )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             )}
           </TableHeader>
@@ -927,15 +998,7 @@ export function DataTable<TData, TValue>({
                   >
                     {row.getVisibleCells().map((cell) => {
                       const pinnedSide = cell.column.getIsPinned();
-                      const cellPinStyle: React.CSSProperties = pinnedSide
-                        ? {
-                            position: 'sticky',
-                            left: pinnedSide === 'left' ? cell.column.getStart('left') : undefined,
-                            right: pinnedSide === 'right' ? cell.column.getAfter('right') : undefined,
-                            zIndex: 10,
-                            background: 'var(--background)',
-                          }
-                        : {};
+                      const cellPinStyle = getPinStyle(cell.column, 10);
                       return (
                         <TableCell key={cell.id} style={cellPinStyle} data-pinned={pinnedSide || undefined}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
