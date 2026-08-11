@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -75,5 +75,26 @@ describe('DataTable column pinning (Epic 23)', () => {
 
     await user.click(screen.getByLabelText('Unpin Name column'));
     expect(nameHeader).not.toHaveAttribute('data-pinned');
+  });
+
+  // Header-cell pinning (asserted above) and body-cell pinning are two
+  // independent code paths in data-table.tsx (~L782-802 for <TableHead>,
+  // ~L929-940 for <TableCell>) — a regression could break/delete the body
+  // wiring while every header-only test above stayed green. Pin a column and
+  // assert on an actual row's <TableCell>, not just the header.
+  it('pins a column left and marks the body TableCell for that column data-pinned="left"', async () => {
+    const user = userEvent.setup();
+    render(<DataTable columns={columns} data={data} enableColumnPinning />);
+
+    const aliceRow = screen.getByText('Alice').closest('tr');
+    if (!aliceRow) throw new Error('expected to find the row containing "Alice"');
+    const nameCell = within(aliceRow).getByText('Alice').closest('td');
+    if (!nameCell) throw new Error('expected to find a <td> ancestor of the "Alice" cell');
+    expect(nameCell).not.toHaveAttribute('data-pinned');
+
+    await user.click(screen.getByLabelText('Pin Name column left'));
+
+    expect(nameCell).toHaveAttribute('data-pinned', 'left');
+    expect(nameCell).toHaveStyle({ position: 'sticky' });
   });
 });
