@@ -128,7 +128,9 @@ responded correctly with live registry data.
 ## Known limitations (first version)
 
 - No resources or prompts — tools only.
-- No pagination — `list_components` returns the full (currently 20-item) list
+- No pagination — `list_components` returns the full list (item count grows
+  as the gallery does; check `registry.json`'s `items.length` for the
+  current figure rather than trusting a number here, which will drift)
   in one response. Fine at this scale; would need `registry.json`'s
   `pagination` field wired through if the registry grows much larger.
 - No file-content size guard on `get_component` — a very large component file

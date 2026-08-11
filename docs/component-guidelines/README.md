@@ -24,7 +24,7 @@ component:
 ## Coverage — partial, expanding
 
 This library has ~70 gallery entries; these guidelines currently cover
-**19 components across 10 categories** — the most-used and most-structurally-
+**21 components across 10 categories** — the most-used and most-structurally-
 complex ones (compound components, the two Cloudscape-gap controls, the
 generic `DataTable`), plus (as of ROADMAP Epic 18) the five components with
 a documented Keyboard subsection: `DataTable`, `Combobox`, `Command
@@ -51,9 +51,9 @@ subsection too when the component has non-trivial keyboard interaction).
 | [`overlays.md`](./overlays.md) | `overlays` | Tooltip |
 | [`disclosure.md`](./disclosure.md) | `disclosure` | Accordion |
 | [`feedback.md`](./feedback.md) | `feedback` | Flashbar |
-| [`data.md`](./data.md) | `data` | DataTable, PropertyFilter |
+| [`data.md`](./data.md) | `data` | DataTable, PropertyFilter, fieldType |
 | [`extras.md`](./extras.md) | `extras` | Tree view |
-| [`gen-ai.md`](./gen-ai.md) | `gen-ai` | PromptInput, ChatMessage / ChatThread |
+| [`gen-ai.md`](./gen-ai.md) | `gen-ai` | PromptInput, ChatMessage / ChatThread, Citation |
 
 ## Machine-readable alternative
 

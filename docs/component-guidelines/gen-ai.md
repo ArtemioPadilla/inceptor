@@ -99,15 +99,26 @@ interface ChatMessageProps {
   nearest scrollable ancestor; if nothing in the ancestry is scrollable,
   nothing visibly scrolls. Give the element that should scroll (often
   `ChatThread` itself) an explicit height + `overflow-y-auto`.
-- The auto-scroll effect deliberately has **no dependency array** — it runs
-  on every render (including every streamed-token append to the last
-  message) and deliberately skips `behavior: 'smooth'`, because a smooth-
-  scroll animation queued every ~80ms during streaming visibly stutters
-  instead of tracking the last line. Don't "fix" this by adding smooth
-  scrolling back in without re-reading that comment.
+- The auto-scroll effect (a render-effect with **no dependency array**, so it
+  re-evaluates on every render — new turn or streamed-token append) only
+  calls `scrollIntoView` **when the user was already near the bottom**
+  (`isScrolledNearBottom`, a `NEAR_BOTTOM_THRESHOLD_PX = 120` check driven by
+  a `scroll` listener). If they've scrolled up to re-read history, it does
+  **not** yank them back down — instead `ChatThread` shows a "Nuevos
+  mensajes ↓" jump-to-bottom button (`showJumpToBottom` state) that snaps
+  back to the bottom on click. It also deliberately skips `behavior:
+  'smooth'`, because a smooth-scroll animation queued every ~80ms during
+  streaming visibly stutters instead of tracking the last line. Don't
+  "simplify" this by removing the near-bottom gate or re-adding smooth
+  scrolling without re-reading the comments in `chat-message.tsx` first —
+  both were deliberate fixes for real reported bugs.
+- `ChatThread` takes an optional `scrollFade?: boolean` prop (default
+  `true`) that applies the `scroll-fade-y` utility — a top/bottom gradient
+  mask signaling "more content above/below".
 - `footer` is a generic `ReactNode` slot, not typed to a specific component —
-  conventionally `<AIOutputLabel>` (disclosure) or `<AIFeedback>`
-  (thumbs up/down), but nothing enforces that.
+  conventionally `<AIOutputLabel>` (disclosure), `<AIFeedback>`
+  (thumbs up/down), or `<CitationList>` (source attribution, below), but
+  nothing enforces that.
 
 **Common mistakes**:
 
@@ -122,3 +133,39 @@ interface ChatMessageProps {
   scroll doesn't work" bug — check `overflow-y-auto` + a bounded height
   exists somewhere between the sentinel and the nearest fixed-size ancestor
   first.
+- Assuming the thread always scrolls to new content — it only does when the
+  reader was already near the bottom; if a bug report says "doesn't
+  auto-scroll," first check whether the user (or the test) had scrolled up,
+  since that's the documented not-scrolling case, not a regression.
+
+## Citation / CitationRef / CitationList (`src/components/ui/ai/citation.tsx`)
+
+**Purpose**: source-attribution for AI answers — an inline numbered marker
+next to a claim, paired with a footer list of sources. Presentation only, no
+citation-matching logic.
+
+**API overview**:
+
+```tsx
+interface CitationSource {
+  label: string;   // e.g. "Estado de cuenta — agosto 2026"
+  url?: string;     // renders as plain text when absent
+}
+
+<CitationRef index={1} />                              {/* inline "[1]" marker, purely visual */}
+<CitationList sources={[{ label, url }, ...]} />        {/* footer <ol>, pass as ChatMessage's footer */}
+```
+
+`CitationList` returns `null` for an empty `sources` array. Numbering is the
+caller's responsibility — `CitationRef`'s `index` and `CitationList`'s array
+order must be kept in sync manually; neither component cross-references the
+other at runtime.
+
+**Common mistakes**:
+
+- Expecting `CitationRef`/`CitationList` to auto-number or auto-match claims
+  to sources — there is no matching logic; the caller decides which claim
+  gets which `index`.
+- Forgetting `CitationList` is meant to go in `ChatMessage`'s `footer` slot
+  (alongside or instead of `<AIOutputLabel>`/`<AIFeedback>`), not as a
+  standalone block outside the message bubble.
