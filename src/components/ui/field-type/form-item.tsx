@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { LazyDatePicker, LazyDateRangePicker } from '@/components/ui/field-type/lazy-date-picker';
+import { OptionSelect } from '@/components/ui/field-type/option-select';
 import { NumberField } from '@/components/ui/number-field';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { FieldType } from '@/lib/field-type';
@@ -158,7 +159,7 @@ function FieldEditControl({
 
     case 'select':
       return (
-        <select
+        <OptionSelect
           name={field.name}
           onBlur={field.onBlur}
           onChange={(e) => field.onChange(e.target.value)}
@@ -166,21 +167,15 @@ function FieldEditControl({
           disabled={field.disabled}
           className={selectClass}
           {...a11y}
-        >
-          <option value="" disabled>
-            Select…
-          </option>
-          {fieldType.options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          items={fieldType.options}
+          placeholder="Select…"
+          placeholderDisabled
+        />
       );
 
     case 'status':
       return (
-        <select
+        <OptionSelect
           name={field.name}
           onBlur={field.onBlur}
           onChange={(e) => field.onChange(e.target.value)}
@@ -188,16 +183,10 @@ function FieldEditControl({
           disabled={field.disabled}
           className={selectClass}
           {...a11y}
-        >
-          <option value="" disabled>
-            Select…
-          </option>
-          {fieldType.statuses.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          items={fieldType.statuses}
+          placeholder="Select…"
+          placeholderDisabled
+        />
       );
 
     case 'date':

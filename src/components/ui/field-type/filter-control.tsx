@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { DateRange } from 'react-day-picker';
 
 import { LazyDatePicker, LazyDateRangePicker } from '@/components/ui/field-type/lazy-date-picker';
+import { OptionSelect } from '@/components/ui/field-type/option-select';
 import type { Operator } from '@/components/ui/property-filter';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { FieldType } from '@/lib/field-type';
@@ -81,53 +82,44 @@ export function FieldFilterControl({ fieldType, value, onChange, placeholder, on
   switch (fieldType.type) {
     case 'select':
       return (
-        <select
+        <OptionSelect
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
-        >
-          <option value="">{placeholder ?? 'Select…'}</option>
-          {fieldType.options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          items={fieldType.options}
+          placeholder={placeholder ?? 'Select…'}
+        />
       );
 
     case 'status':
       return (
-        <select
+        <OptionSelect
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
-        >
-          <option value="">{placeholder ?? 'Select…'}</option>
-          {fieldType.statuses.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          items={fieldType.statuses}
+          placeholder={placeholder ?? 'Select…'}
+        />
       );
 
     case 'boolean':
       return (
-        <select
+        <OptionSelect
           aria-label="Filter value"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={enterKeyDown(onEnter)}
           className={filterControlClass}
-        >
-          <option value="">{placeholder ?? 'Select…'}</option>
-          <option value="true">{fieldType.trueLabel ?? 'Yes'}</option>
-          <option value="false">{fieldType.falseLabel ?? 'No'}</option>
-        </select>
+          items={[
+            { value: 'true', label: fieldType.trueLabel ?? 'Yes' },
+            { value: 'false', label: fieldType.falseLabel ?? 'No' },
+          ]}
+          placeholder={placeholder ?? 'Select…'}
+        />
       );
 
     case 'number':
