@@ -27,10 +27,14 @@ const Alert = React.forwardRef<
 ));
 Alert.displayName = 'Alert';
 
-const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+// Not a semantic heading element: AlertTitle is a title-styled leaf whose
+// correct heading level depends entirely on where the consuming page places
+// it in its own hierarchy (mirrors CardTitle's div-not-h* convention below).
+// A hardcoded <h5> here previously produced Lighthouse/axe heading-order
+// violations on pages whose surrounding structure never reaches an <h4>.
+const AlertTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    // eslint-disable-next-line jsx-a11y/heading-has-content -- children come from ...props spread; static analysis can't see them
-    <h5 ref={ref} className={cn('mb-1 font-medium leading-none tracking-tight', className)} {...props} />
+    <div ref={ref} className={cn('mb-1 font-medium leading-none tracking-tight', className)} {...props} />
   ),
 );
 AlertTitle.displayName = 'AlertTitle';
