@@ -144,6 +144,38 @@ describe('registry.json generation (Epic 26)', () => {
     }
   });
 
+  it('input-primitives does not duplicate a file already owned by another gallery entry', async () => {
+    // Regression test for a second, subtler recurrence of the same bug class:
+    // toggle-group.tsx has its own gallery entry (`advanced`, PR #96), but was
+    // ALSO added to MANUAL_FILES['input-primitives']. That duplicate ownership
+    // doesn't blow up the file count (still ~8 files) but it does make
+    // resolveFiles()'s auto dependency-scan see toggle-group.tsx -> toggle.tsx
+    // and add `advanced` as a whole-item registryDependency on input-primitives
+    // — transitively pulling in advanced's entire file set. Generic version of
+    // the file-count check above: no file input-primitives claims may already
+    // be claimed by a different item.
+    const registry = await generateRegistry();
+    const inputPrimitives = registry.items.find((i) => i.name === 'input-primitives');
+    expect(inputPrimitives, 'expected an "input-primitives" item in the generated registry').toBeDefined();
+
+    const inputPrimitivesPaths = new Set(inputPrimitives!.files.map((f) => f.path));
+    const conflicts: string[] = [];
+
+    for (const item of registry.items) {
+      if (item.name === 'input-primitives') continue;
+      for (const file of item.files) {
+        if (inputPrimitivesPaths.has(file.path)) {
+          conflicts.push(`${file.path} (also owned by "${item.name}")`);
+        }
+      }
+    }
+
+    expect(
+      conflicts,
+      `input-primitives duplicates file(s) already owned by another item:\n${conflicts.join('\n')}`,
+    ).toEqual([]);
+  });
+
   it('the committed registry.json is up to date with gallery.ts', async () => {
     const generated = await generateRegistry();
     const committedRaw = readFileSync(registryPath, 'utf-8');
