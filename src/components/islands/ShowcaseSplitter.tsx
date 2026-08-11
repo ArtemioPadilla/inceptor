@@ -26,7 +26,10 @@ export default function ShowcaseSplitter() {
                 <li>Settings</li>
               </ul>
             </SplitterPanel>
-            <SplitterResizeTrigger id="nav:detail" />
+            <SplitterResizeTrigger
+              id="nav:detail"
+              aria-label="Resize navigation and detail panels"
+            />
             <SplitterPanel id="detail">
               <p className="text-sm font-medium text-foreground">Detail pane</p>
               <p className="mt-2 text-sm text-muted-foreground">
