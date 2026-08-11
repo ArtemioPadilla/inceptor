@@ -57,12 +57,15 @@ const DownloadTrigger = React.forwardRef<HTMLButtonElement, DownloadTriggerProps
         ref={ref}
         type="button"
         variant={variant}
-        disabled={isLoading || props.disabled}
         aria-busy={isLoading}
         aria-label={label}
         onClick={handleClick}
         className={cn(className)}
         {...props}
+        // Applied after {...props} so isLoading always wins — a caller's
+        // disabled={false} must never re-enable a button mid-export, or a
+        // double-click can fire a second concurrent onExport() call.
+        disabled={isLoading || props.disabled}
       >
         {isLoading ? <Spinner label="Exporting" /> : <DownloadIcon className="size-4" />}
         {label}
