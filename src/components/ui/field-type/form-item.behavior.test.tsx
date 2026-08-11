@@ -131,10 +131,13 @@ describe('<FieldFormItem> number/money/percent a11y (regression for the class of
 
     await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'));
 
+    // FormMessage (form.tsx) renders the Zod error text with its own
+    // formMessageId — confirm that id is one of the tokens in the real
+    // input's aria-describedby, i.e. the description is both present and
+    // correctly linked, not just any truthy string.
+    const message = await screen.findByText(/Too small/);
     const describedBy = input.getAttribute('aria-describedby');
     expect(describedBy).toBeTruthy();
-    const describer = document.getElementById(describedBy!.split(' ')[0]!);
-    expect(describer).toBeInTheDocument();
-    expect(describer).toHaveTextContent(/./);
+    expect(describedBy!.split(' ')).toContain(message.id);
   });
 });
