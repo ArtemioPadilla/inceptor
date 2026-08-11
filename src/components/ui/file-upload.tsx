@@ -42,7 +42,7 @@ export function FileUpload({
     const next: File[] = [];
     for (const f of Array.from(incoming)) {
       if (maxSize && f.size > maxSize) {
-        onError?.(`"${f.name}" supera el límite de ${formatSize(maxSize)}.`);
+        onError?.(`"${f.name}" exceeds the ${formatSize(maxSize)} limit.`);
         continue;
       }
       next.push(f);
@@ -86,10 +86,10 @@ export function FileUpload({
       >
         <UploadCloudIcon className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
         <p className="text-sm text-muted-foreground">
-          Arrastra {multiple ? 'archivos' : 'un archivo'} aquí o{' '}
-          <span className="font-medium text-primary">selecciona</span>
+          Drag {multiple ? 'files' : 'a file'} here or{' '}
+          <span className="font-medium text-primary">browse</span>
         </p>
-        {maxSize && <p className="text-xs text-muted-foreground">Máx {formatSize(maxSize)} por archivo</p>}
+        {maxSize && <p className="text-xs text-muted-foreground">Max {formatSize(maxSize)} per file</p>}
       </div>
       {/* The native input lives OUTSIDE the role="button" dropzone — nesting an
           interactive <input> inside an interactive role trips axe's
