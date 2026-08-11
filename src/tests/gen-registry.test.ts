@@ -116,6 +116,34 @@ describe('registry.json generation (Epic 26)', () => {
     );
   });
 
+  it('scopes generic-directory entries to their curated MANUAL_FILES set, not the whole ui/ directory', async () => {
+    // Regression test for the input-primitives bug: the entry's `source` is the
+    // generic shared `src/components/ui/` directory (like several other entries),
+    // so without a MANUAL_FILES override resolveFiles() falls back to listing
+    // every file directly under that directory instead of this entry's real
+    // ~8 files. Bound well below the ~75 files actually in src/components/ui/,
+    // comfortably above the real curated count, so this catches "forgot to add
+    // a MANUAL_FILES override" for any current or future generic-source entry.
+    const registry = await generateRegistry();
+    const item = registry.items.find((i) => i.name === 'input-primitives');
+
+    expect(item, 'expected an "input-primitives" item in the generated registry').toBeDefined();
+    expect(
+      item!.files.length,
+      `input-primitives listed ${item!.files.length} files — looks like it fell through to ` +
+        'listing the entire src/components/ui/ directory instead of its curated MANUAL_FILES set',
+    ).toBeLessThan(15);
+
+    // Files that belong to entirely unrelated gallery entries must never leak in.
+    const paths = item!.files.map((f) => f.path);
+    for (const unrelated of ['dialog.tsx', 'table.tsx', 'tooltip.tsx']) {
+      expect(
+        paths.some((p) => p.endsWith(`/${unrelated}`)),
+        `input-primitives should not include unrelated file ${unrelated}, got: ${paths.join(', ')}`,
+      ).toBe(false);
+    }
+  });
+
   it('the committed registry.json is up to date with gallery.ts', async () => {
     const generated = await generateRegistry();
     const committedRaw = readFileSync(registryPath, 'utf-8');
