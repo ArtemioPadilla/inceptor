@@ -119,7 +119,13 @@ jobs:
           # below is valid ERE: it flags any third-party `uses:` ref that is
           # NOT pinned to a 40-hex commit SHA. First-party actions/* and
           # github/*, and local ./ refs, are exempt.
-          UNPINNED=$(grep -rhE "^[[:space:]]*-?[[:space:]]*uses:[[:space:]]+" \
+          #
+          # Use `-rn` (file + line numbers), not `-rh`: on failure the report
+          # must say WHICH workflow and line holds the unpinned ref so it's
+          # actionable without a manual search. The `file:line:` prefix does
+          # not affect the filters below — the first-party check matches on the
+          # `uses:` token and the SHA check is `$`-anchored on the trailing ref.
+          UNPINNED=$(grep -rnE "^[[:space:]]*-?[[:space:]]*uses:[[:space:]]+" \
               .github/workflows/*.yml \
             | sed -E 's/#.*$//' \
             | grep -vE "uses:[[:space:]]+(actions/|github/|\\./)" \
