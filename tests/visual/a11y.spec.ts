@@ -13,7 +13,11 @@ import AxeBuilder from '@axe-core/playwright';
  * meant to teach principled UX (see docs/ETHICS.md item #7).
  */
 
-const routes = ['/', '/gallery/', '/demos/dashboard/', '/docs/'];
+// Include at least one form-bearing route (/login, /contact) so a regression
+// in the shared <Form> a11y wiring (label htmlFor ↔ control id) is caught.
+// Without form coverage a broken FormItemContext would ship green — exactly
+// the blind spot that let a downstream instantiation ship unlabelled inputs.
+const routes = ['/', '/gallery/', '/demos/dashboard/', '/docs/', '/login/', '/contact/'];
 
 for (const route of routes) {
   test(`a11y — ${route}`, async ({ page }) => {
