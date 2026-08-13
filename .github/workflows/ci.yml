@@ -113,13 +113,23 @@ jobs:
         # be silently updated. SHA pins are required for all third-party actions.
         # First-party `actions/*` are trusted runners; they can use @vN tags.
         run: |
-          # Extract all `uses:` lines that reference non-actions/* and non-github/*
-          # namespaces and are not SHA-pinned (40-char hex).
-          UNPINNED=$(grep -rE "uses: [^/]+/[^@]+@(?!([0-9a-f]{40})|(\\.github))" \
-            .github/workflows/*.yml \
-            | grep -v "uses: actions/" \
-            | grep -v "uses: github/" \
-            | grep -v "uses: \\./" \
+          # BUGFIX: the original pattern used a PCRE negative-lookahead
+          # `(?!...)`, which GNU `grep -E` (POSIX ERE) does not support — so it
+          # never matched and this security scan silently never ran. The form
+          # below is valid ERE: it flags any third-party `uses:` ref that is
+          # NOT pinned to a 40-hex commit SHA. First-party actions/* and
+          # github/*, and local ./ refs, are exempt.
+          #
+          # Use `-rn` (file + line numbers), not `-rh`: on failure the report
+          # must say WHICH workflow and line holds the unpinned ref so it's
+          # actionable without a manual search. The `file:line:` prefix does
+          # not affect the filters below — the first-party check matches on the
+          # `uses:` token and the SHA check is `$`-anchored on the trailing ref.
+          UNPINNED=$(grep -rnE "^[[:space:]]*-?[[:space:]]*uses:[[:space:]]+" \
+              .github/workflows/*.yml \
+            | sed -E 's/#.*$//' \
+            | grep -vE "uses:[[:space:]]+(actions/|github/|\\./)" \
+            | grep -vE "@[0-9a-f]{40}[[:space:]]*$" \
             || true)
           if [ -n "$UNPINNED" ]; then
             echo "ERROR: unpinned third-party action refs found:"
