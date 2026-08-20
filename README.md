@@ -36,6 +36,10 @@ Primitives, form controls, advanced inputs, navigation, compound components (Dia
 
 Two interchangeable archetypes — **`server-node/`** (Hono, reuses the frontend's Zod schemas) and **`server-flask/`** (Flask + Pydantic) — expose the same `/api/*` contract: contact/newsletter handlers, a token-backed GitHub proxy (lifts the 60 req/h cap), feedback→issue creation, and OpenAPI/Swagger. Entirely opt-in via `PUBLIC_API_BASE`; unset, the site stays fully static. See **[the backend guide](https://artemiop.com/inceptor/docs/building/backend/)** and [ADR 0006](./docs/decisions/0006-self-hosted-backend-archetypes.md).
 
+### Optional desktop packaging
+
+`npm run add-tauri` layers an opt-in Tauri v2 desktop shell (Windows/macOS/Linux) into your project — nothing is installed until you run it. See [the desktop runbook](./docs/runbooks/tauri-desktop.md).
+
 ### Explore it live
 
 - **[Gallery](https://artemiop.com/inceptor/gallery/)** — every component rendered live

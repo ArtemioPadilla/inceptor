@@ -517,7 +517,8 @@ command, not an init-time picker option.
   store distribution)
 - [x] `.github/workflows/tauri-desktop.yml` — on-demand (`workflow_dispatch`
   only) build verification across all three desktop OSes, zero secrets,
-  zero impact on normal push/PR CI
+  zero impact on normal push/PR CI (workflow authored and actionlint-clean;
+  first real dispatch pending post-merge — see PR)
 
 **Design spec:** `docs/superpowers/specs/2026-08-20-tauri-desktop-design.md`
 

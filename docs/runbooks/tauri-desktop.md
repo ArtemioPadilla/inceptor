@@ -24,9 +24,15 @@ work exactly as before.
 
 ```bash
 npm install
-npx tauri icon public/icons/pwa-512.png   # generates src-tauri/icons/*
+npx tauri icon <path-to-a-512x512+-source.png>   # generates src-tauri/icons/*
 npm run tauri:dev
 ```
+
+Point `tauri icon` at any 512×512+ source PNG your project has — Inceptor's
+own repo ships one at `public/icons/pwa-512.png`, but a
+`create-inceptor-app`-generated project only writes `public/favicon.svg` by
+default and has no `public/icons/` directory; you may need to add a source
+PNG first (e.g. exported from your app's logo) before this command works.
 
 ## Production build
 
@@ -36,10 +42,26 @@ npm run tauri:build    # produces a native installer under
                         # src-tauri/target/release/bundle/
 ```
 
+Build with a plain `npm run build` (no `ASTRO_BASE` set) — a subpath `base`
+breaks asset resolution inside the desktop WebView; the desktop app is not
+deployed under a URL subpath the way the web version is. (This repo's own
+GitHub Pages deploy sets `ASTRO_BASE=/inceptor` — don't carry that env var
+into a Tauri build.)
+
 The bundle format Tauri produces is OS-dependent (`.dmg`/`.app` on macOS,
 `.msi`/`.exe` on Windows, `.deb`/`.AppImage` on Linux) — `tauri.conf.json`
 deliberately doesn't pin a specific target list, so Tauri builds whatever's
 appropriate for the OS it's running on.
+
+## No Content-Security-Policy is applied by default
+
+`app.security.csp` is unset/null in the generated `tauri.conf.json` — the
+`security` block isn't present at all. That means Tauri's IPC hardening and
+page CSP are both off in the scaffold as shipped. Set a real policy (see
+[Tauri's security docs](https://v2.tauri.app/security/csp/)) before shipping
+this to real users; this needs care, since a wrong CSP can silently break
+asset loading (styles, scripts, fonts) if the `style-src`/`script-src`/nonce
+handling isn't verified against how the Astro build actually emits assets.
 
 ## What this scaffold does NOT do
 
@@ -83,6 +105,7 @@ a wrapped WebView.
 - **Build fails on Linux with a webkit2gtk error** — see the
   prerequisites link above; package names shift between Tauri/webkit2gtk
   releases.
-- **Icon errors** — re-run `npx tauri icon public/icons/pwa-512.png`; the
-  generated files under `src-tauri/icons/` are gitignored and always
-  regenerate from that one source PNG.
+- **Icon errors** — re-run `npx tauri icon <path-to-your-source.png>` (see
+  "First run" above for which source PNG to point it at); the generated
+  files under `src-tauri/icons/` are gitignored and always regenerate from
+  that one source PNG.
