@@ -23,7 +23,9 @@ describe('templates/tauri-desktop scaffold', () => {
   });
 
   it('capabilities/default.json is valid JSON with only core:default', () => {
-    const json = JSON.parse(readFileSync(join(TEMPLATE_ROOT, 'src-tauri/capabilities/default.json'), 'utf8'));
+    const json = JSON.parse(
+      readFileSync(join(TEMPLATE_ROOT, 'src-tauri/capabilities/default.json'), 'utf8'),
+    );
     expect(json.permissions).toEqual(['core:default']);
   });
 
