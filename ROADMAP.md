@@ -499,7 +499,7 @@ gap, not a component-count one.
 - [x] **Citation** component — `CitationRef`/`CitationList`, source-attribution
   for AI answers, wired into `ShowcaseAI.tsx` (#242)
 
-## Epic 29a — Desktop packaging via Tauri (opt-in)
+## Epic 29a — Desktop packaging via Tauri (opt-in) — ✅ shipped (#290)
 
 An Inceptor-derived project can wrap its static build in a real desktop
 app (Windows/macOS/Linux) without every project paying for Rust/Tauri
@@ -508,17 +508,17 @@ command, not an init-time picker option.
 
 - [x] `scripts/add-tauri.mjs` generator + `templates/tauri-desktop/`
   scaffold — merges into an existing project's `package.json`/`.gitignore`
-  rather than creating a new project (unlike `scripts/init.mjs`)
+  rather than creating a new project (unlike `scripts/init.mjs`) (#290)
 - [x] Minimal Tauri v2 capabilities (`core:default` only) — nothing
-  granted beyond a plain window until a project deliberately extends it
+  granted beyond a plain window until a project deliberately extends it (#290)
 - [x] `docs/runbooks/tauri-desktop.md` — copied into every project that
   runs the generator, covers dev workflow, the cross-origin WebView
   gotcha, and what's deliberately NOT included (signing, auto-update,
-  store distribution)
+  store distribution) (#290)
 - [x] `.github/workflows/tauri-desktop.yml` — on-demand (`workflow_dispatch`
   only) build verification across all three desktop OSes, zero secrets,
   zero impact on normal push/PR CI (workflow authored and actionlint-clean;
-  first real dispatch pending post-merge — see PR)
+  first real dispatch pending post-merge — see #290) (#290)
 
 **Design spec:** `docs/superpowers/specs/2026-08-20-tauri-desktop-design.md`
 
