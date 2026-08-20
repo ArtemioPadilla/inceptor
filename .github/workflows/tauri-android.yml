@@ -1,0 +1,209 @@
+name: Tauri Android build/sign/upload
+
+# workflow_dispatch: build verification only, never uploads.
+# push tags v*: the real release path — build, sign, upload to Play's
+# internal track. A project that never tags a release never triggers an
+# upload, keeping this opt-in until actually used.
+# See docs/runbooks/tauri-android.md and
+# docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
+        with:
+          # Two platform levels: one for the Gradle/AGP toolchain Tauri's
+          # Android template expects, plus whatever satisfies Play's
+          # CURRENT minimum targetSdkVersion — re-check
+          # https://developer.android.com/google/play/requirements/target-sdk
+          # at execution time; this number moves on a rolling basis.
+          packages: 'platform-tools platforms;android-34 platforms;android-35 build-tools;34.0.0 ndk;26.1.10909125'
+
+      - name: Confirm Rust toolchain and add Android targets
+        run: |
+          rustup show
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+      - name: Cache Cargo registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-android-${{ hashFiles('src-tauri/Cargo.lock', 'src-tauri/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-android-
+
+      - name: Install Node deps
+        run: npm ci
+
+      - name: Generate Tauri icons
+        run: npx tauri icon public/icons/pwa-512.png
+
+      - name: Build Astro frontend
+        run: npm run build
+
+      - name: Read app identifier from tauri.conf.json
+        id: tauri-identifier
+        run: echo "identifier=$(jq -r .identifier src-tauri/tauri.conf.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Initialise Tauri Android project
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
+        run: |
+          if [ ! -d src-tauri/gen/android ]; then
+            npx tauri android init
+          fi
+          chmod +x src-tauri/gen/android/gradlew
+
+      - name: Patch targetSdkVersion for current Play Store requirements
+        # tauri.conf.json has no targetSdkVersion field (only
+        # minSdkVersion) — the generated Gradle project's default may lag
+        # Play's rolling minimum target API. Force it explicitly so a
+        # Tauri CLI version bump can't silently regress this and get the
+        # upload rejected. Re-verify "35" against Play's current
+        # requirement (see the Setup Android SDK step's comment above)
+        # before relying on this.
+        run: |
+          GRADLE_FILE=src-tauri/gen/android/app/build.gradle.kts
+          if [ -f "$GRADLE_FILE" ]; then
+            sed -i 's/targetSdk = [0-9]\+/targetSdk = 35/' "$GRADLE_FILE"
+            grep -n "targetSdk" "$GRADLE_FILE"
+          else
+            echo "::error::$GRADLE_FILE not found — tauri android init layout may have changed."
+            exit 1
+          fi
+
+      - name: Build AAB
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
+        run: npx tauri android build --aab
+
+      - name: Upload unsigned build artifact (workflow_dispatch verification only)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: tauri-android-unsigned-aab
+          path: src-tauri/gen/android/app/build/outputs/bundle/**/*.aab
+          if-no-files-found: error
+          retention-days: 7
+
+      # Everything below only runs on a version-tag push — never on
+      # workflow_dispatch, which stops at the unsigned-artifact upload
+      # above.
+      - name: Validate required signing secrets
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          missing=""
+          [ -z "$ANDROID_KEYSTORE_BASE64" ] && missing="$missing ANDROID_KEYSTORE_BASE64"
+          [ -z "$ANDROID_KEY_ALIAS" ] && missing="$missing ANDROID_KEY_ALIAS"
+          [ -z "$ANDROID_KEY_PASSWORD" ] && missing="$missing ANDROID_KEY_PASSWORD"
+          [ -z "$ANDROID_KEYSTORE_PASSWORD" ] && missing="$missing ANDROID_KEYSTORE_PASSWORD"
+          [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ] && missing="$missing PLAY_SERVICE_ACCOUNT_JSON"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required secrets for the release path:$missing"
+            echo "::error::See docs/runbooks/tauri-android.md → 'Signing and Play Store release'."
+            exit 1
+          fi
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Decode signing keystore
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: keystore
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
+          echo "keystore_path=/tmp/release.jks" >> "$GITHUB_OUTPUT"
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Sign AAB
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: sign
+        env:
+          KEYSTORE_PATH: ${{ steps.keystore.outputs.keystore_path }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          AAB=$(find src-tauri/gen/android/app/build/outputs/bundle -name '*-release.aab' | head -n 1)
+          if [ -z "$AAB" ]; then
+            echo "::error::No release AAB found under src-tauri/gen/android/app/build/outputs/bundle"
+            exit 1
+          fi
+          # jarsigner (not apksigner) is correct here: unlike installable
+          # .apk files, Play-bound .aab bundles don't require the
+          # apksigner v2/v3 scheme — a standard JAR signature is
+          # sufficient for bundletool/Play to accept.
+          jarsigner -verbose \
+            -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD" \
+            "$AAB" "$ANDROID_KEY_ALIAS"
+          echo "aab_path=$AAB" >> "$GITHUB_OUTPUT"
+          shred -u "$KEYSTORE_PATH" 2>/dev/null || rm -f "$KEYSTORE_PATH"
+
+      - name: Write Play service account credentials to a temp file
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: play-creds
+        run: |
+          CRED_FILE=$(mktemp)
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > "$CRED_FILE"
+          echo "cred_path=$CRED_FILE" >> "$GITHUB_OUTPUT"
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Upload to Play Store internal track
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJson: ${{ steps.play-creds.outputs.cred_path }}
+          packageName: ${{ steps.tauri-identifier.outputs.identifier }}
+          releaseFiles: ${{ steps.sign.outputs.aab_path }}
+          track: internal
+          status: completed
+
+      - name: Clean up Play service account credentials file
+        if: always() && startsWith(github.ref, 'refs/tags/v')
+        run: rm -f "${{ steps.play-creds.outputs.cred_path }}"
+
+      - name: Upload signed AAB artifact (CI archive)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: tauri-android-signed-aab
+          path: ${{ steps.sign.outputs.aab_path }}
+          if-no-files-found: error
+          retention-days: 14
