@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+/**
+ * add-tauri-android — layers Android support onto a project that has
+ * ALREADY run scripts/add-tauri.mjs (Epic 29a). Mobile targets share the
+ * same src-tauri/ Cargo project desktop uses — this does not create a new
+ * project, it patches tauri.conf.json's bundle.android block and adds
+ * tauri:android:* npm scripts. See
+ * docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md.
+ *
+ *   node scripts/add-tauri-android.mjs
+ */
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const MIN_SDK_VERSION = 24;
+
+export function readTauriConfig(cwd) {
+  const confPath = join(cwd, 'src-tauri/tauri.conf.json');
+  if (!existsSync(confPath)) {
+    const err = new Error(`No src-tauri/tauri.conf.json found in ${cwd}`);
+    err.code = 'ENOTAURI';
+    throw err;
+  }
+  return JSON.parse(readFileSync(confPath, 'utf8'));
+}
+
+export function patchAndroidConfig(config, minSdkVersion) {
+  const next = JSON.parse(JSON.stringify(config));
+  next.bundle = next.bundle || {};
+  if (next.bundle.android && next.bundle.android.minSdkVersion !== minSdkVersion) {
+    return {
+      config: next,
+      warning: `bundle.android.minSdkVersion already set to ${next.bundle.android.minSdkVersion}, leaving as-is (wanted ${minSdkVersion})`,
+    };
+  }
+  next.bundle.android = { minSdkVersion };
+  return { config: next, warning: null };
+}
+
+export function main(argv = process.argv.slice(2)) {
+  const cwd = process.cwd();
+
+  let existingConfig;
+  try {
+    existingConfig = readTauriConfig(cwd);
+  } catch (err) {
+    if (err.code === 'ENOTAURI') {
+      console.error('✗ Run "npm run add-tauri" first — no src-tauri/ project found.');
+      process.exit(1);
+    }
+    throw err;
+  }
+
+  const { config, warning } = patchAndroidConfig(existingConfig, MIN_SDK_VERSION);
+  if (warning) console.warn(`⚠ ${warning}`);
+  writeFileSync(join(cwd, 'src-tauri/tauri.conf.json'), JSON.stringify(config, null, 2) + '\n');
+
+  const pkgPath = join(cwd, 'package.json');
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+  pkg.scripts = pkg.scripts || {};
+  pkg.scripts['tauri:android:init'] = pkg.scripts['tauri:android:init'] || 'tauri android init';
+  pkg.scripts['tauri:android:dev'] = pkg.scripts['tauri:android:dev'] || 'tauri android dev';
+  pkg.scripts['tauri:android:build'] = pkg.scripts['tauri:android:build'] || 'tauri android build --aab';
+  writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+
+  const runbookSrc = join(ROOT, 'docs/runbooks/tauri-android.md');
+  const runbookDestDir = join(cwd, 'docs/runbooks');
+  mkdirSync(runbookDestDir, { recursive: true });
+  writeFileSync(join(runbookDestDir, 'tauri-android.md'), readFileSync(runbookSrc, 'utf8'));
+
+  console.log('✓ Android support added. Next: npm install, then see docs/runbooks/tauri-android.md.');
+  console.log(`  App identifier (locked in at first Play Console upload): ${config.identifier}`);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}
