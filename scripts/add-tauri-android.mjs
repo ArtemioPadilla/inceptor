@@ -29,13 +29,14 @@ export function readTauriConfig(cwd) {
 export function patchAndroidConfig(config, minSdkVersion) {
   const next = JSON.parse(JSON.stringify(config));
   next.bundle = next.bundle || {};
-  if (next.bundle.android && next.bundle.android.minSdkVersion !== minSdkVersion) {
+  const current = next.bundle.android?.minSdkVersion;
+  if (current !== undefined && current !== minSdkVersion) {
     return {
       config: next,
-      warning: `bundle.android.minSdkVersion already set to ${next.bundle.android.minSdkVersion}, leaving as-is (wanted ${minSdkVersion})`,
+      warning: `bundle.android.minSdkVersion already set to ${current}, leaving as-is (wanted ${minSdkVersion})`,
     };
   }
-  next.bundle.android = { minSdkVersion };
+  next.bundle.android = { ...next.bundle.android, minSdkVersion };
   return { config: next, warning: null };
 }
 
@@ -76,9 +77,20 @@ export function main(argv = process.argv.slice(2)) {
   writeFileSync(join(cwd, 'src-tauri/tauri.conf.json'), JSON.stringify(config, null, 2) + '\n');
 
   pkg.scripts = pkg.scripts || {};
-  pkg.scripts['tauri:android:init'] = pkg.scripts['tauri:android:init'] || 'tauri android init';
-  pkg.scripts['tauri:android:dev'] = pkg.scripts['tauri:android:dev'] || 'tauri android dev';
-  pkg.scripts['tauri:android:build'] = pkg.scripts['tauri:android:build'] || 'tauri android build --aab';
+  const wantedScripts = {
+    'tauri:android:init': 'tauri android init',
+    'tauri:android:dev': 'tauri android dev',
+    'tauri:android:build': 'tauri android build --aab',
+  };
+  for (const [key, value] of Object.entries(wantedScripts)) {
+    if (Object.hasOwn(pkg.scripts, key) && pkg.scripts[key] !== value) {
+      console.warn(
+        `⚠ script "${key}" already set to "${pkg.scripts[key]}", leaving as-is (wanted "${value}")`,
+      );
+    } else {
+      pkg.scripts[key] = value;
+    }
+  }
   writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
   const runbookSrc = join(ROOT, 'docs/runbooks/tauri-android.md');

@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { readTauriConfig, patchAndroidConfig, main } from '../../scripts/add-tauri-android.mjs';
+import { main as addTauriMain } from '../../scripts/add-tauri.mjs';
 
 const SAMPLE_DESKTOP_CONFIG = {
   $schema: 'https://schema.tauri.app/config/2',
@@ -80,6 +81,16 @@ describe('patchAndroidConfig', () => {
     };
     const { config, warning } = patchAndroidConfig(existing, 24);
     expect(config.bundle.android.minSdkVersion).toBe(24);
+    expect(warning).toBeNull();
+  });
+
+  it('sets minSdkVersion and preserves sibling keys when bundle.android exists without minSdkVersion', () => {
+    const existing = {
+      ...SAMPLE_DESKTOP_CONFIG,
+      bundle: { ...SAMPLE_DESKTOP_CONFIG.bundle, android: { someOtherKey: 'x' } },
+    };
+    const { config, warning } = patchAndroidConfig(existing, 24);
+    expect(config.bundle.android).toEqual({ someOtherKey: 'x', minSdkVersion: 24 });
     expect(warning).toBeNull();
   });
 });
@@ -168,6 +179,33 @@ describe('add-tauri-android CLI (end-to-end)', () => {
       expect(after).toBe(before);
     } finally {
       process.exit = originalExit;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('add-tauri.mjs -> add-tauri-android.mjs chained (end-to-end)', () => {
+  it('runs the real desktop generator then the Android generator and produces a consistent config', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-chain-'));
+    try {
+      writeFileSync(
+        join(dir, 'package.json'),
+        JSON.stringify({ name: 'chain-test', scripts: { dev: 'astro dev' } }, null, 2),
+      );
+
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        addTauriMain(['--name', 'Chain Test', '--identifier', 'com.example.chaintest']);
+        main([]);
+      } finally {
+        process.chdir(cwd);
+      }
+
+      const tauriConf = JSON.parse(readFileSync(join(dir, 'src-tauri/tauri.conf.json'), 'utf8'));
+      expect(tauriConf.identifier).toBe('com.example.chaintest');
+      expect(tauriConf.bundle.android.minSdkVersion).toBe(24);
+    } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
