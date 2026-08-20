@@ -119,7 +119,7 @@ jobs:
       # workflow_dispatch, which stops at the unsigned-artifact upload
       # above.
       - name: Validate required signing secrets
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: |
           missing=""
           [ -z "$ANDROID_KEYSTORE_BASE64" ] && missing="$missing ANDROID_KEYSTORE_BASE64"
@@ -140,7 +140,7 @@ jobs:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
       - name: Decode signing keystore
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         id: keystore
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
@@ -149,7 +149,7 @@ jobs:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
       - name: Sign AAB
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         id: sign
         env:
           KEYSTORE_PATH: ${{ steps.keystore.outputs.keystore_path }}
@@ -173,10 +173,18 @@ jobs:
             -keypass "$ANDROID_KEY_PASSWORD" \
             "$AAB" "$ANDROID_KEY_ALIAS"
           echo "aab_path=$AAB" >> "$GITHUB_OUTPUT"
-          shred -u "$KEYSTORE_PATH" 2>/dev/null || rm -f "$KEYSTORE_PATH"
+
+      - name: Clean up decoded signing keystore
+        # A dedicated step (not the tail of "Sign AAB") because run: steps
+        # default to `bash -eo pipefail` — if jarsigner itself failed,
+        # "Sign AAB" would abort before ever reaching an in-step cleanup
+        # line, leaving the decoded keystore behind at /tmp/release.jks.
+        # always() ensures this runs whether or not signing succeeded.
+        if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        run: shred -u "${{ steps.keystore.outputs.keystore_path }}" 2>/dev/null || rm -f "${{ steps.keystore.outputs.keystore_path }}"
 
       - name: Write Play service account credentials to a temp file
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         id: play-creds
         run: |
           CRED_FILE=$(mktemp)
@@ -186,7 +194,7 @@ jobs:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
       - name: Upload to Play Store internal track
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJson: ${{ steps.play-creds.outputs.cred_path }}
@@ -196,11 +204,11 @@ jobs:
           status: completed
 
       - name: Clean up Play service account credentials file
-        if: always() && startsWith(github.ref, 'refs/tags/v')
+        if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: rm -f "${{ steps.play-creds.outputs.cred_path }}"
 
       - name: Upload signed AAB artifact (CI archive)
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: tauri-android-signed-aab
