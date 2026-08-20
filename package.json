@@ -35,6 +35,7 @@
     "docs": "node -e \"console.log('Open docs/INDEX.md or run: open docs/INDEX.md')\"",
     "new-issue": "bash scripts/new-issue.sh",
     "init": "node scripts/init.mjs",
+    "add-tauri": "node scripts/add-tauri.mjs",
     "gen:catalog": "node --experimental-strip-types scripts/gen-component-catalog.ts",
     "gen:registry": "node --experimental-strip-types scripts/gen-registry.ts",
     "vibe-test": "node --experimental-strip-types scripts/vibe-test.ts",

@@ -1,0 +1,18 @@
+[package]
+name = "__SLUG__"
+version = "0.1.0"
+description = "__NAME__ — desktop shell (Tauri)"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "__LIB_NAME__"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
