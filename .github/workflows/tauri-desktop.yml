@@ -46,6 +46,9 @@ jobs:
       - name: Run the generator against this checkout
         run: node scripts/add-tauri.mjs --name "Inceptor Desktop Smoke" --identifier com.inceptor.desktopsmoke
 
+      - name: Install newly-added Tauri CLI dependency
+        run: npm install
+
       - name: Generate icons
         run: npx tauri icon public/icons/pwa-512.png
 
