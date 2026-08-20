@@ -36,6 +36,7 @@
     "new-issue": "bash scripts/new-issue.sh",
     "init": "node scripts/init.mjs",
     "add-tauri": "node scripts/add-tauri.mjs",
+    "add-tauri-android": "node scripts/add-tauri-android.mjs",
     "gen:catalog": "node --experimental-strip-types scripts/gen-component-catalog.ts",
     "gen:registry": "node --experimental-strip-types scripts/gen-registry.ts",
     "vibe-test": "node --experimental-strip-types scripts/vibe-test.ts",

@@ -47,6 +47,7 @@ haven't uploaded yet and want to change it, edit `identifier` in
 ## First run
 
 ```bash
+npm run add-tauri-android    # or: node scripts/add-tauri-android.mjs
 npm install
 npm run tauri:android:init
 npm run tauri:android:dev   # plug in a USB-debugging device, or start an AVD emulator
