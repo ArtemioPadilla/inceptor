@@ -29,6 +29,23 @@ export function isValidIdentifier(identifier) {
   return /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$/.test(identifier);
 }
 
+// A derived slug must be non-empty (a blank Cargo package name is a hard
+// `cargo` error) and the derived _lib crate name must not start with a
+// digit (Rust identifiers can't start with a digit — deriveNames('2048')
+// would otherwise yield the invalid `2048_lib`).
+export function isValidDerivedName({ slug, libName }) {
+  if (!slug) return false;
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(libName)) return false;
+  return true;
+}
+
+// Rejects characters that would break unescaped interpolation into
+// tauri.conf.json (JSON) / Cargo.toml (TOML) — rather than implementing
+// per-format escaping, we just refuse names that need it.
+export function hasUnsafeNameChars(name) {
+  return /["\\\x00-\x1f]/.test(name);
+}
+
 export function substitutePlaceholders(text, vars) {
   let out = text;
   for (const [key, value] of Object.entries(vars)) {
@@ -129,6 +146,12 @@ export function main(argv = process.argv.slice(2)) {
     );
     process.exit(1);
   }
+  if (hasUnsafeNameChars(name)) {
+    console.error(
+      `✗ --name inválido: "${name}" no puede contener comillas (") barras invertidas (\\) ni caracteres de control — se interpola sin escapar en tauri.conf.json/Cargo.toml.`,
+    );
+    process.exit(1);
+  }
 
   const cwd = process.cwd();
   const srcTauriDest = join(cwd, 'src-tauri');
@@ -137,15 +160,40 @@ export function main(argv = process.argv.slice(2)) {
     process.exit(1);
   }
 
-  const { slug, libName } = deriveNames(name);
+  const derived = deriveNames(name);
+  if (!isValidDerivedName(derived)) {
+    console.error(
+      `✗ --name "${name}" produce un identificador Rust/Cargo inválido (slug="${derived.slug}", libName="${derived.libName}"). Elige un --name con al menos un carácter alfanumérico que no empiece con un dígito.`,
+    );
+    process.exit(1);
+  }
+  const { slug, libName } = derived;
+
+  // Preflight: package.json must exist and be valid JSON BEFORE we write
+  // anything to disk — every other failure mode in this script fails
+  // clean before touching the filesystem; writing a full src-tauri/ tree
+  // ahead of a package.json read that then throws would be inconsistent.
+  const pkgPath = join(cwd, 'package.json');
+  if (!existsSync(pkgPath)) {
+    console.error(
+      `✗ No se encontró ${pkgPath}. Ejecuta este script desde la raíz de un proyecto Node.`,
+    );
+    process.exit(1);
+  }
+  let existingPkg;
+  try {
+    existingPkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+  } catch (err) {
+    console.error(`✗ ${pkgPath} no es JSON válido: ${err.message}`);
+    process.exit(1);
+  }
+
   const vars = { NAME: name, IDENTIFIER: identifier, SLUG: slug, LIB_NAME: libName };
 
   console.log(`→ Agregando shell de escritorio Tauri a ${cwd}…`);
   copyTemplateTree(vars);
 
   // package.json merge
-  const pkgPath = join(cwd, 'package.json');
-  const existingPkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
   const snippet = JSON.parse(readFileSync(join(TEMPLATE_ROOT, 'package.snippet.json'), 'utf8'));
   const { merged, warnings } = mergePackageJson(existingPkg, snippet);
   writeFileSync(pkgPath, JSON.stringify(merged, null, 2) + '\n');
@@ -165,7 +213,9 @@ export function main(argv = process.argv.slice(2)) {
 
   console.log('✓ Listo. Próximos pasos:');
   console.log('  npm install');
-  console.log('  npx tauri icon public/icons/pwa-512.png');
+  console.log(
+    '  npx tauri icon <path-to-a-512x512+-source.png>  (see docs/runbooks/tauri-desktop.md)',
+  );
   console.log('  npm run tauri:dev');
   console.log('  Ver docs/runbooks/tauri-desktop.md para más detalle.');
 }

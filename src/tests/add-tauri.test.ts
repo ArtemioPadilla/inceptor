@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import {
   deriveNames,
   isValidIdentifier,
+  isValidDerivedName,
+  hasUnsafeNameChars,
   substitutePlaceholders,
   mergePackageJson,
   appendGitignoreSnippet,
@@ -21,6 +23,46 @@ describe('deriveNames', () => {
       slug: 'weird-name-2',
       libName: 'weird_name_2_lib',
     });
+  });
+
+  it('produces an empty slug for input with no alphanumerics', () => {
+    expect(deriveNames('!!!')).toEqual({ slug: '', libName: '_lib' });
+  });
+
+  it('produces a digit-leading libName for a purely numeric name', () => {
+    expect(deriveNames('2048')).toEqual({ slug: '2048', libName: '2048_lib' });
+  });
+});
+
+describe('isValidDerivedName', () => {
+  it('rejects an empty slug (e.g. from deriveNames("!!!"))', () => {
+    expect(isValidDerivedName(deriveNames('!!!'))).toBe(false);
+  });
+
+  it('rejects a digit-leading libName (e.g. from deriveNames("2048"))', () => {
+    expect(isValidDerivedName(deriveNames('2048'))).toBe(false);
+  });
+
+  it('accepts a normal derived name', () => {
+    expect(isValidDerivedName(deriveNames('My App'))).toBe(true);
+  });
+});
+
+describe('hasUnsafeNameChars', () => {
+  it('rejects a name with an embedded double quote', () => {
+    expect(hasUnsafeNameChars('My "App"')).toBe(true);
+  });
+
+  it('rejects a name with a backslash', () => {
+    expect(hasUnsafeNameChars('My\\App')).toBe(true);
+  });
+
+  it('rejects a name with a control character', () => {
+    expect(hasUnsafeNameChars('My\x00App')).toBe(true);
+  });
+
+  it('accepts a normal name', () => {
+    expect(hasUnsafeNameChars('My App')).toBe(false);
   });
 });
 
@@ -143,6 +185,106 @@ describe('add-tauri CLI (end-to-end)', () => {
       expect(gitignore).toContain('node_modules/');
       expect(gitignore).toContain('src-tauri/target/');
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('exits(1) and creates no src-tauri/ when package.json is missing', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-'));
+    const exitSpy: { code: unknown } = { code: null };
+    const originalExit = process.exit;
+    process.exit = (code) => {
+      exitSpy.code = code;
+      throw new Error('exit');
+    };
+    try {
+      // deliberately no package.json written in `dir`
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        expect(() => main(['--name', 'No Pkg', '--identifier', 'com.example.nopkg'])).toThrow();
+        expect(exitSpy.code).toBe(1);
+      } finally {
+        process.chdir(cwd);
+      }
+      expect(existsSync(join(dir, 'src-tauri'))).toBe(false);
+    } finally {
+      process.exit = originalExit;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('exits(1) and creates no src-tauri/ when package.json is unparseable', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-'));
+    const exitSpy: { code: unknown } = { code: null };
+    const originalExit = process.exit;
+    process.exit = (code) => {
+      exitSpy.code = code;
+      throw new Error('exit');
+    };
+    try {
+      writeFileSync(join(dir, 'package.json'), '{ not valid json');
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        expect(() => main(['--name', 'Bad Json', '--identifier', 'com.example.badjson'])).toThrow();
+        expect(exitSpy.code).toBe(1);
+      } finally {
+        process.chdir(cwd);
+      }
+      expect(existsSync(join(dir, 'src-tauri'))).toBe(false);
+    } finally {
+      process.exit = originalExit;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('exits(1) for a --name that derives an invalid Rust identifier (e.g. "!!!")', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-'));
+    const exitSpy: { code: unknown } = { code: null };
+    const originalExit = process.exit;
+    process.exit = (code) => {
+      exitSpy.code = code;
+      throw new Error('exit');
+    };
+    try {
+      writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'x', scripts: {} }));
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        expect(() => main(['--name', '!!!', '--identifier', 'com.example.bad'])).toThrow();
+        expect(exitSpy.code).toBe(1);
+      } finally {
+        process.chdir(cwd);
+      }
+      expect(existsSync(join(dir, 'src-tauri'))).toBe(false);
+    } finally {
+      process.exit = originalExit;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('exits(1) for a --name containing an embedded double quote', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-'));
+    const exitSpy: { code: unknown } = { code: null };
+    const originalExit = process.exit;
+    process.exit = (code) => {
+      exitSpy.code = code;
+      throw new Error('exit');
+    };
+    try {
+      writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'x', scripts: {} }));
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        expect(() => main(['--name', 'My "App"', '--identifier', 'com.example.quoted'])).toThrow();
+        expect(exitSpy.code).toBe(1);
+      } finally {
+        process.chdir(cwd);
+      }
+      expect(existsSync(join(dir, 'src-tauri'))).toBe(false);
+    } finally {
+      process.exit = originalExit;
       rmSync(dir, { recursive: true, force: true });
     }
   });
