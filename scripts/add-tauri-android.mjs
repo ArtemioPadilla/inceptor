@@ -53,12 +53,28 @@ export function main(argv = process.argv.slice(2)) {
     throw err;
   }
 
+  // Preflight: package.json must exist and be valid JSON BEFORE we write
+  // anything to disk — mirrors add-tauri.mjs's own preflight (see its
+  // comment around the existsSync(pkgPath) check). Without this, a missing
+  // or unparseable package.json would throw only after tauri.conf.json had
+  // already been patched, leaving the project half-mutated.
+  const pkgPath = join(cwd, 'package.json');
+  if (!existsSync(pkgPath)) {
+    console.error(`✗ No se encontró ${pkgPath}. Ejecuta este script desde la raíz de un proyecto Node.`);
+    process.exit(1);
+  }
+  let pkg;
+  try {
+    pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+  } catch (err) {
+    console.error(`✗ ${pkgPath} no es JSON válido: ${err.message}`);
+    process.exit(1);
+  }
+
   const { config, warning } = patchAndroidConfig(existingConfig, MIN_SDK_VERSION);
   if (warning) console.warn(`⚠ ${warning}`);
   writeFileSync(join(cwd, 'src-tauri/tauri.conf.json'), JSON.stringify(config, null, 2) + '\n');
 
-  const pkgPath = join(cwd, 'package.json');
-  const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
   pkg.scripts = pkg.scripts || {};
   pkg.scripts['tauri:android:init'] = pkg.scripts['tauri:android:init'] || 'tauri android init';
   pkg.scripts['tauri:android:dev'] = pkg.scripts['tauri:android:dev'] || 'tauri android dev';

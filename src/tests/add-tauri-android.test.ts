@@ -140,4 +140,35 @@ describe('add-tauri-android CLI (end-to-end)', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('exits 1 and leaves tauri.conf.json byte-for-byte unchanged when package.json is missing', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-android-'));
+    const originalExit = process.exit;
+    let exitCode = null;
+    process.exit = (code) => {
+      exitCode = code;
+      throw new Error('exit');
+    };
+    try {
+      mkdirSync(join(dir, 'src-tauri'), { recursive: true });
+      writeFileSync(join(dir, 'src-tauri/tauri.conf.json'), JSON.stringify(SAMPLE_DESKTOP_CONFIG, null, 2));
+      // deliberately no package.json written in `dir`
+      const before = readFileSync(join(dir, 'src-tauri/tauri.conf.json'), 'utf8');
+
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        expect(() => main([])).toThrow();
+      } finally {
+        process.chdir(cwd);
+      }
+      expect(exitCode).toBe(1);
+
+      const after = readFileSync(join(dir, 'src-tauri/tauri.conf.json'), 'utf8');
+      expect(after).toBe(before);
+    } finally {
+      process.exit = originalExit;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
