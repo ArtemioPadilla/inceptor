@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal default capability set for the __NAME__ desktop window — a plain window only. Extend deliberately (see Tauri's capabilities docs) if this project needs shell, filesystem, or tray access.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}
