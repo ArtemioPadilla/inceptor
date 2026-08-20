@@ -60,7 +60,7 @@ export function mergePackageJson(existing, snippet) {
 
   merged.devDependencies = merged.devDependencies || {};
   for (const [k, v] of Object.entries(snippet.devDependencies || {})) {
-    if (merged.devDependencies[k] && merged.devDependencies[k] !== v) {
+    if (Object.hasOwn(merged.devDependencies, k) && merged.devDependencies[k] !== v) {
       warnings.push(
         `devDependency "${k}" already set to "${merged.devDependencies[k]}", leaving as-is (snippet wanted "${v}")`,
       );
@@ -71,7 +71,7 @@ export function mergePackageJson(existing, snippet) {
 
   merged.scripts = merged.scripts || {};
   for (const [k, v] of Object.entries(snippet.scripts || {})) {
-    if (merged.scripts[k] && merged.scripts[k] !== v) {
+    if (Object.hasOwn(merged.scripts, k) && merged.scripts[k] !== v) {
       warnings.push(
         `script "${k}" already set to "${merged.scripts[k]}", leaving as-is (snippet wanted "${v}")`,
       );

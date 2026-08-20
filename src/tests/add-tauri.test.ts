@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -130,6 +130,20 @@ describe('mergePackageJson', () => {
     mergePackageJson(existing, snippet);
     expect(existing.devDependencies).toEqual({});
   });
+
+  it('overwrites an existing empty-string value without a false "conflict" warning', () => {
+    // Object.hasOwn, not truthiness — an existing key set to '' is still a
+    // real, present key. A truthiness check (`merged.scripts[k] && ...`)
+    // would treat '' as "not present" and silently overwrite it with no
+    // warning, which is the wrong failure mode for a tool whose whole job
+    // is "never silently clobber what's already there."
+    const existing = { scripts: { 'tauri:dev': '' }, devDependencies: { '@tauri-apps/cli': '' } };
+    const snippet = { devDependencies: { '@tauri-apps/cli': '^2' }, scripts: { 'tauri:dev': 'tauri dev' } };
+    const { merged, warnings } = mergePackageJson(existing, snippet);
+    expect(merged.scripts['tauri:dev']).toBe('');
+    expect(merged.devDependencies['@tauri-apps/cli']).toBe('');
+    expect(warnings).toHaveLength(2);
+  });
 });
 
 describe('appendGitignoreSnippet', () => {
@@ -184,6 +198,43 @@ describe('add-tauri CLI (end-to-end)', () => {
       const gitignore = readFileSync(join(dir, '.gitignore'), 'utf8');
       expect(gitignore).toContain('node_modules/');
       expect(gitignore).toContain('src-tauri/target/');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('leaves no unsubstituted __PLACEHOLDER__ token in any generated src-tauri/ file', () => {
+    // Regression guard: if a future template file adds a new __TOKEN__ but
+    // the generator's `vars` object isn't updated to match, the token would
+    // silently survive into generated output (e.g. a literal `__NAME__` in
+    // a real project's Cargo.toml) instead of failing loudly. Walking the
+    // real generated tree catches that class of bug at the source, not just
+    // for the four tokens this test happens to know about today.
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-'));
+    try {
+      writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'x', scripts: {} }));
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        main(['--name', 'Placeholder Check App', '--identifier', 'com.example.placeholdercheck']);
+      } finally {
+        process.chdir(cwd);
+      }
+
+      const walk = (d: string): string[] => {
+        const out: string[] = [];
+        for (const entry of readdirSync(d)) {
+          const full = join(d, entry);
+          out.push(...(statSync(full).isDirectory() ? walk(full) : [full]));
+        }
+        return out;
+      };
+      const files = walk(join(dir, 'src-tauri'));
+      expect(files.length).toBeGreaterThan(0);
+      for (const file of files) {
+        const text = readFileSync(file, 'utf8');
+        expect(text, `${file} still contains an unsubstituted placeholder`).not.toMatch(/__[A-Z_]+__/);
+      }
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
