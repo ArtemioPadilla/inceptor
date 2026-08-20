@@ -499,6 +499,37 @@ gap, not a component-count one.
 - [x] **Citation** component — `CitationRef`/`CitationList`, source-attribution
   for AI answers, wired into `ShowcaseAI.tsx` (#242)
 
+## Epic 29a — Desktop packaging via Tauri (opt-in)
+
+An Inceptor-derived project can wrap its static build in a real desktop
+app (Windows/macOS/Linux) without every project paying for Rust/Tauri
+weight by default. Per `docs/POSITIONING.md` §4, this is a layer-in
+command, not an init-time picker option.
+
+- [x] `scripts/add-tauri.mjs` generator + `templates/tauri-desktop/`
+  scaffold — merges into an existing project's `package.json`/`.gitignore`
+  rather than creating a new project (unlike `scripts/init.mjs`)
+- [x] Minimal Tauri v2 capabilities (`core:default` only) — nothing
+  granted beyond a plain window until a project deliberately extends it
+- [x] `docs/runbooks/tauri-desktop.md` — copied into every project that
+  runs the generator, covers dev workflow, the cross-origin WebView
+  gotcha, and what's deliberately NOT included (signing, auto-update,
+  store distribution)
+- [x] `.github/workflows/tauri-desktop.yml` — on-demand (`workflow_dispatch`
+  only) build verification across all three desktop OSes, zero secrets,
+  zero impact on normal push/PR CI
+
+**Design spec:** `docs/superpowers/specs/2026-08-20-tauri-desktop-design.md`
+
+## Epic 29b — Mobile packaging via Tauri (iOS/Android) — not yet started
+
+Follow-up to Epic 29a. Needs its own spec: store accounts, code signing,
+and (for iOS) a Mac runner + Apple Developer account are per-project,
+human-provisioned prerequisites this template can document but can't
+provision. See the sibling `watchboard` repo's
+`docs/superpowers/plans/2026-08-19-tauri-android-play-store.md` for a
+worked example of the credential/signing/CI shape this will need.
+
 ---
 
 ## Status legend
