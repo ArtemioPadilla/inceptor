@@ -522,7 +522,7 @@ command, not an init-time picker option.
 
 **Design spec:** `docs/superpowers/specs/2026-08-20-tauri-desktop-design.md`
 
-## Epic 29b — Mobile packaging via Tauri, Android — ✅ shipped (#TODO-PR)
+## Epic 29b — Mobile packaging via Tauri, Android — ✅ shipped (#292)
 
 Additive to Epic 29a — Android targets share the same `src-tauri/` Cargo
 project the desktop scaffold creates. Unlike desktop, "ship unsigned" was
@@ -533,14 +533,14 @@ not optional disclosure.
 - [x] `scripts/add-tauri-android.mjs` — requires `add-tauri.mjs` to have
   already run; reads the existing `identifier` back out rather than
   re-prompting (a Play Store `packageName` locks in permanently at first
-  upload) (#TODO-PR)
+  upload) (#292)
 - [x] `docs/runbooks/tauri-android.md` — copied into every project that
   runs the generator, includes the full signing/Play Console setup
-  walkthrough (#TODO-PR)
+  walkthrough (#292)
 - [x] `.github/workflows/tauri-android.yml` — `workflow_dispatch` for
   build verification (never uploads); a `v*` tag push triggers the real
   signed release, failing loudly if any of 5 required secrets are unset
-  (#TODO-PR)
+  (#292)
 - [ ] *(human-only, tracked but not "shippable" in the code sense)* One-time
   keystore generation + Play Console service account setup — see the
   runbook; this repo's own Play Store release (if any) needs this done
