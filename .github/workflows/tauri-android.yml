@@ -144,7 +144,10 @@ jobs:
         id: tauri-identifier
         run: |
           ID=$(jq -r .identifier src-tauri/tauri.conf.json)
-          [ -n "$ID" ] && [ "$ID" != "null" ] || { echo "::error::Could not read identifier from src-tauri/tauri.conf.json"; exit 1; }
+          if [ -z "$ID" ] || [ "$ID" = "null" ]; then
+            echo "::error::Could not read identifier from src-tauri/tauri.conf.json"
+            exit 1
+          fi
           echo "identifier=$ID" >> "$GITHUB_OUTPUT"
 
       - name: Initialise Tauri Android project
