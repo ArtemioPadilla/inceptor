@@ -522,14 +522,38 @@ command, not an init-time picker option.
 
 **Design spec:** `docs/superpowers/specs/2026-08-20-tauri-desktop-design.md`
 
-## Epic 29b — Mobile packaging via Tauri (iOS/Android) — not yet started
+## Epic 29b — Mobile packaging via Tauri, Android — ✅ shipped (#292)
 
-Follow-up to Epic 29a. Needs its own spec: store accounts, code signing,
-and (for iOS) a Mac runner + Apple Developer account are per-project,
-human-provisioned prerequisites this template can document but can't
-provision. See the sibling `watchboard` repo's
-`docs/superpowers/plans/2026-08-19-tauri-android-play-store.md` for a
-worked example of the credential/signing/CI shape this will need.
+Additive to Epic 29a — Android targets share the same `src-tauri/` Cargo
+project the desktop scaffold creates. Unlike desktop, "ship unsigned" was
+not viable here (Google Play rejects unsigned uploads outright), so the
+signing/credential setup is a required, explicitly human-only follow-up,
+not optional disclosure.
+
+- [x] `scripts/add-tauri-android.mjs` — requires `add-tauri.mjs` to have
+  already run; reads the existing `identifier` back out rather than
+  re-prompting (a Play Store `packageName` locks in permanently at first
+  upload) (#292)
+- [x] `docs/runbooks/tauri-android.md` — copied into every project that
+  runs the generator, includes the full signing/Play Console setup
+  walkthrough (#292)
+- [x] `.github/workflows/tauri-android.yml` — `workflow_dispatch` for
+  build verification (never uploads); a `v*` tag push triggers the real
+  signed release, failing loudly if any of 5 required secrets are unset
+  (#292)
+- [ ] *(human-only, tracked but not "shippable" in the code sense)* One-time
+  keystore generation + Play Console service account setup — see the
+  runbook; this repo's own Play Store release (if any) needs this done
+  once by a human before `tauri-android.yml`'s tag-push path can succeed
+
+**Design spec:** `docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md`
+
+## Epic 29c — iOS packaging via Tauri — not yet started
+
+Follow-up to Epic 29b. Needs a Mac CI runner, a $99/year Apple Developer
+Program membership, and a materially different signing/provisioning flow
+(Xcode-based, not keytool/jarsigner) — deferred for the same reason the
+sibling `watchboard` repo's reference plan deferred it.
 
 ---
 

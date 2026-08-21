@@ -40,6 +40,8 @@ Two interchangeable archetypes — **`server-node/`** (Hono, reuses the frontend
 
 `npm run add-tauri` layers an opt-in Tauri v2 desktop shell (Windows/macOS/Linux) into your project — nothing is installed until you run it. See [the desktop runbook](./docs/runbooks/tauri-desktop.md).
 
+`npm run add-tauri-android` layers an opt-in Tauri v2 Android target onto that same project (build/sign/upload to Play's internal track via CI). See [the Android runbook](./docs/runbooks/tauri-android.md).
+
 ### Explore it live
 
 - **[Gallery](https://artemiop.com/inceptor/gallery/)** — every component rendered live
