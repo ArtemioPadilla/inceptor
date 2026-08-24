@@ -61,7 +61,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "idb-keyval": "^6.2.5",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.33.0",
     "motion": "^12.40.0",
     "nanostores": "^1.4.2",
     "react": "^19.2.7",
