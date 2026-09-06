@@ -1,26 +1,28 @@
 # Lessons log
 
-A running log of non-obvious lessons learned while building Inceptor — the
-kind of thing that should change how we work, not just a changelog.
-
-`centinela` appends an entry here when it rejects the same issue twice (the
-double-reject trigger): the second rejection means the first fix diagnosis was
-wrong, which is exactly the signal worth capturing.
-
-**Format:** newest first. Each entry: date · one-line lesson · why it bit us ·
-the rule we adopted.
+Registro de lecciones no obvias aprendidas durante la migración de travel-plan
+a Inceptor. Mismo formato que `docs/lessons.md` de Inceptor: lo más nuevo
+arriba; cada entrada = fecha · lección en una línea · por qué nos mordió · la
+regla que adoptamos. `centinela` añade una entrada cuando rechaza el mismo
+issue dos veces.
 
 ---
 
-## 2026-06-01 · `astro check` is stricter than `astro build`
+## 2026-09-06 · El subset "lean" de `create-inceptor-app` no compila solo
 
-`astro build` tolerated island imports written with a `.tsx` extension; `astro
-check` (which CI runs via `npm run check`) rejected them with `ts(5097)`. A
-"build clean" claim that only ran build/tsc/test missed it.
+`node scripts/init.mjs --archetype static` genera 18 componentes de `ui/`,
+pero `data-table.tsx` importa `action-bar`, `checkbox`, `download-trigger`,
+`empty-state`, `error-state`, `field-type/display`, `lib/use-listing` y
+`lib/field-type`, que el init no copia. Además deja
+`ignoreDeprecations: "6.0"` en `tsconfig.json` mientras fija
+`typescript ^5.6`, y `npm install` falla con `Cannot read properties of null
+(reading 'edgesOut')` hasta usar `--legacy-peer-deps`. La afirmación
+"Verificado: el proyecto generado pasa `npm run check`" del
+`DX-IMPROVEMENT-PLAN.md` quedó obsoleta tras los Epics 23–24.
 
-**Rule:** validate with the full `npm run check` (which includes `check:astro`)
-before claiming green — never just the sub-commands. Island imports in `.astro`
-pages are extensionless.
+**Regla:** travel-plan v3 parte del `src/` completo de Inceptor con su
+`package.json` + `package-lock.json` (que sí pasan `npm ci`), y se poda
+después. Abrir issue upstream en Inceptor con estos tres hallazgos.
 
 ---
 
