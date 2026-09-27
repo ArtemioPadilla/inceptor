@@ -81,6 +81,14 @@ export function main(argv = process.argv.slice(2)) {
     'tauri:android:init': 'tauri android init',
     'tauri:android:dev': 'tauri android dev',
     'tauri:android:build': 'tauri android build --aab',
+    // APK path (installable without Google Play). The release APK comes
+    // out UNSIGNED (app-universal-release-unsigned.apk) and must be
+    // apksigner-signed before a device will install it; the debug APK is
+    // signed with the Android debug key, so it is directly installable
+    // for testing. See docs/runbooks/tauri-android.md → "Installable APK
+    // without Google Play".
+    'tauri:android:apk': 'tauri android build --apk',
+    'tauri:android:apk:debug': 'tauri android build --apk --debug',
   };
   for (const [key, value] of Object.entries(wantedScripts)) {
     if (Object.hasOwn(pkg.scripts, key) && pkg.scripts[key] !== value) {
