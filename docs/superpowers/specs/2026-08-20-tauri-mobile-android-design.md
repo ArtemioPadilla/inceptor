@@ -261,7 +261,7 @@ deliverable, next to — not instead of — the Play-bound AAB:
 
 - Tauri CLI `tauri android build` accepts `--apk`, `--aab` and `--debug`
   (`crates/tauri-cli/src/mobile/android/build.rs`, `Options.debug`); with
-  neither format flag it defaults to APK.
+  neither format flag it builds both an APK and an AAB.
 - The release APK's filename is **not stable**: cargo-mobile2's
   `Profile::Release.suffixes()` is `["release", "release-unsigned"]` and the
   CLI returns whichever exists. With no `signingConfig` in the generated

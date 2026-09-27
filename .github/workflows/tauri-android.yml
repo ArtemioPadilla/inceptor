@@ -407,6 +407,31 @@ jobs:
         if: always() && steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: shred -u /tmp/release.jks 2>/dev/null || rm -f /tmp/release.jks
 
+      - name: Stage signed release assets
+        # One directory with human-friendly names for both the CI archive
+        # artifact and the GitHub Release. Runs BEFORE the optional Play
+        # upload on purpose: a Play API failure (outage, duplicate
+        # versionCode, unreviewed listing) must not prevent the signed
+        # APK/AAB from reaching the `release` job. The AAB is COPIED (the
+        # Play step below still consumes it from its original path).
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          AAB_PATH: ${{ steps.sign.outputs.aab_path }}
+          ASSET_STEM: ${{ steps.tauri-identifier.outputs.asset_stem }}
+        run: |
+          OUT_DIR="$RUNNER_TEMP/release-assets"
+          cp "$AAB_PATH" "$OUT_DIR/${ASSET_STEM}-android.aab"
+          (cd "$OUT_DIR" && sha256sum ./*.apk ./*.aab | tee SHA256SUMS.txt)
+
+      - name: Upload signed release assets (CI archive + hand-off to the release job)
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: tauri-android-signed
+          path: ${{ runner.temp }}/release-assets/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Write Play service account credentials to a temp file
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && steps.secrets.outputs.play == 'true'
         run: |
@@ -432,28 +457,6 @@ jobs:
         # cleanup can't be skipped by a gating bug.
         if: always() && steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: rm -f /tmp/play-service-account.json
-
-      - name: Stage signed release assets
-        # One directory with human-friendly names for both the CI archive
-        # artifact and the GitHub Release. The AAB is COPIED (the Play step
-        # above already consumed it from its original path).
-        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        env:
-          AAB_PATH: ${{ steps.sign.outputs.aab_path }}
-          ASSET_STEM: ${{ steps.tauri-identifier.outputs.asset_stem }}
-        run: |
-          OUT_DIR="$RUNNER_TEMP/release-assets"
-          cp "$AAB_PATH" "$OUT_DIR/${ASSET_STEM}-android.aab"
-          (cd "$OUT_DIR" && sha256sum ./*.apk ./*.aab | tee SHA256SUMS.txt)
-
-      - name: Upload signed release assets (CI archive + hand-off to the release job)
-        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: tauri-android-signed
-          path: ${{ runner.temp }}/release-assets/
-          if-no-files-found: error
-          retention-days: 14
 
   release:
     # Separate job on purpose: creating a GitHub Release needs

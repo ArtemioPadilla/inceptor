@@ -103,8 +103,10 @@ The AAB/Play path is unchanged and still runs alongside; this is additive.
 
 ```bash
 gh workflow run tauri-android.yml --ref main
-gh run watch
-gh run download --name tauri-android-debug-apk
+# Non-interactive: pin the run id so this also works from a script/CI shell
+RUN_ID=$(gh run list --workflow tauri-android.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN_ID"
+gh run download "$RUN_ID" --name tauri-android-debug-apk
 ```
 
 Every `workflow_dispatch` run uploads two APK artifacts (7-day retention),
