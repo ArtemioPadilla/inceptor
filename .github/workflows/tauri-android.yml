@@ -1,17 +1,26 @@
 name: Tauri Android build/sign/upload
 
-# workflow_dispatch: build verification only, never uploads.
-# push tags v[0-9]*: the real release path — build, sign, upload to Play's
-# internal track. A project that never tags a release never triggers an
-# upload, keeping this opt-in until actually used.
+# workflow_dispatch: build verification only, never uploads and never signs
+#   with the release key. It does publish two INSTALLABLE-for-testing run
+#   artifacts: the unsigned release APK and a debug-key-signed debug APK
+#   (the latter installs on any device with zero secrets configured).
+# push tags v[0-9]*: the real release path — build, sign, attach the signed
+#   APK + AAB to a GitHub Release for the tag, and (optionally, only when
+#   PLAY_SERVICE_ACCOUNT_JSON is set) upload the AAB to Play's internal
+#   track. A project that never tags a release never triggers a signed
+#   build, keeping this opt-in until actually used.
 # See docs/runbooks/tauri-android.md and
-# docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md.
+# docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md
+# (addendum "2026-09-27 — APK / GitHub Release path").
 on:
   workflow_dispatch:
   push:
     tags:
       - 'v[0-9]*'
 
+# Workflow default stays read-only. The one job that needs to write (the
+# `release` job that creates the GitHub Release) widens it for itself
+# only — see its own `permissions:` block below.
 permissions:
   contents: read
 
@@ -23,7 +32,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    outputs:
+      # Consumed by the `release` job so it can skip in lockstep with the
+      # opt-in guard below.
+      skip: ${{ steps.guard.outputs.skip }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
@@ -71,18 +84,32 @@ jobs:
           [ "$TAG" = "v$VER" ] || { echo "::error::Tag $TAG != v$VER from tauri.conf.json — refusing to release."; exit 1; }
 
       - name: Validate required signing secrets
+        # The four keystore secrets are REQUIRED on a tag push — without
+        # them nothing can be signed and there is nothing to release.
+        # PLAY_SERVICE_ACCOUNT_JSON is OPTIONAL: the signed APK + AAB are
+        # always attached to the GitHub Release, and the Play upload is an
+        # extra step layered on top only when a Play listing exists. Since
+        # `secrets.*` can't be referenced from an `if:` directly, the
+        # decision is surfaced as the step output `play` (true/false) and
+        # every Play step below is gated on it.
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        id: secrets
         run: |
           missing=""
           [ -z "$ANDROID_KEYSTORE_BASE64" ] && missing="$missing ANDROID_KEYSTORE_BASE64"
           [ -z "$ANDROID_KEY_ALIAS" ] && missing="$missing ANDROID_KEY_ALIAS"
           [ -z "$ANDROID_KEY_PASSWORD" ] && missing="$missing ANDROID_KEY_PASSWORD"
           [ -z "$ANDROID_KEYSTORE_PASSWORD" ] && missing="$missing ANDROID_KEYSTORE_PASSWORD"
-          [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ] && missing="$missing PLAY_SERVICE_ACCOUNT_JSON"
           if [ -n "$missing" ]; then
             echo "::error::Missing required secrets for the release path:$missing"
             echo "::error::See docs/runbooks/tauri-android.md → 'Signing and Play Store release'."
             exit 1
+          fi
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON is not set — skipping the Google Play upload. The signed APK and AAB will still be attached to the GitHub Release for this tag. See docs/runbooks/tauri-android.md → 'Installable APK without Google Play'."
+            echo "play=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "play=true" >> "$GITHUB_OUTPUT"
           fi
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -107,6 +134,8 @@ jobs:
           # CURRENT minimum targetSdkVersion — re-check
           # https://developer.android.com/google/play/requirements/target-sdk
           # at execution time; this number moves on a rolling basis.
+          # build-tools;34.0.0 also provides apksigner/zipalign for the
+          # "Sign APK" step — keep BUILD_TOOLS_VERSION there in sync.
           packages: 'platform-tools platforms;android-34 platforms;android-35 build-tools;34.0.0 ndk;26.1.10909125'
 
       - name: Confirm Rust toolchain and add Android targets
@@ -132,8 +161,24 @@ jobs:
         run: npm ci
 
       - name: Generate Tauri icons
+        # The app icon (launcher icon, adaptive icon layers, splash) is
+        # generated from ONE square PNG. Downstream projects point this at
+        # their own logo through the repository VARIABLE (not secret)
+        # TAURI_ICON_SOURCE (Settings → Secrets and variables → Actions →
+        # Variables). Default: the PWA 512px icon every Inceptor project
+        # already ships. Must be a square PNG, ≥ 512px (1024px recommended:
+        # Play's listing icon and the xxxhdpi launcher tier both upscale
+        # anything smaller).
         if: steps.guard.outputs.skip != 'true'
-        run: npx tauri icon public/icons/pwa-512.png
+        env:
+          TAURI_ICON_SOURCE: ${{ vars.TAURI_ICON_SOURCE || 'public/icons/pwa-512.png' }}
+        run: |
+          if [ ! -f "$TAURI_ICON_SOURCE" ]; then
+            echo "::error::TAURI_ICON_SOURCE='$TAURI_ICON_SOURCE' does not exist. Set the repository variable TAURI_ICON_SOURCE to a square PNG (≥ 512px) committed in this repo, or add public/icons/pwa-512.png."
+            exit 1
+          fi
+          echo "Generating Tauri icons from $TAURI_ICON_SOURCE"
+          npx tauri icon "$TAURI_ICON_SOURCE"
 
       - name: Build Astro frontend
         if: steps.guard.outputs.skip != 'true'
@@ -149,6 +194,11 @@ jobs:
             exit 1
           fi
           echo "identifier=$ID" >> "$GITHUB_OUTPUT"
+          # Human-friendly file stem for release assets: <product-slug>-<version>.
+          NAME=$(jq -r '.productName // .identifier' src-tauri/tauri.conf.json \
+            | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')
+          VER=$(jq -r .version src-tauri/tauri.conf.json)
+          echo "asset_stem=${NAME:-app}-${VER}" >> "$GITHUB_OUTPUT"
 
       - name: Initialise Tauri Android project
         if: steps.guard.outputs.skip != 'true'
@@ -185,6 +235,45 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
         run: npx tauri android build --aab
 
+      - name: Build release APK (unsigned)
+        # Same release profile as the AAB, so the Rust artifacts under
+        # src-tauri/target are reused — this mostly costs a Gradle
+        # assemble. With no signingConfig wired into the generated Gradle
+        # project, AGP emits the release APK as *-unsigned.apk (Tauri's CLI
+        # resolves either `app-universal-release.apk` or
+        # `app-universal-release-unsigned.apk`, whichever exists — see
+        # cargo-mobile2's Profile::Release suffixes), which is why the
+        # locate step below matches by directory, not by exact filename.
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
+        run: npx tauri android build --apk
+
+      - name: Locate release APK
+        if: steps.guard.outputs.skip != 'true'
+        id: apk
+        run: |
+          MATCHES=$(find src-tauri/gen/android/app/build/outputs/apk -path '*/release/*' -name '*.apk')
+          COUNT=$(echo "$MATCHES" | grep -c . || true)
+          if [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected exactly one release APK under src-tauri/gen/android/app/build/outputs/apk, found $COUNT:"
+            echo "$MATCHES"
+            exit 1
+          fi
+          echo "Found release APK: $MATCHES"
+          echo "unsigned_path=$MATCHES" >> "$GITHUB_OUTPUT"
+
+      - name: Build debug APK (workflow_dispatch verification only)
+        # Signed with the Android debug key by AGP itself, so it installs
+        # on any device (`adb install`) with zero secrets configured — the
+        # "publish an installable APK with no setup" path. Debug profile
+        # means a separate Rust debug compile, hence dispatch-only: a tag
+        # push already yields a properly signed release APK.
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
+        run: npx tauri android build --apk --debug
+
       - name: Upload unsigned build artifact (workflow_dispatch verification only)
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -194,9 +283,26 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Upload unsigned release APK artifact (workflow_dispatch verification only)
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: tauri-android-unsigned-apk
+          path: ${{ steps.apk.outputs.unsigned_path }}
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload debug APK artifact (workflow_dispatch, installable for testing)
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: tauri-android-debug-apk
+          path: src-tauri/gen/android/app/build/outputs/apk/**/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
+
       # Everything below only runs on a version-tag push — never on
-      # workflow_dispatch, which stops at the unsigned-artifact upload
-      # above.
+      # workflow_dispatch, which stops at the artifact uploads above.
       - name: Decode signing keystore
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: |
@@ -238,27 +344,78 @@ jobs:
             "$AAB" "$ANDROID_KEY_ALIAS"
           echo "aab_path=$AAB" >> "$GITHUB_OUTPUT"
 
+      - name: Sign APK
+        # apksigner (not jarsigner) is REQUIRED for an installable APK:
+        # Android 11+ refuses APKs that carry only a v1 JAR signature, and
+        # apksigner produces the v2/v3 scheme. It also takes both passwords
+        # via `env:` references, so — unlike the jarsigner step above —
+        # neither password appears on the process command line.
+        # The unsigned release APK is signed in place into a new file
+        # (`--out`), leaving the unsigned original untouched.
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        id: sign-apk
+        env:
+          KEYSTORE_PATH: /tmp/release.jks
+          # Must match the build-tools;<version> package requested in the
+          # "Setup Android SDK" step above.
+          BUILD_TOOLS_VERSION: 34.0.0
+          UNSIGNED_APK: ${{ steps.apk.outputs.unsigned_path }}
+          ASSET_STEM: ${{ steps.tauri-identifier.outputs.asset_stem }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION"
+          for tool in apksigner zipalign; do
+            if [ ! -x "$BUILD_TOOLS/$tool" ]; then
+              echo "::error::$BUILD_TOOLS/$tool not found — keep BUILD_TOOLS_VERSION in sync with the 'Setup Android SDK' packages list."
+              exit 1
+            fi
+          done
+          OUT_DIR="$RUNNER_TEMP/release-assets"
+          mkdir -p "$OUT_DIR"
+          SIGNED="$OUT_DIR/${ASSET_STEM}-android.apk"
+          # apksigner must run AFTER zipalign (v2+ signatures cover the
+          # whole file). AGP already aligns release APKs; verify, and only
+          # re-align into a temp copy if that ever stops being true.
+          ALIGNED="$UNSIGNED_APK"
+          if ! "$BUILD_TOOLS/zipalign" -c -p 4 "$UNSIGNED_APK" >/dev/null 2>&1; then
+            echo "Release APK is not 4-byte aligned — running zipalign first."
+            ALIGNED="$RUNNER_TEMP/aligned-unsigned.apk"
+            "$BUILD_TOOLS/zipalign" -p -f 4 "$UNSIGNED_APK" "$ALIGNED"
+          fi
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$KEYSTORE_PATH" \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass env:ANDROID_KEYSTORE_PASSWORD \
+            --key-pass env:ANDROID_KEY_PASSWORD \
+            --out "$SIGNED" \
+            "$ALIGNED"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$SIGNED"
+          echo "Signed APK: $SIGNED"
+          echo "apk_path=$SIGNED" >> "$GITHUB_OUTPUT"
+
       - name: Clean up decoded signing keystore
-        # A dedicated step (not the tail of "Sign AAB") because run: steps
-        # default to `bash -eo pipefail` — if jarsigner itself failed,
-        # "Sign AAB" would abort before ever reaching an in-step cleanup
-        # line, leaving the decoded keystore behind at /tmp/release.jks.
-        # always() ensures this runs whether or not signing succeeded. The
-        # path is a hardcoded literal (not a step output) so cleanup does
-        # not depend on the write step having succeeded far enough to
-        # emit one.
+        # A dedicated step (not the tail of "Sign AAB"/"Sign APK") because
+        # run: steps default to `bash -eo pipefail` — if a signer itself
+        # failed, the signing step would abort before ever reaching an
+        # in-step cleanup line, leaving the decoded keystore behind at
+        # /tmp/release.jks. always() ensures this runs whether or not
+        # signing succeeded. The path is a hardcoded literal (not a step
+        # output) so cleanup does not depend on the write step having
+        # succeeded far enough to emit one.
         if: always() && steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: shred -u /tmp/release.jks 2>/dev/null || rm -f /tmp/release.jks
 
       - name: Write Play service account credentials to a temp file
-        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && steps.secrets.outputs.play == 'true'
         run: |
           (umask 077; printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > /tmp/play-service-account.json)
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
       - name: Upload to Play Store internal track
-        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && steps.secrets.outputs.play == 'true'
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJson: /tmp/play-service-account.json
@@ -270,14 +427,67 @@ jobs:
       - name: Clean up Play service account credentials file
         # Fixed, predictable path (not a step output) so cleanup doesn't
         # depend on the write step having succeeded far enough to emit one.
+        # Not gated on the `play` output on purpose: `rm -f` of a file that
+        # was never written is a harmless no-op, and an unconditional
+        # cleanup can't be skipped by a gating bug.
         if: always() && steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: rm -f /tmp/play-service-account.json
 
-      - name: Upload signed AAB artifact (CI archive)
+      - name: Stage signed release assets
+        # One directory with human-friendly names for both the CI archive
+        # artifact and the GitHub Release. The AAB is COPIED (the Play step
+        # above already consumed it from its original path).
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          AAB_PATH: ${{ steps.sign.outputs.aab_path }}
+          ASSET_STEM: ${{ steps.tauri-identifier.outputs.asset_stem }}
+        run: |
+          OUT_DIR="$RUNNER_TEMP/release-assets"
+          cp "$AAB_PATH" "$OUT_DIR/${ASSET_STEM}-android.aab"
+          (cd "$OUT_DIR" && sha256sum ./*.apk ./*.aab | tee SHA256SUMS.txt)
+
+      - name: Upload signed release assets (CI archive + hand-off to the release job)
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: tauri-android-signed-aab
-          path: ${{ steps.sign.outputs.aab_path }}
+          name: tauri-android-signed
+          path: ${{ runner.temp }}/release-assets/
           if-no-files-found: error
           retention-days: 14
+
+  release:
+    # Separate job on purpose: creating a GitHub Release needs
+    # `contents: write`, and this is the ONLY place that token scope is
+    # granted. The `build` job — which handles the keystore, the Play
+    # credentials, npm ci and every third-party toolchain action — keeps
+    # the workflow's read-only default. Widening `permissions:` at the
+    # workflow level would hand a write token to all of that.
+    needs: build
+    if: needs.build.outputs.skip != 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download signed release assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: tauri-android-signed
+          path: release-assets
+
+      - name: List release assets
+        run: ls -la release-assets
+
+      - name: Attach signed APK and AAB to the GitHub Release for this tag
+        # Creates the Release if the tag has none yet, otherwise uploads
+        # onto the existing one. The .apk is the "install it without Google
+        # Play" deliverable (adb install / sideload); the .aab is for anyone
+        # uploading to Play by hand.
+        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
+        with:
+          files: |
+            release-assets/*.apk
+            release-assets/*.aab
+            release-assets/SHA256SUMS.txt
+          fail_on_unmatched_files: true
+          generate_release_notes: true
