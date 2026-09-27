@@ -842,6 +842,24 @@ git commit -m "docs(roadmap): update Epic 29b (Android shipped) + add Epic 29c (
 
 ---
 
+### Task 7 (added 2026-09-27): APK / GitHub Release path — ✅ done
+
+**Spec:** the design spec's addendum "2026-09-27 — APK / GitHub Release path".
+
+**Files:**
+- Modify: `scripts/add-tauri-android.mjs` (+ `tauri:android:apk`, `tauri:android:apk:debug`)
+- Modify: `.github/workflows/tauri-android.yml`
+- Modify: `docs/runbooks/tauri-android.md`
+- Test: `src/tests/add-tauri-android.test.ts`, `src/tests/workflow-tauri-android.test.ts`
+
+- [x] **Step 1: Generator scripts + tests** — two new npm scripts, existing merge/warning semantics preserved and now covered by a dedicated test.
+- [x] **Step 2: Workflow** — `TAURI_ICON_SOURCE` via `vars` with `::error` on a missing file; release APK built after the AAB and located with `find` + count check; `workflow_dispatch` uploads unsigned release APK + installable debug APK; tag push signs the APK with `apksigner` (`env:` passwords, `verify` after), attaches signed APK + AAB (+ `SHA256SUMS.txt`) to a GitHub Release from a separate `contents: write` job; `PLAY_SERVICE_ACCOUNT_JSON` optional via a `play` step output.
+- [x] **Step 3: actionlint + unpinned-ref scan** run locally against the same pinned actionlint 1.7.12 binary `ci.yml` uses; `softprops/action-gh-release` and `actions/download-artifact` SHA-pinned from `git ls-remote`.
+- [x] **Step 4: Runbook** — "Installable APK without Google Play" section, secrets table with the Play secret marked optional, `TAURI_ICON_SOURCE` documented.
+- [ ] *(HUMAN, NOT AGENT-EXECUTABLE)* **Step 5: First real run** — `gh workflow run tauri-android.yml` and confirm the `tauri-android-debug-apk` artifact installs on a device; then a `v*` tag with only the four `ANDROID_*` secrets set and confirm the GitHub Release carries an installable `.apk`. Same structural limit as Task 6: cannot be verified without a device and real credentials.
+
+---
+
 ## Self-Review
 
 **1. Spec coverage:** Architecture (generator reads back identifier, patches `bundle.android`) → Task 1. Runbook → Task 2. Dual-trigger CI with secret validation → Task 3. Human-gated tasks named explicitly, matching the spec's own section → Tasks 5–6. ROADMAP/Epic 29c → Task 4. The spec's toolchain-pin caveat ("carried over as a starting point, not verified fresh") is reflected in both Global Constraints and Task 6's real-run requirement.

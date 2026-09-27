@@ -541,10 +541,18 @@ not optional disclosure.
   build verification (never uploads); a `v*` tag push triggers the real
   signed release, failing loudly if any of 5 required secrets are unset
   (#292)
+- [x] *(2026-09-27 follow-up)* Installable APK without Google Play —
+  `tauri:android:apk[:debug]` scripts; `workflow_dispatch` uploads an
+  installable debug APK with zero secrets; a `v*` tag signs the release
+  APK with `apksigner` and attaches APK + AAB to a GitHub Release from a
+  separate `contents: write` job; `PLAY_SERVICE_ACCOUNT_JSON` is now
+  optional (Play upload skipped with a `::notice` when unset); own icon via
+  the `TAURI_ICON_SOURCE` repository variable — see the spec's addendum
 - [ ] *(human-only, tracked but not "shippable" in the code sense)* One-time
-  keystore generation + Play Console service account setup — see the
-  runbook; this repo's own Play Store release (if any) needs this done
-  once by a human before `tauri-android.yml`'s tag-push path can succeed
+  keystore generation (+ Play Console service account setup, only if a
+  Play listing is wanted) — see the runbook; this repo's own signed
+  release (if any) needs the keystore done once by a human before
+  `tauri-android.yml`'s tag-push path can succeed
 
 **Design spec:** `docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md`
 
