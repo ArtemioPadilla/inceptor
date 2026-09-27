@@ -22,6 +22,15 @@ describe('templates/tauri-desktop scaffold', () => {
     expect(existsSync(join(TEMPLATE_ROOT, rel))).toBe(true);
   });
 
+  it('src/lib.rs marks run() as the mobile entry point (Android/iOS builds need it)', () => {
+    const rs = readFileSync(join(TEMPLATE_ROOT, 'src-tauri/src/lib.rs'), 'utf8');
+    // Regression guard: Epic 29b shipped without this attribute, so every
+    // downstream `tauri android build` failed with "does not include
+    // required runtime symbols" (found while adopting the scaffold in
+    // TradePilot, 2026-09-27).
+    expect(rs).toMatch(/#\[cfg_attr\(mobile,\s*tauri::mobile_entry_point\)\]\s*\n\s*pub fn run\(\)/);
+  });
+
   it('capabilities/default.json is valid JSON with only core:default', () => {
     const json = JSON.parse(
       readFileSync(join(TEMPLATE_ROOT, 'src-tauri/capabilities/default.json'), 'utf8'),
