@@ -3,7 +3,7 @@ name = "__SLUG__"
 version = "0.1.0"
 description = "__NAME__ — desktop shell (Tauri)"
 edition = "2021"
-rust-version = "1.77"
+rust-version = "1.77.2"
 
 [lib]
 name = "__LIB_NAME__"
