@@ -118,6 +118,22 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
+      - name: Free runner disk space
+        # Four Android ABIs x (release + debug) Rust builds need ~20 GB of
+        # scratch under src-tauri/target; ubuntu-latest ships with ~14 GB
+        # free. The first real run (TradePilot, 2026-09-27) built the AAB
+        # and the release APK, then died in the debug build with "No space
+        # left on device" and lost both artifacts. Drop toolchains this job
+        # never uses (dotnet, Haskell, Swift, CodeQL, boost, docker images).
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/share/swift \
+            /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/local/share/powershell \
+            /usr/lib/google-cloud-sdk 2>/dev/null || true
+          sudo docker image prune --all --force >/dev/null 2>&1 || true
+          df -h / | tail -1
+
       - name: Setup Java 17
         if: steps.guard.outputs.skip != 'true'
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -151,7 +167,9 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            src-tauri/target
+            # src-tauri/target is deliberately NOT cached: four ABIs of
+            # release artifacts exceed the 10 GB per-entry cache limit, so the
+            # save step only ever wasted minutes; the registry is what pays off.
           key: ${{ runner.os }}-cargo-android-${{ hashFiles('src-tauri/Cargo.lock', 'src-tauri/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-android-
@@ -263,17 +281,9 @@ jobs:
           echo "Found release APK: $MATCHES"
           echo "unsigned_path=$MATCHES" >> "$GITHUB_OUTPUT"
 
-      - name: Build debug APK (workflow_dispatch verification only)
-        # Signed with the Android debug key by AGP itself, so it installs
-        # on any device (`adb install`) with zero secrets configured — the
-        # "publish an installable APK with no setup" path. Debug profile
-        # means a separate Rust debug compile, hence dispatch-only: a tag
-        # push already yields a properly signed release APK.
-        if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
-        env:
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
-        run: npx tauri android build --apk --debug
-
+      # Upload the release artifacts BEFORE the debug build: it is the one
+      # step that can still fail for resource reasons, and a failure there
+      # must not discard an AAB/APK that already built fine.
       - name: Upload unsigned build artifact (workflow_dispatch verification only)
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -291,6 +301,23 @@ jobs:
           path: ${{ steps.apk.outputs.unsigned_path }}
           if-no-files-found: error
           retention-days: 7
+
+      - name: Build debug APK (workflow_dispatch verification only)
+        # Signed with the Android debug key by AGP itself, so it installs
+        # on any device (`adb install`) with zero secrets configured — the
+        # "publish an installable APK with no setup" path. Debug profile
+        # means a separate Rust debug compile, hence dispatch-only: a tag
+        # push already yields a properly signed release APK.
+        if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
+          # Full DWARF for four ABIs is what filled the disk; line tables keep
+          # panics readable at a fraction of the size.
+          CARGO_PROFILE_DEV_DEBUG: line-tables-only
+        # arm64 only: this APK exists to be sideloaded on a test phone, and
+        # every Android device sold in years is arm64. One ABI = 1/4 of the
+        # compile time and disk of the release builds above.
+        run: npx tauri android build --apk --debug --target aarch64
 
       - name: Upload debug APK artifact (workflow_dispatch, installable for testing)
         if: steps.guard.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'

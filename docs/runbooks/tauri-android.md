@@ -117,6 +117,11 @@ alongside the pre-existing `tauri-android-unsigned-aab`:
 | `tauri-android-debug-apk` | `tauri android build --apk --debug`, signed by Gradle with the standard Android **debug key** | **Yes**, on any device — no secrets needed |
 | `tauri-android-unsigned-apk` | `tauri android build --apk` (release profile), emitted by Gradle as `app-universal-release-unsigned.apk` | No — Android refuses unsigned APKs; sign it yourself with `apksigner` if you need a release-profile test build |
 
+The debug APK is built for **arm64 only** (every phone sold in years; an
+x86_64 emulator needs a local `tauri:android:apk:debug` run instead) with
+line-table debuginfo, so it fits the runner's disk next to the four-ABI
+release builds.
+
 The debug APK is the right thing to hand a tester today. It is **not** a
 release: it carries the debug key (so it cannot later be updated in place
 by a release-signed build — the user must uninstall first), and debug

@@ -248,3 +248,40 @@ describe('tauri-android.yml — secrets handling', () => {
     expect(cleanup).toContain('rm -f /tmp/play-service-account.json');
   });
 });
+
+describe('tauri-android.yml — runner disk budget (regression: TradePilot run 2026-09-27)', () => {
+  // The first real run built the AAB and the release APK, then died in the
+  // debug build with "No space left on device" — and because the artifact
+  // uploads came after that step, both finished binaries were discarded.
+  it('frees runner disk before any toolchain/build step', () => {
+    const free = wf.indexOf('- name: Free runner disk space');
+    expect(free).toBeGreaterThan(-1);
+    expect(free).toBeLessThan(wf.indexOf('- name: Setup Java 17'));
+    const block = wf.slice(free, wf.indexOf('- name:', free + 10));
+    expect(block).toContain('sudo rm -rf /usr/share/dotnet');
+    expect(block).toContain('docker image prune --all --force');
+  });
+
+  it('uploads the unsigned AAB and release APK BEFORE building the debug APK', () => {
+    const dbg = wf.indexOf('- name: Build debug APK');
+    expect(wf.indexOf('name: tauri-android-unsigned-aab')).toBeLessThan(dbg);
+    expect(wf.indexOf('name: tauri-android-unsigned-apk')).toBeLessThan(dbg);
+    expect(wf.indexOf('name: tauri-android-debug-apk')).toBeGreaterThan(dbg);
+  });
+
+  it('builds the debug APK for arm64 only with line-table debuginfo', () => {
+    expect(wf).toContain('run: npx tauri android build --apk --debug --target aarch64');
+    const dbg = wf.indexOf('- name: Build debug APK');
+    const block = wf.slice(dbg, wf.indexOf('- name:', dbg + 10));
+    expect(block).toContain('CARGO_PROFILE_DEV_DEBUG: line-tables-only');
+  });
+
+  it('does not put src-tauri/target in the Cargo cache (exceeds the 10 GB entry limit)', () => {
+    const cache = wf.slice(
+      wf.indexOf('- name: Cache Cargo registry'),
+      wf.indexOf('- name: Install Node deps'),
+    );
+    expect(cache).toContain('~/.cargo/registry');
+    expect(cache).not.toMatch(/^\s+src-tauri\/target\s*$/m);
+  });
+});
