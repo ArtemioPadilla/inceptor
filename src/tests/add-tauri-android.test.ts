@@ -122,9 +122,58 @@ describe('add-tauri-android CLI (end-to-end)', () => {
       expect(pkg.scripts['tauri:android:init']).toBe('tauri android init');
       expect(pkg.scripts['tauri:android:dev']).toBe('tauri android dev');
       expect(pkg.scripts['tauri:android:build']).toBe('tauri android build --aab');
+      expect(pkg.scripts['tauri:android:apk']).toBe('tauri android build --apk');
+      expect(pkg.scripts['tauri:android:apk:debug']).toBe('tauri android build --apk --debug');
+      expect(pkg.scripts.dev).toBe('astro dev'); // pre-existing scripts untouched
 
       expect(existsSync(join(dir, 'docs/runbooks/tauri-android.md'))).toBe(true);
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('warns and preserves a pre-existing, different tauri:android:apk script instead of overwriting', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'add-tauri-android-'));
+    const originalWarn = console.warn;
+    const warnings: string[] = [];
+    console.warn = (msg: string) => {
+      warnings.push(String(msg));
+    };
+    try {
+      mkdirSync(join(dir, 'src-tauri'), { recursive: true });
+      writeFileSync(join(dir, 'src-tauri/tauri.conf.json'), JSON.stringify(SAMPLE_DESKTOP_CONFIG, null, 2));
+      writeFileSync(
+        join(dir, 'package.json'),
+        JSON.stringify({
+          name: 'scratch-app',
+          scripts: {
+            'tauri:android:apk': 'tauri android build --apk --split-per-abi',
+            'tauri:android:apk:debug': 'tauri android build --apk --debug', // identical → silent no-op
+          },
+        }),
+      );
+
+      const cwd = process.cwd();
+      process.chdir(dir);
+      try {
+        main([]);
+      } finally {
+        process.chdir(cwd);
+      }
+
+      const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+      expect(pkg.scripts['tauri:android:apk']).toBe('tauri android build --apk --split-per-abi');
+      expect(pkg.scripts['tauri:android:apk:debug']).toBe('tauri android build --apk --debug');
+      // The AAB script is still added alongside the preserved custom one.
+      expect(pkg.scripts['tauri:android:build']).toBe('tauri android build --aab');
+
+      const apkWarnings = warnings.filter((w) => w.includes('"tauri:android:apk"'));
+      expect(apkWarnings).toHaveLength(1);
+      expect(apkWarnings[0]).toMatch(/leaving as-is/);
+      // Identical values never warn.
+      expect(warnings.some((w) => w.includes('"tauri:android:apk:debug"'))).toBe(false);
+    } finally {
+      console.warn = originalWarn;
       rmSync(dir, { recursive: true, force: true });
     }
   });

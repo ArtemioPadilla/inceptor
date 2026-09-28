@@ -212,3 +212,95 @@ does NOT do."
 - `ROADMAP.md`'s existing Epic 29b entry (added when Epic 29a shipped)
   gets checked off against this spec once implemented; a new Epic 29c
   line added for the deferred iOS work.
+
+---
+
+## Addendum 2026-09-27 — APK / GitHub Release path
+
+*Additive. Nothing above is rewritten; where this addendum and the original
+text disagree ("five required secrets", "unsigned is not a shippable end
+state"), this addendum is current.*
+
+### Decision
+
+The pipeline now produces an **installable APK** as a first-class
+deliverable, next to — not instead of — the Play-bound AAB:
+
+- **An APK is the deliverable when there is no Play listing yet.** The
+  original spec framed "signed AAB uploaded to Play" as the only useful end
+  state, which made the whole Android layer inert for any project that had
+  not yet done the human-gated Play Console setup (or never will: internal
+  tools, tester groups, a "download for Android" link on the project's own
+  site). An `.aab` cannot be installed on a device at all; an `.apk` can.
+- **AAB stays for Play.** Play requires AABs for new apps; that path, its
+  `jarsigner` signing and `r0adkll/upload-google-play` upload are unchanged.
+- **Play upload becomes optional; keystore signing stays required on a tag
+  push.** `PLAY_SERVICE_ACCOUNT_JSON` absent ⇒ `::notice` + Play steps
+  skipped, run stays green. The four `ANDROID_*` keystore secrets remain a
+  hard requirement on `v*` tags, because an unsigned release APK is as
+  useless as an unsigned AAB. Since `secrets.*` cannot appear in `if:`, the
+  validation step exposes a `play=true|false` output every Play step is
+  gated on.
+- **The signed APK and AAB are attached to a GitHub Release for the tag**
+  (`softprops/action-gh-release`, SHA-pinned like every other third-party
+  action here). That needs `contents: write`, which is granted **only to a
+  separate `release` job** that does nothing but download the signed
+  artifacts and publish them — the `build` job (keystore, Play credentials,
+  `npm ci`, all toolchain actions) keeps the workflow's read-only default.
+- **Zero-setup path:** `workflow_dispatch` additionally builds a
+  `--debug` APK (Gradle signs it with the Android debug key, so it installs
+  on any device) and uploads it as an artifact alongside the unsigned
+  release APK. A project with no secrets configured at all can hand a
+  tester an installable build.
+- **Own icon:** the icon source is a repository *variable*
+  (`vars.TAURI_ICON_SOURCE`, default `public/icons/pwa-512.png`), validated
+  to exist with a `::error` otherwise. Square PNG, ≥ 512 px, 1024
+  recommended.
+
+### Facts verified at implementation time (not assumed)
+
+- Tauri CLI `tauri android build` accepts `--apk`, `--aab` and `--debug`
+  (`crates/tauri-cli/src/mobile/android/build.rs`, `Options.debug`); with
+  neither format flag it builds both an APK and an AAB.
+- The release APK's filename is **not stable**: cargo-mobile2's
+  `Profile::Release.suffixes()` is `["release", "release-unsigned"]` and the
+  CLI returns whichever exists. With no `signingConfig` in the generated
+  Gradle project (the Tauri template only wires one when a
+  `keystore.properties` is present), AGP emits
+  `app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk`.
+  The workflow therefore locates the APK with `find … -path '*/release/*'
+  -name '*.apk'` plus an exactly-one count check — the same discipline as
+  the existing "Sign AAB" step — never a hardcoded filename.
+- `apksigner` (from `build-tools;34.0.0`, already installed by the SDK
+  setup step) is required for the APK: Android 11+ rejects v1-only (JAR)
+  signatures on install. It takes passwords as `env:` references, so
+  unlike the `jarsigner` AAB step no password is on the command line.
+  `zipalign -c` is checked first and alignment repaired only if needed, as
+  v2+ signatures must be applied post-alignment.
+- Pins resolved via `git ls-remote --tags` on 2026-09-27:
+  `softprops/action-gh-release` v2.0.5 =
+  `69320dbe05506a9a39fc8ae11030b214ec2d1f87`;
+  `actions/download-artifact` v8.0.1 =
+  `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c`.
+
+### What did not change
+
+Opt-in guard (`bundle.android` present or quiet skip), `tag == v<version>`
+check, `umask 077` keystore decode + `always()` shred, service-account file
+cleanup, `concurrency` without `cancel-in-progress`, identifier read back
+from `tauri.conf.json`, `minSdkVersion: 24`, the `targetSdk` patch, and
+`workflow_dispatch` never signing with the release key or publishing
+anything.
+
+### Testing added
+
+- `src/tests/add-tauri-android.test.ts` — the generator now adds
+  `tauri:android:apk` / `tauri:android:apk:debug` with the same
+  never-clobber-a-differing-script semantics.
+- `src/tests/workflow-tauri-android.test.ts` — text-level guards on the
+  workflow: every `uses:` SHA-pinned with a version comment, `contents:
+  write` present exactly once and only inside the `release` job, Play
+  steps gated on the `play` output, keystore shredded after *both* signing
+  steps, icon var + `::error`, find-based APK location, apksigner `env:`
+  passwords.
+
