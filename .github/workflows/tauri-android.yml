@@ -513,7 +513,7 @@ jobs:
         # onto the existing one. The .apk is the "install it without Google
         # Play" deliverable (adb install / sideload); the .aab is for anyone
         # uploading to Play by hand.
-        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: |
             release-assets/*.apk
