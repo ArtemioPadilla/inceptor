@@ -11,6 +11,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readdirSync } from 'node:fs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -393,6 +394,24 @@ if (archetype === 'backend-flask') {
 if (archetype === 'backend-node') {
   cpSync(join(ROOT, 'server-node'), dst('server'), { recursive: true, filter: noArtifacts });
 }
+
+// De-brand the copied backend like every other file: otherwise REPO_SLUG
+// defaults to the template repo and a generated project's feedback endpoint
+// files issues into Inceptor. (Same replacements as copy().)
+function debrandTree(rel) {
+  for (const e of readdirSync(dst(rel), { withFileTypes: true })) {
+    const child = `${rel}/${e.name}`;
+    if (e.isDirectory()) debrandTree(child);
+    else {
+      const text = readFileSync(dst(child), 'utf8');
+      const next = text
+        .replaceAll('ArtemioPadilla/inceptor', repoSlug)
+        .replaceAll('inceptor', slug);
+      if (next !== text) writeFileSync(dst(child), next);
+    }
+  }
+}
+if (backend) debrandTree('server');
 
 // The node backend reuses the frontend's Zod schemas
 // (server/src/schemas.ts imports ../../src/schemas/index).
