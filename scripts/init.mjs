@@ -136,6 +136,15 @@ copy('docs/decisions/TEMPLATE.md');
 copy('.github/workflows/ci.yml');
 
 // --- templated files ---
+const TEMPLATE_PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+const TEMPLATE_VERSIONS = { ...TEMPLATE_PKG.dependencies, ...TEMPLATE_PKG.devDependencies };
+function pick(names) {
+  return Object.fromEntries(names.map((n) => {
+    const v = TEMPLATE_VERSIONS[n];
+    if (!v) throw new Error(`init.mjs: ${n} is not a dependency of the template package.json`);
+    return [n, v];
+  }));
+}
 const backend = archetype !== 'static';
 write('package.json', JSON.stringify({
   name: slug,
@@ -152,50 +161,24 @@ write('package.json', JSON.stringify({
     test: 'vitest run',
     format: 'prettier --write .',
   },
-  dependencies: {
-    '@astrojs/check': '^0.9.9',
-    '@astrojs/react': '^5.0.6',
-    '@base-ui-components/react': '^1.0.0-rc.0',
-    '@hookform/resolvers': '^5.4.0',
-    '@nanostores/react': '^1.1.0',
-    '@tailwindcss/vite': '^4.3.0',
-    '@tanstack/query-persist-client-core': '^5.100.14',
-    '@tanstack/react-query': '^5.100.14',
-    '@tanstack/react-table': '^8.21.3',
-    '@tanstack/react-virtual': '^3.14.2',
-    astro: '^5.18.2',
-    'class-variance-authority': '^0.7.1',
-    clsx: '^2.1.1',
-    'idb-keyval': '^6.2.4',
-    'lucide-react': '^1.17.0',
-    motion: '^12.40.0',
-    nanostores: '^1.3.0',
-    react: '^19.2.7',
-    'react-day-picker': '^10.0.1',
-    'react-dom': '^19.2.7',
-    'react-hook-form': '^7.77.0',
-    recharts: '^3.8.1',
-    'tailwind-merge': '^3.6.0',
-    tailwindcss: '^4.3.0',
-    'tailwindcss-motion': '^1.1.1',
-    zod: '^4.4.3',
-  },
-  devDependencies: {
-    '@testing-library/jest-dom': '^6.9.1',
-    '@testing-library/react': '^16.3.2',
-    '@testing-library/user-event': '^14.6.1',
-    '@types/node': '^22.10.2',
-    '@types/react': '^19.2.16',
-    '@types/react-dom': '^19.2.3',
-    jsdom: '^29.1.1',
-    'npm-run-all': '^4.1.5',
-    prettier: '^3.8.3',
-    'prettier-plugin-astro': '^0.14.1',
-    // Must be TS 6: the generated tsconfig sets ignoreDeprecations: '6.0',
-    // which TS 5.x rejects (TS5103).
-    typescript: '^6.0.3',
-    vitest: '^4.1.8',
-  },
+  // Versions come from the template's own package.json so the generated
+  // project can never drift from what this repo actually builds and tests
+  // with (drift once paired TS 5 with ignoreDeprecations: '6.0' → TS5103).
+  dependencies: pick([
+    '@astrojs/check', '@astrojs/react', '@base-ui-components/react',
+    '@hookform/resolvers', '@nanostores/react', '@tailwindcss/vite',
+    '@tanstack/query-persist-client-core', '@tanstack/react-query',
+    '@tanstack/react-table', '@tanstack/react-virtual', 'astro',
+    'class-variance-authority', 'clsx', 'idb-keyval', 'lucide-react', 'motion',
+    'nanostores', 'react', 'react-day-picker', 'react-dom', 'react-hook-form',
+    'recharts', 'tailwind-merge', 'tailwindcss', 'tailwindcss-motion', 'zod',
+  ]),
+  devDependencies: pick([
+    '@testing-library/jest-dom', '@testing-library/react',
+    '@testing-library/user-event', '@types/node', '@types/react',
+    '@types/react-dom', 'jsdom', 'npm-run-all', 'prettier',
+    'prettier-plugin-astro', 'typescript', 'vitest',
+  ]),
 }, null, 2) + '\n');
 
 write('astro.config.mjs', `import { defineConfig } from 'astro/config';
