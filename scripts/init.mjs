@@ -8,8 +8,8 @@
  * layout, landing mínima), renombra/de-brandea, y deja `npm run check` verde.
  * Archetypes: static | backend-node | backend-flask.
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -23,7 +23,15 @@ const flag = (n, d) => {
 const name = flag('name', 'my-app');
 const archetype = flag('archetype', 'static');
 const out = flag('out', null);
-const slug = name.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
+// Strip diacritics before slugging so "Buró del Pueblo" → "buro-del-pueblo"
+// (not "bur-del-pueblo"): NFD splits "ó" into "o" + U+0301, which we drop.
+const slug = name
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9-]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+const ident = slug.replace(/-/g, '_');
 const repoSlug = flag('repo', `your-org/${slug}`);
 
 if (!out) {
@@ -50,20 +58,55 @@ const LIB = ['utils', 'api', 'href', 'flags', 'report-issue', 'queryClient'];
 const dst = (p) => join(out, p);
 // Copia con de-brand: reemplaza el nombre interno del scaffold por el del
 // proyecto en strings/comentarios. No-op en archivos sin referencias.
+const copied = new Set();
 function copy(rel) {
   const src = join(ROOT, rel);
   if (!existsSync(src)) return;
+  copied.add(rel);
   mkdirSync(dirname(dst(rel)), { recursive: true });
   const text = readFileSync(src, 'utf8')
     .replaceAll('the Inceptor integration of this Astro+React UI template', `the issue-driven development of the ${name} project`)
     .replaceAll('Inceptor', name)
     .replaceAll('ArtemioPadilla/inceptor', repoSlug)
+    // Inside JS identifiers (`W.__inceptor_diag`) a hyphenated slug is a
+    // syntax error, so use an identifier-safe variant there.
+    .replace(/(?<=[\w$])inceptor|inceptor(?=[\w$])/g, ident)
     .replaceAll('inceptor', slug);
   writeFileSync(dst(rel), text);
 }
 function write(rel, content) {
   mkdirSync(dirname(dst(rel)), { recursive: true });
   writeFileSync(dst(rel), content);
+}
+
+// Follow local imports (`@/…` and relative) of every copied src/ file and copy
+// whatever they pull in, so a core component that grows a new internal
+// dependency in the template (e.g. data-table → action-bar, use-listing,
+// i18n) can't silently break the generated project's type-check.
+const IMPORT_RE = /(?:from\s+|import\s*\(\s*|import\s+)['"]([^'"]+)['"]/g;
+const RESOLVE_EXTS = ['', '.ts', '.tsx', '.astro', '/index.ts', '/index.tsx'];
+function resolveLocal(spec, fromRel) {
+  let base;
+  if (spec.startsWith('@/')) base = `src/${spec.slice(2)}`;
+  else if (spec.startsWith('.')) base = posix.join(posix.dirname(fromRel), spec);
+  else return null;
+  for (const ext of RESOLVE_EXTS) {
+    const p = join(ROOT, base + ext);
+    if (existsSync(p) && statSync(p).isFile()) return base + ext;
+  }
+  return null;
+}
+function copyImportClosure() {
+  const queue = [...copied].filter((f) => f.startsWith('src/') && /\.(tsx?|astro)$/.test(f));
+  while (queue.length) {
+    const rel = queue.shift();
+    for (const [, spec] of readFileSync(join(ROOT, rel), 'utf8').matchAll(IMPORT_RE)) {
+      const dep = resolveLocal(spec, rel);
+      if (!dep || copied.has(dep) || !/\.(tsx?|astro)$/.test(dep)) continue;
+      copy(dep);
+      queue.push(dep);
+    }
+  }
 }
 
 console.log(`→ Generando ${name} (${archetype}) en ${out}…`);
@@ -80,6 +123,7 @@ copy('src/components/islands/ErrorBoundary.tsx');
 copy('src/components/islands/QueryProvider.tsx');
 copy('src/components/common/ThemeToggle.astro');
 copy('src/components/common/FeedbackFAB.astro');
+copyImportClosure();
 for (const f of ['vitest.config.ts', 'vitest.setup.ts', '.prettierrc.json', '.prettierignore', '.editorconfig', '.nvmrc']) copy(f);
 copy('.claude/agents/prometeo.md');
 copy('.claude/agents/forja.md');
@@ -127,6 +171,7 @@ write('package.json', JSON.stringify({
     motion: '^12.40.0',
     nanostores: '^1.3.0',
     react: '^19.2.7',
+    'react-day-picker': '^10.0.1',
     'react-dom': '^19.2.7',
     'react-hook-form': '^7.77.0',
     recharts: '^3.8.1',
@@ -146,7 +191,9 @@ write('package.json', JSON.stringify({
     'npm-run-all': '^4.1.5',
     prettier: '^3.8.3',
     'prettier-plugin-astro': '^0.14.1',
-    typescript: '^5.6.0',
+    // Must be TS 6: the generated tsconfig sets ignoreDeprecations: '6.0',
+    // which TS 5.x rejects (TS5103).
+    typescript: '^6.0.3',
     vitest: '^4.1.8',
   },
 }, null, 2) + '\n');
