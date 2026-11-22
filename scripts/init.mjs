@@ -2,7 +2,8 @@
 /**
  * create-inceptor-app — genera un proyecto LEAN a partir de este scaffold.
  *
- *   node scripts/init.mjs --name my-app --archetype static --out ../my-app
+ *   node scripts/init.mjs --name my-app --archetype static --out ../my-app \
+ *     [--repo owner/repo] [--lang en|es] [--site https://example.com]
  *
  * Copia un subconjunto *core* (UI ~18, lib, stores/theme, islas de infra,
  * layout, landing mínima), renombra/de-brandea, y deja `npm run check` verde.
@@ -34,9 +35,21 @@ const slug = name
   .replace(/^-+|-+$/g, '');
 const ident = slug.replace(/-/g, '_');
 const repoSlug = flag('repo', `your-org/${slug}`);
+// UI language of the generated shell (<html lang>, landing copy, FeedbackFAB).
+const lang = flag('lang', 'en');
+// Production origin (no trailing slash) → astro `site`, sitemap, robots.txt.
+const site = flag('site', null)?.replace(/\/+$/, '') ?? null;
 
 if (!out) {
   console.error('✗ Falta --out <dir>. Ej: node scripts/init.mjs --name app --archetype static --out ../app');
+  process.exit(1);
+}
+if (!['en', 'es'].includes(lang)) {
+  console.error(`✗ --lang inválido: ${lang} (usa en | es)`);
+  process.exit(1);
+}
+if (site !== null && !/^https?:\/\/[^/]+$/.test(site)) {
+  console.error(`✗ --site debe ser un origen, p.ej. https://example.com (recibido: ${site})`);
   process.exit(1);
 }
 if (!['static', 'backend-node', 'backend-flask'].includes(archetype)) {
@@ -53,7 +66,8 @@ const CORE_UI = [
   'skeleton', 'spinner', 'badge', 'separator', 'table', 'data-table', 'select',
   'dialog', 'toast', 'dropdown-menu',
 ];
-const LIB = ['utils', 'api', 'href', 'flags', 'report-issue', 'queryClient'];
+// disposer + use-client-preference back the island rules in the generated CLAUDE.md.
+const LIB = ['utils', 'api', 'href', 'flags', 'report-issue', 'queryClient', 'disposer', 'use-client-preference'];
 
 // --- helpers ---
 const dst = (p) => join(out, p);
@@ -166,7 +180,7 @@ write('package.json', JSON.stringify({
   // project can never drift from what this repo actually builds and tests
   // with (drift once paired TS 5 with ignoreDeprecations: '6.0' → TS5103).
   dependencies: pick([
-    '@astrojs/check', '@astrojs/react', '@base-ui-components/react',
+    '@astrojs/check', '@astrojs/react', '@astrojs/sitemap', '@base-ui-components/react',
     '@hookform/resolvers', '@nanostores/react', '@tailwindcss/vite',
     '@tanstack/query-persist-client-core', '@tanstack/react-query',
     '@tanstack/react-table', '@tanstack/react-virtual', 'astro',
@@ -185,12 +199,14 @@ write('package.json', JSON.stringify({
 write('astro.config.mjs', `import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 
 const BASE = process.env.ASTRO_BASE || '/';
 
 export default defineConfig({
+  site: '${site ?? 'https://example.com'}',${site ? '' : ' // TODO(agent): production origin — feeds the sitemap and public/robots.txt'}
   base: BASE,
-  integrations: [react()],
+  integrations: [react(), sitemap()],
   vite: { plugins: [tailwindcss()] },
   output: 'static',
 });
@@ -224,7 +240,7 @@ const nav: { href: string; label: string }[] = [];
       {nav.map((n) => (
         <a href={withBase(n.href)} class="rounded-md px-2 py-1 text-muted-foreground transition-colors hover:text-primary">{n.label}</a>
       ))}
-      <span class="ml-1"><ThemeToggle /></span>
+      <span class="ml-1"><ThemeToggle lang="${lang}" /></span>
     </div>
   </nav>
 </header>
@@ -236,7 +252,7 @@ import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import SiteHeader from '../components/common/SiteHeader.astro';
 import { withBase } from '../lib/href';
 interface Props { title?: string; description?: string; lang?: 'es' | 'en'; }
-const { title = '${name}', description = '', lang = 'en' } = Astro.props;
+const { title = '${name}', description = '', lang = '${lang}' } = Astro.props;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -261,6 +277,10 @@ const { title = '${name}', description = '', lang = 'en' } = Astro.props;
     <meta name="theme-color" content="#10b981" />
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
+    >${lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
     <SiteHeader />
     <slot />
     <FeedbackFAB lang={lang} />
@@ -272,16 +292,22 @@ write('src/pages/index.astro', `---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="${name}">
-  <main class="mx-auto max-w-3xl px-5 py-24 text-center">
+  <main id="main" class="mx-auto max-w-3xl px-5 py-24 text-center">
     <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground">${name}</h1>
     <p class="mt-4 text-lg text-muted-foreground">
-      Tu nuevo proyecto, listo. Edita <code class="font-mono">src/pages/index.astro</code> y empieza.
+      ${lang === 'es'
+        ? 'Tu nuevo proyecto, listo. Edita <code class="font-mono">src/pages/index.astro</code> y empieza.'
+        : 'Your new project is ready. Edit <code class="font-mono">src/pages/index.astro</code> to get started.'}
     </p>
   </main>
 </BaseLayout>
 `);
 
 write('.nvmrc', '22\n');
+// robots.txt: the deploy workflow serves under /${slug}/ by default (ASTRO_BASE).
+write('public/robots.txt', site
+  ? `User-agent: *\nAllow: /\n\n# Deploy base /${slug}/ (ASTRO_BASE in .github/workflows/deploy.yml)\nSitemap: ${site}/${slug}/sitemap-index.xml\n`
+  : `User-agent: *\nAllow: /\n\n# TODO(agent): point at the production sitemap (deploy base included), e.g.\n# Sitemap: https://example.com/${slug}/sitemap-index.xml\n`);
 write('.gitignore', '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n.astro/\n*.log\n');
 write('.env.example', `PUBLIC_REPO_SLUG=${repoSlug}\n${backend ? 'PUBLIC_API_BASE=\n' : ''}PUBLIC_BUILD_SHA=dev\nPUBLIC_VERSION=dev\n`);
 // public/ con un favicon mínimo
@@ -381,17 +407,39 @@ still carries generated defaults; an agent (or human) must:
 - [ ] \`src/lib/site-meta.ts\` — write ${name}'s real one-line description
       (it feeds /llms.txt, JSON-LD and the default meta description)
 - [ ] \`src/pages/llms.txt.ts\` — list the real routes as they're built
-- [ ] \`astro.config.mjs\` — set \`site\` to the production origin
-- [ ] \`public/robots.txt\` — point Sitemap at the production sitemap URL
+- [${site ? 'x' : ' '}] \`astro.config.mjs\` — set \`site\` to the production origin
+- [${site ? 'x' : ' '}] \`public/robots.txt\` — point Sitemap at the production sitemap URL
 - [ ] \`.github/workflows/deploy.yml\` — confirm ASTRO_BASE matches the
       deploy path
 - [ ] Issue templates in \`.github/ISSUE_TEMPLATE/\` — adjust labels/wording
       to this project
 
 Conventions inherited from the scaffold: Conventional Commits + issue refs,
-never push to main, every PR passes \`npm run check\`, never import
-@radix-ui/* / framer-motion / @tremor/react, Nano Stores for cross-island
-state (never React Context across islands).
+never push to main, every PR passes \`npm run check\`.
+
+## Stack rules (from the Inceptor scaffold — read before touching code)
+
+Astro 5 islands + React 19 + Tailwind v4 + Base UI primitives.
+
+1. Never install \`@astrojs/tailwind\` — Tailwind v4 goes through
+   \`@tailwindcss/vite\`.
+2. Never use React Context for state shared between islands — each
+   \`client:*\` island is its own React root. Use Nano Stores (\`src/stores/\`).
+3. Never wrap the whole app in one \`client:load\` island — prefer
+   \`client:idle\` / \`client:visible\`; ship zero JS by default.
+4. Never mix Radix and Base UI primitives in one component (prefer Base UI);
+   never import \`@radix-ui/*\`, \`@tremor/react\` or \`framer-motion\` —
+   animations come from \`motion/react\`.
+5. The compound-component gotcha: \`Dialog\`, \`Tabs\`, controlled
+   \`DropdownMenu\`, \`Toast\` cannot span islands. Compose the whole thing in
+   ONE file under \`src/components/islands/\` and hydrate that single island.
+6. Island lifecycle: every listener, interval, timeout or observer is torn
+   down on unmount. Use \`createDisposer()\` from \`src/lib/disposer.ts\` and
+   return \`d.dispose\` from the \`useEffect\`.
+7. Browser-only values (theme, locale, reduced motion) go through
+   \`useClientPreference\` (\`src/lib/use-client-preference.ts\`) to avoid
+   hydration mismatches.
+8. Path alias \`@/*\` → \`./src/*\`.
 `);
 
 // Issue forms ARE the Inceptor workflow's front door (issue → Claude → PR):
