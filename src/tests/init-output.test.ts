@@ -14,6 +14,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
  *    that the hand-maintained copy list didn't include.
  *  - the de-brand put the hyphenated slug inside JS identifiers
  *    (`W.__buro-del-pueblo_diag`), a syntax error in FeedbackFAB.
+ *  - hand-copied dependency versions drifted from the template (the root
+ *    cause of the TS5103 mismatch above).
  */
 describe('create-inceptor-app output', () => {
   let dir: string;
@@ -76,5 +78,19 @@ describe('create-inceptor-app output', () => {
     expect(fab).toContain('__buro_del_pueblo_diag');
     // DOM ids keep the hyphenated slug.
     expect(fab).toContain('buro-del-pueblo-report-btn');
+  });
+
+  it('takes every dependency version from the template package.json', () => {
+    type Pkg = { dependencies?: Record<string, string>; devDependencies?: Record<string, string> };
+    const template = JSON.parse(readFileSync('package.json', 'utf8')) as Pkg;
+    const generated = JSON.parse(readOut('package.json')) as Pkg;
+    const templateVersions = { ...template.dependencies, ...template.devDependencies };
+    const drift = Object.entries({ ...generated.dependencies, ...generated.devDependencies })
+      .filter(([name, version]) => templateVersions[name] !== version)
+      .map(
+        ([name, version]) =>
+          `${name}: generated ${version}, template ${templateVersions[name] ?? '(absent)'}`,
+      );
+    expect(drift).toEqual([]);
   });
 });
