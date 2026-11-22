@@ -82,7 +82,8 @@ describe('create-inceptor-app CI and backend wiring', () => {
 
   it('backend-flask: the contract test reads a golden file that ships with the project', () => {
     const test = read('backend-flask', 'server/tests/test_app.py');
-    expect(test).not.toContain('server-node');
+    expect(test).not.toContain('"server-node", "openapi.golden.json"');
+    expect(test).toContain('"..", "openapi.golden.json"');
     expect(existsSync(join(out('backend-flask'), 'server/openapi.golden.json'))).toBe(true);
   });
 
