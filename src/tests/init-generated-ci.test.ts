@@ -108,6 +108,13 @@ describe('create-inceptor-app CI and backend wiring', () => {
     },
   );
 
+  it('backend-node: the Dockerfile builds from server/, not the template-only server-node/', () => {
+    const dockerfile = read('backend-node', 'server/Dockerfile');
+    expect(dockerfile).not.toContain('server-node');
+    expect(dockerfile).toContain('COPY server/package.json');
+    expect(dockerfile).toContain('COPY src/schemas');
+  });
+
   it('README tells you to commit the lockfile CI installs from', () => {
     expect(read('static', 'README.md')).toContain('package-lock.json');
   });
