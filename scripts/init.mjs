@@ -11,6 +11,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readdirSync } from 'node:fs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -287,7 +288,7 @@ write('.env.example', `PUBLIC_REPO_SLUG=${repoSlug}\n${backend ? 'PUBLIC_API_BAS
 write('public/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#10b981"/></svg>\n`);
 
 // minimal README
-write('README.md', `# ${name}\n\nGenerado con create-inceptor-app (archetype: \`${archetype}\`).\n\n\`\`\`bash\nnpm install\nnpm run dev      # http://localhost:4321\nnpm run check    # gate: astro check + type-check + tests + build\n\`\`\`\n\nRecetas (auth, IA, hosting): ver el repo scaffold, carpeta \`docs/recipes/\`.\n`);
+write('README.md', `# ${name}\n\nGenerado con create-inceptor-app (archetype: \`${archetype}\`).\n\n\`\`\`bash\nnpm install\nnpm run dev      # http://localhost:4321\nnpm run check    # gate: astro check + type-check + tests + build\n\`\`\`\n\n> CI y deploy instalan con \`npm ci\`: haz commit de \`package-lock.json\` tras el primer \`npm install\`. Si npm 10.9 truena con \`Cannot read properties of null (reading 'edgesOut')\`, genera el lockfile con \`npx npm@11 install\`.\n\nRecetas (auth, IA, hosting): ver el repo scaffold, carpeta \`docs/recipes/\`.\n`);
 
 // deploy workflow (Pages) con el slug
 write('.github/workflows/deploy.yml', `name: Deploy to GitHub Pages
@@ -410,10 +411,88 @@ const SKIP = new Set(['.venv', 'node_modules', '__pycache__', '.pytest_cache', '
 const noArtifacts = (src) => !SKIP.has(src.split('/').pop());
 if (archetype === 'backend-flask') {
   cpSync(join(ROOT, 'server-flask'), dst('server'), { recursive: true, filter: noArtifacts });
+  // The parity test compares Flask's OpenAPI surface against the node
+  // archetype's golden contract, which lives in server-node/ only in the
+  // template. Ship the golden next to the server and point the test at it.
+  cpSync(join(ROOT, 'server-node/openapi.golden.json'), dst('server/openapi.golden.json'));
+  const testPath = dst('server/tests/test_app.py');
+  writeFileSync(
+    testPath,
+    readFileSync(testPath, 'utf8')
+      .replace('"..", "..", "server-node", "openapi.golden.json"', '"..", "openapi.golden.json"')
+      .replace('run `npm run gen:openapi` in server-node/ ', 'regenerate it with `npm run gen:openapi` in the Inceptor template\'s server-node/ '),
+  );
 }
 if (archetype === 'backend-node') {
   cpSync(join(ROOT, 'server-node'), dst('server'), { recursive: true, filter: noArtifacts });
 }
+
+// De-brand the copied backend like every other file: otherwise REPO_SLUG
+// defaults to the template repo and a generated project's feedback endpoint
+// files issues into Inceptor. (Same replacements as copy().)
+function debrandTree(rel) {
+  for (const e of readdirSync(dst(rel), { withFileTypes: true })) {
+    const child = `${rel}/${e.name}`;
+    if (e.isDirectory()) debrandTree(child);
+    else {
+      const text = readFileSync(dst(child), 'utf8');
+      const next = text
+        .replaceAll('ArtemioPadilla/inceptor', repoSlug)
+        .replaceAll('inceptor', slug);
+      if (next !== text) writeFileSync(dst(child), next);
+    }
+  }
+}
+if (backend) debrandTree('server');
+
+// The node Dockerfile builds from the repo root (it needs ../src/schemas) and
+// referenced the template's server-node/ paths and docker-compose.yml.
+if (archetype === 'backend-node') {
+  const df = dst('server/Dockerfile');
+  writeFileSync(
+    df,
+    readFileSync(df, 'utf8')
+      .replace(/\(see docker-compose\.yml\)/, '(docker build -f server/Dockerfile .)')
+      .replaceAll('server-node', 'server'),
+  );
+}
+
+// The node backend reuses the frontend's Zod schemas
+// (server/src/schemas.ts imports ../../src/schemas/index).
+if (archetype === 'backend-node') {
+  cpSync(join(ROOT, 'src/schemas'), dst('src/schemas'), { recursive: true });
+}
+
+// --- CI: only the jobs this project actually has ---
+// The template's ci.yml also tests server-node/ and server-flask/, which exist
+// only in the template. Keep the job matching this archetype — renamed and
+// pointed at server/, so its SHA pins stay in sync with the template — and
+// drop the other one (both, for static).
+function rewriteCi() {
+  const path = dst('.github/workflows/ci.yml');
+  if (!existsSync(path)) return;
+  const BACKEND_JOBS = { 'backend-node': 'server-node', 'backend-flask': 'server-flask' };
+  const keep = BACKEND_JOBS[archetype];
+  const lines = [];
+  let job = null;
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const key = /^ {2}([\w-]+):\s*$/.exec(line);
+    if (key) job = key[1];
+    if (job !== 'server-node' && job !== 'server-flask') {
+      lines.push(line);
+    } else if (job === keep) {
+      lines.push(
+        line
+          .replace(/^ {2}[\w-]+:\s*$/, '  server:')
+          .replace(/^( {4}name: ).*$/, '$1server tests')
+          .replaceAll(`${keep}/`, 'server/')
+          .replace(new RegExp(`(working-directory: )${keep}$`), '$1server'),
+      );
+    }
+  }
+  writeFileSync(path, lines.join('\n'));
+}
+rewriteCi();
 
 console.log(`✓ Listo: ${out}`);
 console.log(`  cd ${out} && npm install && npm run check`);
