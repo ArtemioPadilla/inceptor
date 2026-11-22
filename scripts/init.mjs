@@ -8,7 +8,7 @@
  * layout, landing mínima), renombra/de-brandea, y deja `npm run check` verde.
  * Archetypes: static | backend-node | backend-flask.
  */
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -397,7 +397,7 @@ if (archetype === 'backend-node') {
 // The node backend reuses the frontend's Zod schemas
 // (server/src/schemas.ts imports ../../src/schemas/index).
 if (archetype === 'backend-node') {
-  for (const f of readdirSync(join(ROOT, 'src/schemas'))) copy(`src/schemas/${f}`);
+  cpSync(join(ROOT, 'src/schemas'), dst('src/schemas'), { recursive: true });
 }
 
 // --- CI: only the jobs this project actually has ---
