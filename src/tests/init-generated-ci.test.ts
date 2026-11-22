@@ -87,6 +87,27 @@ describe('create-inceptor-app CI and backend wiring', () => {
     expect(existsSync(join(out('backend-flask'), 'server/openapi.golden.json'))).toBe(true);
   });
 
+  it.each(['backend-node', 'backend-flask'] as const)(
+    '%s: the server is de-branded (never files feedback into the template repo)',
+    (a) => {
+      const files: string[] = [];
+      const walk = (abs: string) => {
+        for (const e of readdirSync(abs, { withFileTypes: true })) {
+          const child = join(abs, e.name);
+          if (e.isDirectory()) walk(child);
+          else files.push(child);
+        }
+      };
+      walk(join(out(a), 'server'));
+      const leaks = files.filter((f) =>
+        readFileSync(f, 'utf8').includes('ArtemioPadilla/inceptor'),
+      );
+      expect(leaks).toEqual([]);
+      const config = a === 'backend-node' ? 'server/src/config.ts' : 'server/config.py';
+      expect(read(a, config)).toContain('your-org/ci-probe');
+    },
+  );
+
   it('README tells you to commit the lockfile CI installs from', () => {
     expect(read('static', 'README.md')).toContain('package-lock.json');
   });
