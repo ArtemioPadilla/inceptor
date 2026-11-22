@@ -413,6 +413,18 @@ function debrandTree(rel) {
 }
 if (backend) debrandTree('server');
 
+// The node Dockerfile builds from the repo root (it needs ../src/schemas) and
+// referenced the template's server-node/ paths and docker-compose.yml.
+if (archetype === 'backend-node') {
+  const df = dst('server/Dockerfile');
+  writeFileSync(
+    df,
+    readFileSync(df, 'utf8')
+      .replace(/\(see docker-compose\.yml\)/, '(docker build -f server/Dockerfile .)')
+      .replaceAll('server-node', 'server'),
+  );
+}
+
 // The node backend reuses the frontend's Zod schemas
 // (server/src/schemas.ts imports ../../src/schemas/index).
 if (archetype === 'backend-node') {
