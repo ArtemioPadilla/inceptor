@@ -8,8 +8,8 @@
  * layout, landing mínima), renombra/de-brandea, y deja `npm run check` verde.
  * Archetypes: static | backend-node | backend-flask.
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -23,7 +23,15 @@ const flag = (n, d) => {
 const name = flag('name', 'my-app');
 const archetype = flag('archetype', 'static');
 const out = flag('out', null);
-const slug = name.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
+// Strip diacritics before slugging so "Buró del Pueblo" → "buro-del-pueblo"
+// (not "bur-del-pueblo"): NFD splits "ó" into "o" + U+0301, which we drop.
+const slug = name
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9-]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+const ident = slug.replace(/-/g, '_');
 const repoSlug = flag('repo', `your-org/${slug}`);
 
 if (!out) {
@@ -50,20 +58,55 @@ const LIB = ['utils', 'api', 'href', 'flags', 'report-issue', 'queryClient'];
 const dst = (p) => join(out, p);
 // Copia con de-brand: reemplaza el nombre interno del scaffold por el del
 // proyecto en strings/comentarios. No-op en archivos sin referencias.
+const copied = new Set();
 function copy(rel) {
   const src = join(ROOT, rel);
   if (!existsSync(src)) return;
+  copied.add(rel);
   mkdirSync(dirname(dst(rel)), { recursive: true });
   const text = readFileSync(src, 'utf8')
     .replaceAll('the Inceptor integration of this Astro+React UI template', `the issue-driven development of the ${name} project`)
     .replaceAll('Inceptor', name)
     .replaceAll('ArtemioPadilla/inceptor', repoSlug)
+    // Inside JS identifiers (`W.__inceptor_diag`) a hyphenated slug is a
+    // syntax error, so use an identifier-safe variant there.
+    .replace(/(?<=[\w$])inceptor|inceptor(?=[\w$])/g, ident)
     .replaceAll('inceptor', slug);
   writeFileSync(dst(rel), text);
 }
 function write(rel, content) {
   mkdirSync(dirname(dst(rel)), { recursive: true });
   writeFileSync(dst(rel), content);
+}
+
+// Follow local imports (`@/…` and relative) of every copied src/ file and copy
+// whatever they pull in, so a core component that grows a new internal
+// dependency in the template (e.g. data-table → action-bar, use-listing,
+// i18n) can't silently break the generated project's type-check.
+const IMPORT_RE = /(?:from\s+|import\s*\(\s*|import\s+)['"]([^'"]+)['"]/g;
+const RESOLVE_EXTS = ['', '.ts', '.tsx', '.astro', '/index.ts', '/index.tsx'];
+function resolveLocal(spec, fromRel) {
+  let base;
+  if (spec.startsWith('@/')) base = `src/${spec.slice(2)}`;
+  else if (spec.startsWith('.')) base = posix.join(posix.dirname(fromRel), spec);
+  else return null;
+  for (const ext of RESOLVE_EXTS) {
+    const p = join(ROOT, base + ext);
+    if (existsSync(p) && statSync(p).isFile()) return base + ext;
+  }
+  return null;
+}
+function copyImportClosure() {
+  const queue = [...copied].filter((f) => f.startsWith('src/') && /\.(tsx?|astro)$/.test(f));
+  while (queue.length) {
+    const rel = queue.shift();
+    for (const [, spec] of readFileSync(join(ROOT, rel), 'utf8').matchAll(IMPORT_RE)) {
+      const dep = resolveLocal(spec, rel);
+      if (!dep || copied.has(dep) || !/\.(tsx?|astro)$/.test(dep)) continue;
+      copy(dep);
+      queue.push(dep);
+    }
+  }
 }
 
 console.log(`→ Generando ${name} (${archetype}) en ${out}…`);
@@ -80,6 +123,7 @@ copy('src/components/islands/ErrorBoundary.tsx');
 copy('src/components/islands/QueryProvider.tsx');
 copy('src/components/common/ThemeToggle.astro');
 copy('src/components/common/FeedbackFAB.astro');
+copyImportClosure();
 for (const f of ['vitest.config.ts', 'vitest.setup.ts', '.prettierrc.json', '.prettierignore', '.editorconfig', '.nvmrc']) copy(f);
 copy('.claude/agents/prometeo.md');
 copy('.claude/agents/forja.md');
@@ -92,6 +136,15 @@ copy('docs/decisions/TEMPLATE.md');
 copy('.github/workflows/ci.yml');
 
 // --- templated files ---
+const TEMPLATE_PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+const TEMPLATE_VERSIONS = { ...TEMPLATE_PKG.dependencies, ...TEMPLATE_PKG.devDependencies };
+function pick(names) {
+  return Object.fromEntries(names.map((n) => {
+    const v = TEMPLATE_VERSIONS[n];
+    if (!v) throw new Error(`init.mjs: ${n} is not a dependency of the template package.json`);
+    return [n, v];
+  }));
+}
 const backend = archetype !== 'static';
 write('package.json', JSON.stringify({
   name: slug,
@@ -108,47 +161,24 @@ write('package.json', JSON.stringify({
     test: 'vitest run',
     format: 'prettier --write .',
   },
-  dependencies: {
-    '@astrojs/check': '^0.9.9',
-    '@astrojs/react': '^5.0.6',
-    '@base-ui-components/react': '^1.0.0-rc.0',
-    '@hookform/resolvers': '^5.4.0',
-    '@nanostores/react': '^1.1.0',
-    '@tailwindcss/vite': '^4.3.0',
-    '@tanstack/query-persist-client-core': '^5.100.14',
-    '@tanstack/react-query': '^5.100.14',
-    '@tanstack/react-table': '^8.21.3',
-    '@tanstack/react-virtual': '^3.14.2',
-    astro: '^5.18.2',
-    'class-variance-authority': '^0.7.1',
-    clsx: '^2.1.1',
-    'idb-keyval': '^6.2.4',
-    'lucide-react': '^1.17.0',
-    motion: '^12.40.0',
-    nanostores: '^1.3.0',
-    react: '^19.2.7',
-    'react-dom': '^19.2.7',
-    'react-hook-form': '^7.77.0',
-    recharts: '^3.8.1',
-    'tailwind-merge': '^3.6.0',
-    tailwindcss: '^4.3.0',
-    'tailwindcss-motion': '^1.1.1',
-    zod: '^4.4.3',
-  },
-  devDependencies: {
-    '@testing-library/jest-dom': '^6.9.1',
-    '@testing-library/react': '^16.3.2',
-    '@testing-library/user-event': '^14.6.1',
-    '@types/node': '^22.10.2',
-    '@types/react': '^19.2.16',
-    '@types/react-dom': '^19.2.3',
-    jsdom: '^29.1.1',
-    'npm-run-all': '^4.1.5',
-    prettier: '^3.8.3',
-    'prettier-plugin-astro': '^0.14.1',
-    typescript: '^5.6.0',
-    vitest: '^4.1.8',
-  },
+  // Versions come from the template's own package.json so the generated
+  // project can never drift from what this repo actually builds and tests
+  // with (drift once paired TS 5 with ignoreDeprecations: '6.0' → TS5103).
+  dependencies: pick([
+    '@astrojs/check', '@astrojs/react', '@base-ui-components/react',
+    '@hookform/resolvers', '@nanostores/react', '@tailwindcss/vite',
+    '@tanstack/query-persist-client-core', '@tanstack/react-query',
+    '@tanstack/react-table', '@tanstack/react-virtual', 'astro',
+    'class-variance-authority', 'clsx', 'idb-keyval', 'lucide-react', 'motion',
+    'nanostores', 'react', 'react-day-picker', 'react-dom', 'react-hook-form',
+    'recharts', 'tailwind-merge', 'tailwindcss', 'tailwindcss-motion', 'zod',
+  ]),
+  devDependencies: pick([
+    '@testing-library/jest-dom', '@testing-library/react',
+    '@testing-library/user-event', '@types/node', '@types/react',
+    '@types/react-dom', 'jsdom', 'npm-run-all', 'prettier',
+    'prettier-plugin-astro', 'typescript', 'vitest',
+  ]),
 }, null, 2) + '\n');
 
 write('astro.config.mjs', `import { defineConfig } from 'astro/config';
