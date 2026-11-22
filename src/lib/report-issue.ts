@@ -28,9 +28,27 @@ export function openIssue(input: ReportIssueInput): void {
 }
 
 /**
+ * Strip query-string and fragment values from a URL before it lands in a
+ * PUBLIC issue: they routinely carry secrets (magic-link / OAuth tokens such
+ * as `#access_token=…`, password-reset codes, search terms, ids). Keeps
+ * origin + path and marks what was removed. String-based on purpose so it
+ * also handles relative and malformed URLs and never throws.
+ *
+ * Mirrored inline as `redact()` in FeedbackFAB.astro (an `is:inline` script
+ * can't import) — keep both in sync.
+ */
+export function redactUrl(url: string): string {
+  const hashAt = url.indexOf('#');
+  const beforeHash = hashAt >= 0 ? url.slice(0, hashAt) : url;
+  const queryAt = beforeHash.indexOf('?');
+  const base = queryAt >= 0 ? beforeHash.slice(0, queryAt) : beforeHash;
+  return base + (queryAt >= 0 ? '?[redacted]' : '') + (hashAt >= 0 ? '#[redacted]' : '');
+}
+
+/**
  * Build a body for a runtime error. Includes the error name, message,
  * stack trace (clipped to 50 lines), component path, user agent, and the
- * current URL. Safe to call on server (window/navigator guarded).
+ * current URL (query and fragment redacted — see redactUrl). Safe to call on server (window/navigator guarded).
  */
 export function buildErrorReportBody(args: {
   error: Error;
@@ -48,7 +66,7 @@ export function buildErrorReportBody(args: {
     `**Type:** ${hydrationMismatch ? 'Hydration mismatch' : 'Runtime error'}`,
     `**Error:** \`${error.name}: ${error.message}\``,
     componentPath ? `**Component path:** \`${componentPath}\`` : '',
-    typeof window !== 'undefined' ? `**URL:** ${window.location.href}` : '',
+    typeof window !== 'undefined' ? `**URL:** ${redactUrl(window.location.href)}` : '',
     typeof navigator !== 'undefined' ? `**User agent:** ${navigator.userAgent}` : '',
     '',
     '## Stack',

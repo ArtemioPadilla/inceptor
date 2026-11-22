@@ -5,7 +5,7 @@ import { PromptInput } from '@/components/ui/ai/prompt-input';
 import { StreamingText } from '@/components/ui/ai/streaming-text';
 import { AIOutputLabel } from '@/components/ui/ai/ai-output-label';
 import { AIFeedback } from '@/components/ui/ai/ai-feedback';
-import { buildIssueUrl } from '@/lib/report-issue';
+import { buildIssueUrl, redactUrl } from '@/lib/report-issue';
 
 interface Turn {
   id: number;
@@ -71,7 +71,7 @@ export default function AIChatDemo() {
     if (vote === 'down' && typeof window !== 'undefined') {
       const url = buildIssueUrl({
         title: 'AI response flagged as unhelpful',
-        body: `A user thumbed-down an AI response.\n\nReason: ${reason ?? '(none given)'}\n\nURL: ${window.location.href}`,
+        body: `A user thumbed-down an AI response.\n\nReason: ${reason ?? '(none given)'}\n\nURL: ${redactUrl(window.location.href)}`,
         labels: ['bug'],
       });
       window.open(url, '_blank', 'noopener,noreferrer');
