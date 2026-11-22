@@ -66,4 +66,18 @@ describe('create-inceptor-app production defaults', () => {
     expect(existsSync(join(dir, 'plain-app', 'src/lib/disposer.ts'))).toBe(true);
     expect(existsSync(join(dir, 'plain-app', 'src/lib/use-client-preference.ts'))).toBe(true);
   });
+
+  it('ships a skip link in the --lang language that targets the main landmark', () => {
+    expect(withSite('src/layouts/BaseLayout.astro')).toContain('Saltar al contenido');
+    expect(plain('src/layouts/BaseLayout.astro')).toContain('Skip to content');
+    expect(plain('src/layouts/BaseLayout.astro')).toContain('href="#main"');
+    expect(plain('src/pages/index.astro')).toContain('id="main"');
+  });
+
+  it('passes the language to the theme toggle so its accessible name is localized', () => {
+    expect(withSite('src/components/common/SiteHeader.astro')).toContain(
+      '<ThemeToggle lang="es" />',
+    );
+    expect(plain('src/components/common/SiteHeader.astro')).toContain('<ThemeToggle lang="en" />');
+  });
 });
