@@ -8,27 +8,12 @@
  * all surface as `console.error` / `pageerror` events. This makes them visible
  * in CI without baselines and without render-diff flakiness.
  *
- * ALLOWLIST: Add patterns here when a third-party emits known, harmless noise.
- * Keep the list tight and always add a comment explaining *why* each entry exists.
+ * ALLOWLIST: lives in ./console-allowlist.ts (pure + unit-tested). Add patterns
+ * there when a third-party emits known, harmless noise.
  */
 
 import { test as base, expect } from '@playwright/test';
-
-/** Patterns that are allowed even if they appear as console errors. */
-const ALLOWLIST: RegExp[] = [
-  // GitHub API rate-limits unauthenticated requests in CI; the dashboard island
-  // catches this and degrades gracefully, so the fetch-failure log is expected.
-  /api\.github\.com.*rate limit/i,
-  // Pagefind emits a 404 for its WASM worker on first load when the search
-  // index hasn't been built yet (e.g. in smoke tests that skip `npm run build`).
-  /pagefind.*404/i,
-  /Failed to load resource.*pagefind/i,
-];
-
-/** Returns true when the message matches a known-harmless allowlist pattern. */
-function isAllowed(message: string): boolean {
-  return ALLOWLIST.some((pattern) => pattern.test(message));
-}
+import { describeConsoleMessage, isAllowed } from './console-allowlist';
 
 /**
  * Extended `test` that:
@@ -49,7 +34,9 @@ export const test = base.extend<{ _consoleGuard: void }>({
 
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
-          const text = msg.text();
+          // Include the source URL: network failures only carry it there, and
+          // it makes a failing report say which resource broke.
+          const text = describeConsoleMessage(msg.text(), msg.location().url);
           if (!isAllowed(text)) {
             errors.push(`[console.error] ${text}`);
           }
@@ -68,7 +55,7 @@ export const test = base.extend<{ _consoleGuard: void }>({
       expect(
         errors,
         `Browser console errors detected — if these are known noise, ` +
-          `add a pattern to the ALLOWLIST in tests/fixtures/console-guard.ts:\n` +
+          `add a pattern to the ALLOWLIST in tests/fixtures/console-allowlist.ts:\n` +
           errors.join('\n'),
       ).toEqual([]);
     },
