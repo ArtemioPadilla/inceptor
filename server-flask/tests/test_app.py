@@ -7,6 +7,19 @@ import pytest
 
 import github
 from app import create_app
+from config import config
+
+
+@pytest.fixture(autouse=True)
+def _hermetic_config(monkeypatch):
+    """Never use a GITHUB_TOKEN from the developer's shell or .env.
+
+    Config is read at import time; with an ambient token,
+    test_feedback_503_without_token hit the real GitHub API instead — and
+    with a valid token it created a real issue in REPO_SLUG.
+    """
+    monkeypatch.setattr(config, "github_token", "")
+    monkeypatch.setattr(config, "repo_slug", "test-owner/test-repo")
 
 
 @pytest.fixture
