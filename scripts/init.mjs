@@ -239,7 +239,7 @@ const nav: { href: string; label: string }[] = [];
       {nav.map((n) => (
         <a href={withBase(n.href)} class="rounded-md px-2 py-1 text-muted-foreground transition-colors hover:text-primary">{n.label}</a>
       ))}
-      <span class="ml-1"><ThemeToggle /></span>
+      <span class="ml-1"><ThemeToggle lang="${lang}" /></span>
     </div>
   </nav>
 </header>
@@ -276,6 +276,10 @@ const { title = '${name}', description = '', lang = '${lang}' } = Astro.props;
     <meta name="theme-color" content="#10b981" />
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
+    >${lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
     <SiteHeader />
     <slot />
     <FeedbackFAB lang={lang} />
@@ -287,7 +291,7 @@ write('src/pages/index.astro', `---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="${name}">
-  <main class="mx-auto max-w-3xl px-5 py-24 text-center">
+  <main id="main" class="mx-auto max-w-3xl px-5 py-24 text-center">
     <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground">${name}</h1>
     <p class="mt-4 text-lg text-muted-foreground">
       ${lang === 'es'
