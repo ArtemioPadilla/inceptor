@@ -340,6 +340,17 @@ const tr = {
 (function () {
   // ── Telemetry capture (runs once at parse time) ──────────────────────
   var W = window;
+
+  // Reports become PUBLIC GitHub issues: keep origin + path, drop query and
+  // fragment values (magic-link/OAuth tokens, reset codes, search terms).
+  // Inline copy of redactUrl() in src/lib/report-issue.ts — keep in sync.
+  function redact(u) {
+    u = String(u || '');
+    var h = u.indexOf('#');
+    var beforeHash = h >= 0 ? u.slice(0, h) : u;
+    var q = beforeHash.indexOf('?');
+    return (q >= 0 ? beforeHash.slice(0, q) : beforeHash) + (q >= 0 ? '?[redacted]' : '') + (h >= 0 ? '#[redacted]' : '');
+  }
   if (!W.__inceptor_diag) {
     var MAX = 30;
     var diag = { console: [], network: [], errors: [] };
@@ -384,13 +395,13 @@ const tr = {
         var method = (arguments[1] && arguments[1].method) || (typeof url === 'object' && url.method) || 'GET';
         return origFetch.apply(W, arguments).then(function (res) {
           if (!res.ok) {
-            diag.network.push({ ts: new Date().toISOString(), method: method.toUpperCase(), url: urlStr.slice(0, 200), status: res.status, statusText: res.statusText || '' });
+            diag.network.push({ ts: new Date().toISOString(), method: method.toUpperCase(), url: redact(urlStr).slice(0, 200), status: res.status, statusText: res.statusText || '' });
             if (diag.network.length > MAX) diag.network.shift();
             W.__inceptor_updateBadge && W.__inceptor_updateBadge();
           }
           return res;
         }, function (err) {
-          diag.network.push({ ts: new Date().toISOString(), method: method.toUpperCase(), url: urlStr.slice(0, 200), status: 0, statusText: err && err.message ? err.message.slice(0, 100) : 'Network error' });
+          diag.network.push({ ts: new Date().toISOString(), method: method.toUpperCase(), url: redact(urlStr).slice(0, 200), status: 0, statusText: err && err.message ? err.message.slice(0, 100) : 'Network error' });
           if (diag.network.length > MAX) diag.network.shift();
           W.__inceptor_updateBadge && W.__inceptor_updateBadge();
           throw err;
@@ -599,7 +610,7 @@ const tr = {
       // Env block
       if (envBlock) {
         envBlock.textContent = JSON.stringify({
-          url: location.href,
+          url: redact(location.href),
           userAgent: navigator.userAgent,
           viewport: window.innerWidth + 'x' + window.innerHeight,
           lang: lang,
@@ -697,7 +708,7 @@ const tr = {
         var diag = W.__inceptor_diag || { console: [], network: [], errors: [] };
         var consEntries = (diag.console || []).concat((diag.errors || []).map(function(e){ return { level:'error', ts:e.ts, msg:e.msg + (e.src ? ' @ '+e.src : '') }; }));
         var diagText = '**Entorno / Environment**\n```json\n' + JSON.stringify({
-          url: location.href, userAgent: navigator.userAgent,
+          url: redact(location.href), userAgent: navigator.userAgent,
           viewport: window.innerWidth + 'x' + window.innerHeight,
           lang: lang, buildSha: buildSha, version: appVersion,
           timestamp: new Date().toISOString(),
