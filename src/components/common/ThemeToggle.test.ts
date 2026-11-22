@@ -6,9 +6,20 @@ describe('ThemeToggle.astro', () => {
     expect(source).toMatch(/id=["']theme-toggle["']/);
   });
 
-  it('sets initial aria-pressed and aria-label', () => {
+  // WAI-ARIA APG toggle-button pattern: the accessible name stays constant and
+  // aria-pressed carries the state. Changing the name as well ("Switch to light
+  // theme") makes screen readers announce "Switch to light theme, pressed",
+  // which contradicts itself. https://www.w3.org/WAI/ARIA/apg/patterns/button/
+  it('uses a constant accessible name with aria-pressed for state', () => {
     expect(source).toMatch(/aria-pressed/);
-    expect(source).toMatch(/aria-label=["']Toggle dark mode["']/);
+    expect(source).toMatch(/aria-label=\{label\}/);
+    expect(source).not.toMatch(/setAttribute\(\s*['"]aria-label['"]/);
+  });
+
+  it('localizes the name (en default, es supported)', () => {
+    expect(source).toMatch(/en:\s*['"]Dark theme['"]/);
+    expect(source).toMatch(/es:\s*['"]Tema oscuro['"]/);
+    expect(source).toMatch(/lang\s*=\s*['"]en['"]/);
   });
 
   // Since #19 (Nano Stores migration), localStorage and classList side-effects
