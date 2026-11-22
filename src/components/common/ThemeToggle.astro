@@ -3,14 +3,25 @@
  * Dark mode toggle. The actual theme application happens via an
  * inline script in BaseLayout's <head> (zero-flash). This button
  * only handles user interaction at click time.
+ *
+ * Accessibility: WAI-ARIA APG toggle-button pattern — a constant accessible
+ * name ("Dark theme") and aria-pressed for the state. The name must not
+ * change with the state, or screen readers announce contradictions such as
+ * "Switch to light theme, pressed".
  */
+interface Props {
+  lang?: 'en' | 'es';
+}
+const { lang = 'en' } = Astro.props;
+const LABELS = { en: 'Dark theme', es: 'Tema oscuro' } as const;
+const label = LABELS[lang];
 ---
 
 <button
   type="button"
   id="theme-toggle"
   class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-  aria-label="Toggle dark mode"
+  aria-label={label}
   aria-pressed="false"
 >
   <!-- Sun icon: shown when dark mode is active (click to go light) -->
@@ -61,25 +72,18 @@
     if (!btn) return;
 
     /**
-     * Sync aria-pressed and aria-label to the current theme value.
-     * - aria-pressed: true when dark mode is active (the button is "on").
-     * - aria-label: describes the action the button will perform (next state),
-     *   not the current state, so screen-reader users hear what will happen.
+     * Sync aria-pressed (true when dark mode is active) to the current theme.
+     * The accessible name stays constant — see the frontmatter note.
      */
     const sync = (t: 'light' | 'dark') => {
-      const isDark = t === 'dark';
-      btn.setAttribute('aria-pressed', String(isDark));
-      btn.setAttribute(
-        'aria-label',
-        isDark ? 'Switch to light theme' : 'Switch to dark theme',
-      );
+      btn.setAttribute('aria-pressed', String(t === 'dark'));
     };
 
     // Initial sync — the store's onMount may not have fired yet, so read
     // the atom directly (it falls back to the class the inline script set).
     sync($theme.get());
 
-    // Keep aria-pressed + aria-label in sync with any future store changes
+    // Keep aria-pressed in sync with any future store changes
     // (e.g. cross-tab sync, programmatic theme changes).
     const unsub = $theme.subscribe(sync);
 
