@@ -6,6 +6,13 @@ A web starter template built around **Inceptor**. Every
 feature ships as: GitHub issue → Claude triages → PR → merge → deploy. The
 FeedbackFAB lets real users file issues with diagnostics pre-filled.
 
+## CI budget (read `AGENTS.md`)
+
+Actions minutes are money. Read the **CI budget** section of `AGENTS.md`
+before pushing: validate locally, push once per ready PR (draft while
+iterating), never add the `ci:override` label, ask before anything that
+triggers more than ~10 CI runs. Runbook: `docs/runbooks/ci-cost.md`.
+
 ## Active integration
 
 Integration complete; `INTEGRATION-PLAN.md` is the historical record of every

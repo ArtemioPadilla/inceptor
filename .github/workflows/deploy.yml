@@ -4,10 +4,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Single concurrent deployment — newer pushes cancel older runs in progress
+# Single concurrent deployment. Never cancel one mid-upload (#334): a cancelled
+# Pages deploy can leave the site half-published. A newer run replaces one still
+# pending (default queue behaviour), so intermediate pushes are dropped.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read

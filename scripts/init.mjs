@@ -168,6 +168,29 @@ copy('.claude/checklists/governance.md');
 copy('.claude/checklists/forbidden-imports.json');
 copy('docs/decisions/TEMPLATE.md');
 copy('.github/workflows/ci.yml');
+// CI cost guardrails (#334): the rules file for agents, its runbook, the
+// scripts ci.yml calls (breaker + changes gate) and the opt-in hook. ci.yml
+// would fail on day one without the scripts, so they travel together.
+for (const f of [
+  'AGENTS.md',
+  'docs/runbooks/ci-cost.md',
+  'scripts/ci-budget.mjs',
+  'scripts/ci-changes.mjs',
+  '.claude/hooks/ci-push-guard.mjs',
+  '.claude/settings.example.json',
+]) copy(f);
+// The copied runbook is the template's: drop the table rows for workflows a
+// generated project does not have, so it only claims what exists.
+{
+  const rb = dst('docs/runbooks/ci-cost.md');
+  writeFileSync(
+    rb,
+    readFileSync(rb, 'utf8')
+      .split('\n')
+      .filter((l) => !/`visual\.yml`|`tauri-\*\.yml`/.test(l))
+      .join('\n'),
+  );
+}
 
 // --- templated files ---
 const TEMPLATE_PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -345,7 +368,7 @@ write('.github/workflows/deploy.yml', `name: Deploy to GitHub Pages
 on:
   push: { branches: [main] }
   workflow_dispatch:
-concurrency: { group: pages, cancel-in-progress: true }
+concurrency: { group: pages, cancel-in-progress: false }
 permissions: { contents: read, pages: write, id-token: write }
 jobs:
   build:
@@ -444,6 +467,14 @@ still carries generated defaults; an agent (or human) must:
 
 Conventions inherited from the scaffold: Conventional Commits + issue refs,
 never push to main, every PR passes \`npm run check\`.
+
+## CI budget — set this up now, agents read \`AGENTS.md\`
+
+CI minutes cost money on private repos and agents push often. Before the first
+real PR: in GitHub **Billing > Budgets and alerts** create an Actions budget
+with **stop usage** and alerts (see \`docs/runbooks/ci-cost.md\`). The rules
+every agent must follow (validate locally, push once per ready PR, never add
+the \`ci:override\` label) are in \`AGENTS.md\`.
 
 ## Stack rules (from the Inceptor scaffold — read before touching code)
 
@@ -572,4 +603,5 @@ rewriteCi();
 
 console.log(`✓ Listo: ${out}`);
 console.log(`  cd ${out} && npm install && npm run check`);
+console.log('  ⚠ CI: configura un presupuesto de Actions con «stop usage» y alertas (Billing > Budgets and alerts); ver docs/runbooks/ci-cost.md y AGENTS.md');
 if (backend) console.log('  backend en ./server (ver su README); PUBLIC_API_BASE → su URL');

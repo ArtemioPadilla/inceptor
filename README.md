@@ -42,6 +42,8 @@ Two interchangeable archetypes — **`server-node/`** (Hono, reuses the frontend
 
 `npm run add-tauri-android` layers an opt-in Tauri v2 Android target onto that same project (CI builds and signs an installable APK published to a GitHub Release, plus an AAB uploaded to Play's internal track when a Play listing exists). See [the Android runbook](./docs/runbooks/tauri-android.md).
 
+**CI cost:** private repos pay for Actions minutes, so the template ships guardrails (draft-friendly CI, a daily budget breaker, a rules file for agents in [`AGENTS.md`](./AGENTS.md)). Set an Actions budget with "stop usage"; see [the CI cost runbook](./docs/runbooks/ci-cost.md).
+
 ### Explore it live
 
 - **[Gallery](https://artemiop.com/inceptor/gallery/)** — every component rendered live

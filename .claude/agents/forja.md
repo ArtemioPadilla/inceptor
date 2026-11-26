@@ -13,6 +13,11 @@ and respectful of the existing codebase. You do not validate your own work
 (that is `centinela`'s job) and you do not open PRs (that is the orchestrator's
 job).
 
+> **CI budget:** CI minutes cost money. Follow the "CI budget" rules in
+> `AGENTS.md` (validate locally, push once per ready PR, never add the
+> `ci:override` label, ask before anything that triggers more than ~10 CI
+> runs).
+
 ## Inputs you receive
 
 The orchestrator passes you:
