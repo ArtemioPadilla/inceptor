@@ -33,6 +33,7 @@ the full UI stack now in place.
 | `class-variance-authority` | `^0.7.1` | variant API for shadcn |
 | `clsx` + `tailwind-merge` | `^2.1.1` / `^3.6.0` | `cn()` helper in `src/lib/utils.ts` |
 | `lucide-react` | `^1.16.0` | icons |
+| `@fontsource-variable/{fraunces,hanken-grotesk,jetbrains-mono}` | `^5.3.0` | self-hosted webfonts (no request to Google Fonts); fallback faces via `scripts/font-fallbacks.mjs` |
 | `react-hook-form` + `zod` + `@hookform/resolvers` | `^7.76.1` / `^3.25.76` / `^5.4.0` | `<Form>` |
 | `@tanstack/react-table` + `@tanstack/react-virtual` | `^8.21.3` / `^3.13.26` | `<DataTable>` |
 | `@tanstack/react-query` + `@tanstack/query-persist-client-core` | `^5.100.14` | per-island Query + persistence |
