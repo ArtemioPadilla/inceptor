@@ -2,8 +2,8 @@
 /**
  * Daily CI budget breaker (issue #334).
  *
- * Counts the pull_request workflow runs created in the last 24h (pushes,
- * Dependabot and issue_comment runs are not what burns minutes here) with ONE REST call
+ * Counts the pull_request workflow runs created in the last 24h (pushes and
+ * issue_comment runs are not counted) with ONE REST call
  * (`GET /repos/{repo}/actions/runs?per_page=1` -> total_count) and fails the
  * calling job when the count is confidently over CI_DAILY_RUN_LIMIT.
  *
@@ -11,6 +11,11 @@
  * satisfies a required status check, so a "skip when over budget" breaker
  * would let PRs merge unchecked. Every required job runs this as its first
  * step so the check goes red instead.
+ *
+ * Dependabot PRs ARE counted: they are pull_request runs like any other. We do
+ * not subtract actor=dependabot[bot] (that needs a second call per job, more
+ * failure surface for a breaker that must stay simple); instead the limit must
+ * leave room for them (dependabot.yml caps open PRs, but each rebase re-runs CI).
  *
  * Fail-open on purpose: any API/parse error only warns. A broken breaker must
  * never block the team. Fail-closed only when the number is known and over.

@@ -17,16 +17,16 @@ Everything below only reduces the rate of spending; it cannot stop it.
 
 ## 2. What the template does by itself
 
-| Guardrail                                                                          | Where                   |
-| ---------------------------------------------------------------------------------- | ----------------------- |
-| One CI run per commit: push triggers only on `main`; PRs run via `pull_request`    | `ci.yml`                |
-| Superseded PR runs are cancelled (`concurrency`, never in progress on `main`)      | `ci.yml`                |
-| Draft PRs fail fast (no tests run); `ready_for_review` starts the full CI          | `ci.yml`, `changes` job |
-| Docs-only diffs skip the heavy steps (short allowlist in `scripts/ci-changes.mjs`) | `changes` job           |
-| Playwright visual runs on dispatch and weekly, not on every PR                     | `visual.yml`            |
-| Tauri builds: dispatch only (Android also on version tags)                         | `tauri-*.yml`           |
-| Deploys are never cancelled mid-upload (a newer run replaces one still pending)    | `deploy.yml`            |
-| Daily budget breaker                                                               | `scripts/ci-budget.mjs` |
+| Guardrail                                                                                              | Where                   |
+| ------------------------------------------------------------------------------------------------------ | ----------------------- |
+| One CI run per commit: push triggers only on `main`; PRs run via `pull_request`                        | `ci.yml`                |
+| Superseded PR runs are cancelled (`concurrency`, never in progress on `main`)                          | `ci.yml`                |
+| Draft PRs fail fast (no tests run, about 5 billed min per push); `ready_for_review` starts the full CI | `ci.yml`, `changes` job |
+| Docs-only diffs skip the heavy steps (short allowlist in `scripts/ci-changes.mjs`)                     | `changes` job           |
+| Playwright visual runs on dispatch and weekly, not on every PR                                         | `visual.yml`            |
+| Tauri builds: dispatch only (Android also on version tags)                                             | `tauri-*.yml`           |
+| Deploys are never cancelled mid-upload (a newer run replaces one still pending)                        | `deploy.yml`            |
+| Daily budget breaker                                                                                   | `scripts/ci-budget.mjs` |
 
 ### Required checks stay correct
 
@@ -66,8 +66,13 @@ Everything below only reduces the rate of spending; it cannot stop it.
 `scripts/ci-budget.mjs` is the first step (after checkout) of every job in
 `ci.yml`. It makes one REST call (`GET /actions/runs?event=pull_request`,
 `total_count` of PR runs created in the last 24h) using only `GITHUB_TOKEN`
-with `actions: read`. Only PR-event runs count: pushes, Dependabot and
-`issue_comment` runs are cheap or not agent-driven.
+with `actions: read`. Only PR-event runs count: pushes and `issue_comment` runs do not.
+**Dependabot PRs are counted**: they are `pull_request` runs like any other, and
+each Dependabot rebase starts a new one. We keep the single call rather than
+subtracting `actor=dependabot[bot]` with a second call (that doubles the API
+calls in every job and adds failure surface to a breaker that must stay
+simple), so **set the limit with headroom for Dependabot** (its open-PR cap in
+`dependabot.yml` times a few rebases a week is a small, predictable share).
 
 - Over the limit: `::error::` and **exit 1**, so the required check goes red.
   It fails rather than skips because a skipped job satisfies a required check.
@@ -95,10 +100,22 @@ so after applying the label the maintainer must **re-run the failed jobs**.
 ## 4. Optional: Claude Code PreToolUse hook
 
 `.claude/hooks/ci-push-guard.mjs` asks the human for confirmation once more
-than N CI-triggering Bash commands (`git push`, `git -C dir push`,
-`gh pr create|merge|ready`, `gh api` calls on pulls or auto-merge,
-`gh workflow run`, `gh run rerun`) ran today in the checkout (default 5,
-`CI_GUARD_LIMIT`). It answers `ask`, never blocks, and fails open.
+than N CI-triggering Bash commands ran today in the checkout (default 5,
+`CI_GUARD_LIMIT`). It answers `ask`, never blocks, and fails open. The command
+is split on `&&`, `||`, `;`, `&`, `|`, `(` and newlines, and a segment counts
+only if it STARTS with one of these (a commit message that mentions "git push"
+does not count):
+
+- `git push`, also with `-C dir` / `-c k=v` options, and after leading
+  `VAR=val` assignments or `env [VAR=val]`; `--dry-run` and `-n` are not counted.
+- `gh pr create|merge|ready|update-branch|reopen`.
+- `gh workflow run` and `gh run rerun`.
+- `gh api` calls that WRITE (an explicit `-X/--method POST|PUT|PATCH|DELETE`,
+  or a body flag `-f/-F/--field/--raw-field/--input`) on the pulls,
+  merge/update-branch, auto-merge/ready, workflow dispatch or run rerun routes,
+  plus the `enablePullRequestAutoMerge` and `markPullRequestReadyForReview`
+  GraphQL mutations. An explicit `-X GET` is a read even with body flags.
+  Plain reads are never counted.
 
 It is **opt-in** on purpose: a committed `.claude/settings.json` would prompt
 every contributor and every unattended agent run (where a prompt can stall a

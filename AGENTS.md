@@ -16,7 +16,9 @@ the full CI. Treat CI minutes as a budget you spend, not a free oracle.
    discover.
 2. **Push once per ready PR.** Iterate in a **draft** PR: drafts run no checks
    (each required job fails on purpose after the budget breaker, so a draft
-   cannot be merged by accident). Mark it ready for review when it is done, which starts
+   cannot be merged by accident). Drafts are cheaper, not free: each draft push
+   still bills about 5 minutes (the `changes` job plus jobs that start and exit,
+   each rounded up to 1 minute), so keep draft pushes few too. Mark it ready for review when it is done, which starts
    the full CI once. After marking ready, **wait for the new run** to finish
    green before merging; never `gh pr ready && gh pr merge` in one go.
 3. **Do not "update branch with main"** (the button, `git merge main`, rebase
