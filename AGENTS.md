@@ -14,9 +14,9 @@ the full CI. Treat CI minutes as a budget you spend, not a free oracle.
 1. **Validate locally before pushing.** Run `npm run format`, `npm run check`
    (and `npm run test`) on your machine first. CI confirms; it does not
    discover.
-2. **Push once per ready PR.** Iterate in a **draft** PR: drafts run only the
-   cheap checks (their required jobs fail on purpose, so a draft cannot be
-   merged by accident). Mark it ready for review when it is done, which starts
+2. **Push once per ready PR.** Iterate in a **draft** PR: drafts run no checks
+   (each required job fails on purpose after the budget breaker, so a draft
+   cannot be merged by accident). Mark it ready for review when it is done, which starts
    the full CI once. After marking ready, **wait for the new run** to finish
    green before merging; never `gh pr ready && gh pr merge` in one go.
 3. **Do not "update branch with main"** (the button, `git merge main`, rebase

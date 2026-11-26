@@ -31,8 +31,9 @@ Everything below only reduces the rate of spending; it cannot stop it.
 ### Required checks stay correct
 
 - A job skipped by its own `if` reports **success** and satisfies a required
-  check. So no job in `ci.yml` has a job-level skip condition: every job
-  always runs and reports, and only its _steps_ are gated.
+  check. So no required job has a job-level skip condition (in `ci.yml`): every
+  required job always runs and reports, and only its _steps_ are gated (the
+  non-required `changes` job does have an `if`).
 - The gate is fail-safe: heavy steps run when
   `needs.changes.outputs.heavy != 'false'` (so also when `changes` fails or is
   unknown), never `== 'true'`.
@@ -47,8 +48,10 @@ Everything below only reduces the rate of spending; it cannot stop it.
   check is the honest state.
 - After `ready_for_review`, **wait for the new run** before merging. If the
   event was sent with `GITHUB_TOKEN` (or a fork run waits for approval) GitHub
-  creates no run at all: the red draft check stays, which is safe; push or
-  re-run to get a real run.
+  creates no run at all: the red draft check stays, which is safe. To get a
+  real run, push a new commit, or close and reopen the PR (`reopened` carries
+  draft=false). Re-running the draft run will fail again: a re-run keeps the
+  original event payload, so it still says draft.
 - The `changes` job runs on `pull_request` only. On push to `main` it is
   skipped (no billed minute); dependents use `!cancelled()` and an empty
   output counts as heavy.
@@ -74,7 +77,10 @@ with `actions: read`. Only PR-event runs count: pushes, Dependabot and
   Example: 3,000 min / 30 / 6 min is about 16 runs a day; 50 is a deliberately
   loose ceiling that still stops an incident (the 2026-11 one ran about 1,280
   minutes a day). Lower it once you know your real average. Cancelled runs
-  still count, so cancelling does not buy headroom.
+  still count, so cancelling does not buy headroom. Re-runs are not counted
+  ("Re-run failed jobs" and `gh run rerun` add attempts to an existing run
+  and `total_count` does not move), so a re-run sweep spends minutes without
+  moving the breaker; `AGENTS.md` rule 7 and the hook cover them.
 - It fails open: any API/parse error only emits a `::warning::` and passes.
 - Label `ci:override` on the PR bypasses it (one extra call, looked up only
   when over the limit; needs `pull-requests: read`). Humans only: `AGENTS.md`
@@ -109,6 +115,6 @@ The command uses `$CLAUDE_PROJECT_DIR`, so it keeps working after the agent
 
 - [ ] Budget with "stop usage" and alerts (section 1)
 - [ ] `CI_DAILY_RUN_LIMIT` repository variable (see the calibration formula in section 3)
-- [ ] Required checks set in branch protection (the four `ci.yml` jobs; each fails on drafts)
+- [ ] Required checks set in branch protection (name the `ci.yml` jobs your project has: Build & Check, Lint workflows (actionlint), plus the server test jobs if you have a backend; never the Changes gate; each fails on drafts)
 - [ ] Review the `DOCS_ONLY` allowlist in `scripts/ci-changes.mjs`
 - [ ] Decide whether to enable the hook (section 4)

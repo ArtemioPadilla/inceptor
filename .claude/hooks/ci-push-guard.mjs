@@ -2,7 +2,7 @@
 /**
  * Claude Code PreToolUse hook (opt-in, issue #334): asks for confirmation once
  * more than CI_GUARD_LIMIT (default 5) CI-triggering commands (git push, git -C d push,
- * gh pr create/merge/ready, gh api pulls/auto-merge, gh workflow run, gh run rerun) ran today in this
+ * gh pr create/merge/ready, WRITING gh api calls on pulls/merge/dispatch/rerun routes, gh workflow run, gh run rerun) ran today in this
  * checkout. Wire it with `.claude/settings.example.json`.
  *
  * Never blocks outright: it answers `ask`, so the human decides. On any
@@ -14,13 +14,44 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-// Matches the command at the start or after a shell separator, so a string
-// that merely mentions "git push" (a commit message) is not counted.
-const COSTLY =
-  /(?:^|[;&|(]\s*|&&\s*)(?:git\s+(?:-C\s+\S+\s+)?push\b|gh\s+pr\s+(?:create|merge|ready)\b|gh\s+workflow\s+run\b|gh\s+run\s+rerun\b|gh\s+api\b[^\n]*(?:\/pulls\b|enablePullRequestAutoMerge|markPullRequestReadyForReview))/;
+// The command is split on shell separators (including newlines) and each
+// segment must START with the costly command, so a string that merely mentions
+// "git push" (a commit message) is not counted.
+const SEGMENT_SPLIT = /&&|\|\||[;&|(\n]/;
+const SIMPLE = [
+  /^git\s+(?:-C\s+\S+\s+)?push\b/,
+  /^gh\s+pr\s+(?:create|merge|ready)\b/,
+  /^gh\s+workflow\s+run\b/,
+  /^gh\s+run\s+rerun\b/,
+];
+const DRY_RUN = /\s(?:--dry-run|-n)(?=\s|$)/;
+// `gh api` is read-only by default; it writes with an explicit mutating
+// method or with any body flag (which make gh default to POST).
+const API_WRITES =
+  /(?:\s(?:-X|--method)[\s=]*(?:POST|PUT|PATCH|DELETE)\b|\s(?:-f|-F|--field|--raw-field|--input)\b)/i;
+const API_COSTLY_ROUTES = [
+  /\/pulls(?=[\s'"?]|$)/, // create a PR
+  /\/pulls\/\d+\/(?:merge|update-branch)\b/,
+  /\/ccr\/(?:auto_merge|ready_for_review)\b/,
+  /\/actions\/workflows\/[^\s/]+\/dispatches\b/,
+  /\/actions\/runs\/\d+\/(?:rerun|rerun-failed-jobs)\b/,
+];
+const API_MUTATIONS = /enablePullRequestAutoMerge|markPullRequestReadyForReview/;
+
+function segmentIsCostly(seg) {
+  if (/^git\s/.test(seg)) return SIMPLE[0].test(seg) && !DRY_RUN.test(seg);
+  if (SIMPLE.slice(1).some((r) => r.test(seg))) return true;
+  if (/^gh\s+api\b/.test(seg)) {
+    if (API_MUTATIONS.test(seg)) return true;
+    return API_WRITES.test(seg) && API_COSTLY_ROUTES.some((r) => r.test(seg));
+  }
+  return false;
+}
 
 export function isCostly(command) {
-  return COSTLY.test(String(command ?? ''));
+  return String(command ?? '')
+    .split(SEGMENT_SPLIT)
+    .some((seg) => segmentIsCostly(seg.trim()));
 }
 
 export function decide({ command, state, now = new Date(), limit = 5 }) {
