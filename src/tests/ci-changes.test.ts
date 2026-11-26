@@ -14,7 +14,7 @@ const pr = { eventName: 'pull_request', draft: false };
 
 describe('classify', () => {
   it('docs-only diffs do not need the heavy jobs', () => {
-    expect(classify({ ...pr, files: ['docs/superpowers/plans/x.md', 'SECURITY.md'] }).heavy).toBe(
+    expect(classify({ ...pr, files: ['docs/superpowers/plans/x.md', 'ROADMAP.md'] }).heavy).toBe(
       false,
     );
   });
@@ -48,7 +48,7 @@ describe('classify', () => {
   });
 
   it('non-PR events are always heavy', () => {
-    expect(classify({ eventName: 'push', draft: false, files: ['SECURITY.md'] }).heavy).toBe(true);
+    expect(classify({ eventName: 'push', draft: false, files: ['ROADMAP.md'] }).heavy).toBe(true);
     expect(classify({ eventName: 'workflow_dispatch', draft: true, files: [] }).heavy).toBe(true);
   });
 });
@@ -83,7 +83,8 @@ describe('files that tests or the generator read are never docs-only', () => {
     expect(tracked.length).toBeGreaterThan(0);
     for (const f of tracked) {
       expect(corpus.includes(f), `${f} is read by a test`).toBe(false);
-      expect(corpus.includes(dirname(f) + '/'), `${dirname(f)}/ is read by a test`).toBe(false);
+      if (dirname(f) !== '.')
+        expect(corpus.includes(dirname(f) + '/'), `${dirname(f)}/ is read by a test`).toBe(false);
     }
   });
 });

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Claude Code PreToolUse hook (opt-in, issue #334): asks for confirmation once
- * more than CI_GUARD_LIMIT (default 5) CI-triggering commands (git push,
- * gh pr merge/ready, gh workflow run, gh run rerun) ran today in this
+ * more than CI_GUARD_LIMIT (default 5) CI-triggering commands (git push, git -C d push,
+ * gh pr create/merge/ready, gh api pulls/auto-merge, gh workflow run, gh run rerun) ran today in this
  * checkout. Wire it with `.claude/settings.example.json`.
  *
  * Never blocks outright: it answers `ask`, so the human decides. On any
@@ -17,7 +17,7 @@ import { pathToFileURL } from 'node:url';
 // Matches the command at the start or after a shell separator, so a string
 // that merely mentions "git push" (a commit message) is not counted.
 const COSTLY =
-  /(?:^|[;&|(]\s*|&&\s*)(?:git\s+push\b|gh\s+pr\s+(?:merge|ready)\b|gh\s+workflow\s+run\b|gh\s+run\s+rerun\b)/;
+  /(?:^|[;&|(]\s*|&&\s*)(?:git\s+(?:-C\s+\S+\s+)?push\b|gh\s+pr\s+(?:create|merge|ready)\b|gh\s+workflow\s+run\b|gh\s+run\s+rerun\b|gh\s+api\b[^\n]*(?:\/pulls\b|enablePullRequestAutoMerge|markPullRequestReadyForReview))/;
 
 export function isCostly(command) {
   return COSTLY.test(String(command ?? ''));
@@ -47,7 +47,12 @@ async function main() {
     const input = JSON.parse(raw || '{}');
     if (input.tool_name !== 'Bash') return;
     const dir = join(tmpdir(), 'ci-push-guard');
-    const file = join(dir, createHash('sha1').update(process.cwd()).digest('hex') + '.json');
+    const file = join(
+      dir,
+      createHash('sha1')
+        .update(process.env.CLAUDE_PROJECT_DIR || process.cwd())
+        .digest('hex') + '.json',
+    );
     let state;
     try {
       state = JSON.parse(readFileSync(file, 'utf8'));

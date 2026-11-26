@@ -160,6 +160,18 @@ for (const f of [
   '.claude/hooks/ci-push-guard.mjs',
   '.claude/settings.example.json',
 ]) copy(f);
+// The copied runbook is the template's: drop the table rows for workflows a
+// generated project does not have, so it only claims what exists.
+{
+  const rb = dst('docs/runbooks/ci-cost.md');
+  writeFileSync(
+    rb,
+    readFileSync(rb, 'utf8')
+      .split('\n')
+      .filter((l) => !/`visual\.yml`|`tauri-\*\.yml`/.test(l))
+      .join('\n'),
+  );
+}
 
 // --- templated files ---
 const TEMPLATE_PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -332,7 +344,7 @@ write('.github/workflows/deploy.yml', `name: Deploy to GitHub Pages
 on:
   push: { branches: [main] }
   workflow_dispatch:
-concurrency: { group: pages, cancel-in-progress: true }
+concurrency: { group: pages, cancel-in-progress: false }
 permissions: { contents: read, pages: write, id-token: write }
 jobs:
   build:

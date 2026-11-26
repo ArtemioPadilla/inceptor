@@ -2,25 +2,29 @@
 /**
  * `changes` gate for the heavy CI jobs (issue #334).
  *
- * Prints `heavy=true|false` to $GITHUB_OUTPUT. FAIL-SAFE: it only says `false`
+ * Prints `heavy=true|false` and `draft=true|false` to $GITHUB_OUTPUT. The
+ * workflow turns `draft=true` into a FAILING step in every required job: a
+ * draft must never leave a green required check behind (marking ready keeps
+ * the same SHA, so a stale green would be mergeable with nothing run).
+ * FAIL-SAFE: it only says `false`
  * when it can prove the heavy jobs are unnecessary (draft PR, or a diff made
  * solely of files no test/build reads). Anything unknown, empty or erroring
  * is `true`, and the workflow additionally treats a failed/absent output as
  * "run" (`!= 'false'`), so a bug here can only cost minutes, never skip checks.
  *
- * DOCS_ONLY is a deliberately short allowlist: CLAUDE.md, README.md,
- * CONTRIBUTING.md, AGENTS.md and docs/COMPONENTS.md are read by unit tests,
- * so editing them still runs the full CI. Extend it per project.
+ * DOCS_ONLY is a deliberately short allowlist of files NOTHING reads: not the
+ * tests, not scripts/init.mjs. CLAUDE.md, README.md, CONTRIBUTING.md,
+ * AGENTS.md, docs/COMPONENTS.md, .github/ISSUE_TEMPLATE/ and docs/decisions/
+ * are read by tests or the generator, so editing them runs the full CI.
+ * src/tests/ci-changes.test.ts fails if an entry becomes read. Extend per project.
  */
 import { appendFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 export const DOCS_ONLY = [
-  /^docs\/decisions\//,
   /^docs\/superpowers\//,
-  /^\.github\/ISSUE_TEMPLATE\//,
-  /^(SETUP|ROADMAP|SECURITY|CODE_OF_CONDUCT|INTEGRATION-PLAN)\.md$/,
+  /^(SETUP|ROADMAP|CODE_OF_CONDUCT|INTEGRATION-PLAN)\.md$/,
   /^LICENSE$/,
 ];
 
@@ -40,9 +44,15 @@ function main() {
   let files;
   try {
     if (eventName === 'pull_request') {
-      files = execFileSync('git', ['diff', '--name-only', `origin/${BASE_REF}...HEAD`], {
-        encoding: 'utf8',
-      })
+      // --no-renames: otherwise a moved file lists only its destination, so moving
+      // a file tests read into an allowlisted folder would look docs-only.
+      files = execFileSync(
+        'git',
+        ['diff', '--no-renames', '--name-only', `origin/${BASE_REF}...HEAD`],
+        {
+          encoding: 'utf8',
+        },
+      )
         .split('\n')
         .filter(Boolean);
     }
@@ -53,7 +63,8 @@ function main() {
   }
   const { heavy, reason } = classify({ eventName, draft: PR_DRAFT === 'true', files });
   console.log(`heavy=${heavy} (${reason})`);
-  if (GITHUB_OUTPUT) appendFileSync(GITHUB_OUTPUT, `heavy=${heavy}\n`);
+  const draft = eventName === 'pull_request' && PR_DRAFT === 'true';
+  if (GITHUB_OUTPUT) appendFileSync(GITHUB_OUTPUT, `heavy=${heavy}\ndraft=${draft}\n`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

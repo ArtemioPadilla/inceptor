@@ -15,8 +15,10 @@ the full CI. Treat CI minutes as a budget you spend, not a free oracle.
    (and `npm run test`) on your machine first. CI confirms; it does not
    discover.
 2. **Push once per ready PR.** Iterate in a **draft** PR: drafts run only the
-   cheap checks. Mark it ready for review when it is done, which starts the
-   full CI once.
+   cheap checks (their required jobs fail on purpose, so a draft cannot be
+   merged by accident). Mark it ready for review when it is done, which starts
+   the full CI once. After marking ready, **wait for the new run** to finish
+   green before merging; never `gh pr ready && gh pr merge` in one go.
 3. **Do not "update branch with main"** (the button, `git merge main`, rebase
    plus force-push) unless there is a real conflict. Every update re-runs CI.
 4. **No parallel mass sweeps** over many PRs (rebasing, re-running, relabelling,

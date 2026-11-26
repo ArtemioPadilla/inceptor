@@ -2,7 +2,8 @@
 /**
  * Daily CI budget breaker (issue #334).
  *
- * Counts the workflow runs created in the last 24h with ONE REST call
+ * Counts the pull_request workflow runs created in the last 24h (pushes,
+ * Dependabot and issue_comment runs are not what burns minutes here) with ONE REST call
  * (`GET /repos/{repo}/actions/runs?per_page=1` -> total_count) and fails the
  * calling job when the count is confidently over CI_DAILY_RUN_LIMIT.
  *
@@ -21,7 +22,10 @@
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-export const DEFAULT_LIMIT = 200;
+// Calibration: limit ~ monthly budget minutes / 30 / average billed minutes per
+// PR run (docs/runbooks/ci-cost.md). 50 fits a Pro plan (3,000 min) at ~2 PR
+// runs/hour of work; the Nov 2026 incident ran ~1,280 minutes/day.
+export const DEFAULT_LIMIT = 50;
 export const OVERRIDE_LABEL = 'ci:override';
 
 export async function evaluateBudget({
@@ -56,7 +60,7 @@ export async function evaluateBudget({
   let total;
   try {
     const res = await fetchImpl(
-      `${apiUrl}/repos/${repo}/actions/runs?created=${encodeURIComponent(`>=${since}`)}&per_page=1`,
+      `${apiUrl}/repos/${repo}/actions/runs?event=pull_request&created=${encodeURIComponent(`>=${since}`)}&per_page=1`,
       { headers },
     );
     if (!res.ok) return open(`runs API answered HTTP ${res.status}`);

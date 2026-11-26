@@ -5,15 +5,18 @@ on:
   # listening to branch pushes ran the same CI twice per commit (#334).
   push:
     branches: [main]
-  # ready_for_review: draft PRs run only the cheap checks (see the `changes`
-  # job); marking ready must start the full CI. The newest check run of a
-  # given name on a commit is the one branch protection counts.
+  # ready_for_review: a draft PR's required jobs FAIL on purpose ("full CI has
+  # not run"), so a draft can never leave a green required check behind;
+  # marking ready starts the full CI. The SHA does not change when marking
+  # ready, so wait for the new run to finish before merging (AGENTS.md).
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
 
 # One run per PR: a new push cancels the in-flight run instead of queueing N
-# parallel runs. Runs on main are never cancelled (merges must finish).
+# parallel runs. Runs on main are never cancelled in progress; with the default
+# queue behaviour a newer main run replaces one still *pending* (intermediate
+# runs are dropped, the latest always runs).
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -27,15 +30,20 @@ permissions:
 
 jobs:
   # Decides whether the heavy steps are needed. Fail-safe: the heavy jobs gate
-  # on `!= 'false'`, so a failed/unknown result still runs them. Drafts and
-  # docs-only diffs get heavy=false; every job below still REPORTS (so required
-  # checks stay green-by-running, not green-by-skipping).
+  # on `!= 'false'`, so a failed/skipped/unknown result still runs them. Docs-
+  # only diffs get heavy=false; drafts get draft=true, which makes every
+  # required job fail. Every job below still REPORTS (required checks are
+  # green-by-running, never green-by-skipping).
+  # PR-only: on push to main it would cost a billed minute to always say
+  # "heavy"; skipped, the empty output still runs everything (`!= 'false'`).
   changes:
     name: Changes gate
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       heavy: ${{ steps.gate.outputs.heavy }}
+      draft: ${{ steps.gate.outputs.draft }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
@@ -60,7 +68,14 @@ jobs:
         run: node scripts/ci-budget.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
+          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '50' }}
+      - name: Draft PR - full CI has not run
+        # A draft must not leave a passing required check: marking ready keeps
+        # the same SHA, so a green draft check would be mergeable with no tests.
+        if: ${{ !cancelled() && needs.changes.outputs.draft == 'true' }}
+        run: |
+          echo "::error::Draft: full CI has not run; mark the PR ready for review"
+          exit 1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           node-version: '22'
@@ -112,9 +127,11 @@ jobs:
   #   Tracking: #168.
   #
   # axe a11y smoke note:
-  #   The axe/Playwright smoke already runs in visual.yml (one AxeBuilder scan
-  #   per smoke route, failing on serious/critical). Wiring a duplicate here
-  #   would double the cost. See visual.yml for the implementation.
+  #   The axe/Playwright smoke lives in visual.yml (one AxeBuilder scan per
+  #   smoke route, failing on serious/critical). Since #334 that workflow runs
+  #   on dispatch and weekly, NOT on every PR, so there is no per-PR a11y gate:
+  #   dispatch it before merging UI changes. Wiring a duplicate here would
+  #   double the cost.
   # ---------------------------------------------------------------------------
   actionlint:
     name: Lint workflows (actionlint)
@@ -130,7 +147,14 @@ jobs:
         run: node scripts/ci-budget.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
+          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '50' }}
+      - name: Draft PR - full CI has not run
+        # A draft must not leave a passing required check: marking ready keeps
+        # the same SHA, so a green draft check would be mergeable with no tests.
+        if: ${{ !cancelled() && needs.changes.outputs.draft == 'true' }}
+        run: |
+          echo "::error::Draft: full CI has not run; mark the PR ready for review"
+          exit 1
 
       - name: Download actionlint v1.7.12 (SHA-pinned)
         # The SHA is the sha256 of actionlint_1.7.12_linux_amd64.tar.gz,
@@ -194,7 +218,14 @@ jobs:
         run: node scripts/ci-budget.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
+          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '50' }}
+      - name: Draft PR - full CI has not run
+        # A draft must not leave a passing required check: marking ready keeps
+        # the same SHA, so a green draft check would be mergeable with no tests.
+        if: ${{ !cancelled() && needs.changes.outputs.draft == 'true' }}
+        run: |
+          echo "::error::Draft: full CI has not run; mark the PR ready for review"
+          exit 1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           node-version: '22'
@@ -222,7 +253,14 @@ jobs:
         run: node scripts/ci-budget.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
+          CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '50' }}
+      - name: Draft PR - full CI has not run
+        # A draft must not leave a passing required check: marking ready keeps
+        # the same SHA, so a green draft check would be mergeable with no tests.
+        if: ${{ !cancelled() && needs.changes.outputs.draft == 'true' }}
+        run: |
+          echo "::error::Draft: full CI has not run; mark the PR ready for review"
+          exit 1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
         with:
           python-version: '3.12'
