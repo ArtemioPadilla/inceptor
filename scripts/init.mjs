@@ -3,7 +3,8 @@
  * create-inceptor-app — genera un proyecto LEAN a partir de este scaffold.
  *
  *   node scripts/init.mjs --name my-app --archetype static --out ../my-app \
- *     [--repo owner/repo] [--lang en|es] [--site https://example.com]
+ *     [--repo owner/repo] [--lang en|es] [--site https://example.com] \
+ *     [--accent '#d6006f']
  *
  * Copia un subconjunto *core* (UI ~18, lib, stores/theme, islas de infra,
  * layout, landing mínima), renombra/de-brandea, y deja `npm run check` verde.
@@ -13,6 +14,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } 
 import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdirSync } from 'node:fs';
+import { accentHex, parseAccent, rebrandCss } from './accent.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -39,6 +41,20 @@ const repoSlug = flag('repo', `your-org/${slug}`);
 const lang = flag('lang', 'en');
 // Production origin (no trailing slash) → astro `site`, sitemap, robots.txt.
 const site = flag('site', null)?.replace(/\/+$/, '') ?? null;
+
+// Brand colour (#hex or oklch(L C H)): its hue re-brands the palette, the
+// favicon and theme-color. Without it the template's emerald is kept.
+const accent = flag('accent', null);
+let accentHue = null;
+if (accent !== null) {
+  try {
+    accentHue = parseAccent(accent).h;
+  } catch (err) {
+    console.error(`✗ --accent inválido: ${err.message}`);
+    process.exit(1);
+  }
+}
+const brandHex = accentHue === null ? '#10b981' : accentHex(accentHue);
 
 if (!out) {
   console.error('✗ Falta --out <dir>. Ej: node scripts/init.mjs --name app --archetype static --out ../app');
@@ -129,6 +145,9 @@ mkdirSync(out, { recursive: true });
 
 // --- reusable copies (self-contained: solo dependen de @/lib/utils, base-ui, etc.) ---
 copy('src/styles/global.css');
+if (accentHue !== null) {
+  writeFileSync(dst('src/styles/global.css'), rebrandCss(readFileSync(dst('src/styles/global.css'), 'utf8'), accentHue));
+}
 for (const f of LIB) copy(`src/lib/${f}.ts`);
 copy('src/lib/api.test.ts');
 copy('src/stores/theme.ts');
@@ -274,7 +293,7 @@ const { title = '${name}', description = '', lang = '${lang}' } = Astro.props;
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="${brandHex}" />
   </head>
   <body class="relative min-h-screen bg-background text-foreground antialiased">
     <a
@@ -311,7 +330,7 @@ write('public/robots.txt', site
 write('.gitignore', '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n.astro/\n*.log\n');
 write('.env.example', `PUBLIC_REPO_SLUG=${repoSlug}\n${backend ? 'PUBLIC_API_BASE=\n' : ''}PUBLIC_BUILD_SHA=dev\nPUBLIC_VERSION=dev\n`);
 // public/ con un favicon mínimo
-write('public/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#10b981"/></svg>\n`);
+write('public/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="${brandHex}"/></svg>\n`);
 
 // minimal README
 write('README.md', `# ${name}\n\nGenerado con create-inceptor-app (archetype: \`${archetype}\`).\n\n\`\`\`bash\nnpm install\nnpm run dev      # http://localhost:4321\nnpm run check    # gate: astro check + type-check + tests + build\n\`\`\`\n\n> CI y deploy instalan con \`npm ci\`: haz commit de \`package-lock.json\` tras el primer \`npm install\`. Si npm 10.9 truena con \`Cannot read properties of null (reading 'edgesOut')\`, genera el lockfile con \`npx npm@11 install\`.\n\nRecetas (auth, IA, hosting): ver el repo scaffold, carpeta \`docs/recipes/\`.\n`);
@@ -404,6 +423,10 @@ PR → merge.
 This project was instanced from a template. The machine-readable identity
 still carries generated defaults; an agent (or human) must:
 
+- [${accentHue === null ? ' ' : 'x'}] \`src/styles/global.css\` — brand colour: the template ships emerald.
+      Decide the action colour on purpose (a green brand can read as an
+      "approved" state) and re-run with \`--accent <colour>\`, or rotate the
+      hue of the brand tokens by hand; the favicon and \`theme-color\` follow it
 - [ ] \`src/lib/site-meta.ts\` — write ${name}'s real one-line description
       (it feeds /llms.txt, JSON-LD and the default meta description)
 - [ ] \`src/pages/llms.txt.ts\` — list the real routes as they're built
