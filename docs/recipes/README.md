@@ -10,6 +10,7 @@ código vivo del demo — son recetas: copia lo que necesites a tu proyecto.
 | [ai-byok.md](./ai-byok.md) | Feature de IA con **BYOK** (el usuario trae su API key) + backend stateless + tests mockeados |
 | [ai-backend-hosting.md](./ai-backend-hosting.md) | Dónde corre el backend de IA (local / Render / Cloud Run) y por qué Edge Functions ≠ Python |
 | [supabase-migrations-ci.md](./supabase-migrations-ci.md) | Aplicar migraciones de DB e inyectar env públicas por GitHub Actions |
+| [theme-aware-graphics.md](./theme-aware-graphics.md) | Gráficos decorativos (mapas, ilustraciones) que siguen claro/oscuro con máscaras CSS y CSP estricta |
 
 Principio transversal: **el extractor/servicio es stateless; el frontend escribe
 en la DB con la sesión del usuario + RLS** → no se usa la service key en ningún
