@@ -49,9 +49,22 @@ describe('ci.yml — cost-aware', () => {
     );
   });
 
-  it('has a changes job running scripts/ci-changes.mjs', () => {
+  it('has a changes job running scripts/ci-changes.mjs, only on pull_request (no billed minute on main)', () => {
     expect(j.changes).toContain('scripts/ci-changes.mjs');
+    expect(j.changes).toMatch(/^ {4}if: github\.event_name == 'pull_request'$/m);
   });
+
+  it.each(['build', 'actionlint', 'server-node', 'server-flask'])(
+    '%s fails (never passes green) while the PR is a draft',
+    (name) => {
+      const body = j[name] ?? '';
+      expect(body).toMatch(
+        /if: \$\{\{ !cancelled\(\) && needs\.changes\.outputs\.draft == 'true' \}\}/,
+      );
+      expect(body).toContain('Draft: full CI has not run');
+      expect(body).toMatch(/exit 1/);
+    },
+  );
 
   it('gates heavy work fail-safe: != false, never == true', () => {
     expect(ci).not.toMatch(/outputs\.heavy == 'true'/);
@@ -82,6 +95,11 @@ describe('ci.yml — cost-aware', () => {
     expect(j.build).toMatch(
       /if: \$\{\{ success\(\) && needs\.changes\.outputs\.heavy != 'false' \}\}/,
     );
+  });
+
+  it('breaker default is calibrated low and documented', () => {
+    expect(ci).toContain("vars.CI_DAILY_RUN_LIMIT || '50'");
+    expect(read('docs/runbooks/ci-cost.md')).toMatch(/monthly budget minutes \/ 30/);
   });
 
   it('actions stay SHA-pinned (no new unpinned refs)', () => {
@@ -123,6 +141,7 @@ describe('docs and agent wiring', () => {
       'update branch',
       '10',
       'stop usage',
+      'wait for the new',
     ]) {
       expect(a.toLowerCase()).toContain(needle.toLowerCase());
     }
@@ -148,6 +167,7 @@ describe('docs and agent wiring', () => {
       'fails open',
       'PreToolUse',
       'required',
+      'wait for the new run',
     ]) {
       expect(r).toContain(needle);
     }
@@ -200,6 +220,13 @@ describe('create-inceptor-app ships the guardrails', () => {
     const c = gen('.github/workflows/ci.yml');
     expect(c).toContain('scripts/ci-budget.mjs');
     expect(c).toContain("needs.changes.outputs.heavy != 'false'");
+  });
+
+  it('generated deploy.yml and runbook match what the project really has', () => {
+    expect(gen('.github/workflows/deploy.yml')).toContain('cancel-in-progress: false');
+    const rb = gen('docs/runbooks/ci-cost.md');
+    expect(rb).not.toContain('visual.yml');
+    expect(rb).not.toContain('tauri-*.yml');
   });
 
   it('reminds to set an Actions budget with "stop usage"', () => {

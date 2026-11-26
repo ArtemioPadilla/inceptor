@@ -11,6 +11,10 @@ describe('isCostly', () => {
     'gh workflow run visual.yml',
     'gh pr ready 3',
     'gh run rerun 99',
+    'gh pr create --title x',
+    'git -C packages/app push origin HEAD',
+    'gh api repos/o/r/pulls -f title=x',
+    "gh api graphql -f query='mutation { enablePullRequestAutoMerge(input:{}) { clientMutationId } }'",
   ])('flags %s', (c) => expect(isCostly(c)).toBe(true));
 
   it.each([
@@ -56,5 +60,14 @@ describe('decide', () => {
     });
     expect(r.decision).toBe('allow');
     expect(r.state).toEqual({ day: '2026-11-26', count: 1 });
+  });
+});
+
+describe('settings example', () => {
+  it('uses CLAUDE_PROJECT_DIR so a cd into a subfolder does not disable the guard', async () => {
+    const { readFileSync } = await import('node:fs');
+    const s = readFileSync('.claude/settings.example.json', 'utf8');
+    expect(s).toContain('$CLAUDE_PROJECT_DIR');
+    expect(s).not.toContain('"node .claude/hooks');
   });
 });

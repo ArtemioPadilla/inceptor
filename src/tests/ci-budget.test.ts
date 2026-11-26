@@ -54,6 +54,8 @@ describe('evaluateBudget', () => {
     expect(url).toContain('/repos/o/r/actions/runs');
     expect(url).toContain('created=>=2026-11-25T12:00:00Z');
     expect(url).toContain('per_page=1');
+    // only PR-event runs: pushes, Dependabot and issue_comment runs are not what the breaker meters
+    expect(url).toContain('event=pull_request');
   });
 
   it('fails closed with an ::error:: when over the threshold', async () => {
