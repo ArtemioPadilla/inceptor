@@ -1,0 +1,97 @@
+---
+/**
+ * Landing hero with a theme-aware graphic (marketing block, #338).
+ *
+ * The graphic is CSS-masked SVG layers painted with theme tokens, so one set
+ * of files follows light and dark with no inline style (recipe:
+ * docs/recipes/theme-aware-graphics.md). On a phone the graphic sits under
+ * the text; from `lg` it fills the section behind it, faded on the text side.
+ *
+ * Slots: `actions` (the call to action), `aside` (a small card over the
+ * graphic) and `graphic` (replace the demo layers with your own: a map, an
+ * illustration. Keep it `aria-hidden` if it is decorative).
+ */
+import HighlightHeadline from './HighlightHeadline.astro';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  /** Closing phrase of the title, on the highlight block. */
+  highlight?: string;
+  lead?: string;
+}
+const { eyebrow, title, highlight, lead } = Astro.props;
+---
+
+<section class="relative isolate overflow-hidden">
+  <div
+    class="pointer-events-none relative z-10 mx-auto max-w-6xl px-5 pb-6 pt-10 lg:pb-36 lg:pt-20"
+  >
+    <div class="pointer-events-auto max-w-xl">
+      {eyebrow && <p class="font-mono text-sm uppercase tracking-widest text-primary">{eyebrow}</p>}
+      <HighlightHeadline tag="h1" size="hero" text={title} highlight={highlight} class="mt-4" />
+      {lead && <p class="mt-6 max-w-prose text-lg leading-relaxed text-muted-foreground">{lead}</p>}
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <slot name="actions" />
+      </div>
+    </div>
+  </div>
+
+  <div class="relative -mt-6 h-[24rem] lg:absolute lg:inset-0 lg:-z-10 lg:mt-0 lg:h-auto">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 overflow-hidden print:hidden"
+    >
+      <slot name="graphic">
+        <div
+          class="hero-canvas absolute left-1/2 top-1/2 w-[56rem] -translate-x-1/2 -translate-y-1/2 lg:left-auto lg:right-[-6%] lg:h-[125%] lg:w-auto lg:translate-x-0"
+        >
+          <div class="hero-layer hero-lines"></div>
+          <div class="hero-layer hero-accents"></div>
+        </div>
+      </slot>
+      <div class="hero-veil absolute inset-0"></div>
+    </div>
+    <div class="absolute inset-x-3 bottom-3 lg:inset-x-0 lg:bottom-8">
+      <div class="mx-auto flex max-w-6xl lg:justify-end lg:px-5">
+        <slot name="aside" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The canvas has the aspect ratio of the layers, so nothing is cropped out of step. */
+  .hero-canvas {
+    aspect-ratio: 1024 / 900;
+  }
+  .hero-layer {
+    position: absolute;
+    inset: 0;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+  .hero-lines {
+    background: var(--border);
+    mask-image: url('../../assets/blocks/hero-lines.svg');
+  }
+  .hero-accents {
+    background: var(--primary);
+    mask-image: url('../../assets/blocks/hero-accents.svg');
+  }
+  /* Fades the graphic into the page where the text is: from the top on a
+     phone, from the left on desktop. */
+  .hero-veil {
+    background: linear-gradient(180deg, var(--background) 0%, transparent 26%);
+  }
+  @media (min-width: 64rem) {
+    .hero-veil {
+      background: linear-gradient(
+        90deg,
+        var(--background) 0%,
+        var(--background) 42%,
+        transparent 70%
+      );
+    }
+  }
+</style>

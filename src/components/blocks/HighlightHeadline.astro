@@ -1,0 +1,33 @@
+---
+/**
+ * A display headline whose closing phrase sits on the highlight block
+ * (marketing block, #338). The phrase is `inline-block`, so it wraps as a
+ * unit instead of breaking mid-word under `overflow-wrap: anywhere`.
+ */
+interface Props {
+  /** The headline, without the highlighted phrase. */
+  text: string;
+  /** The closing phrase, painted on `--highlight`. */
+  highlight?: string;
+  tag?: 'h1' | 'h2' | 'h3';
+  /** `hero` for a page's main headline, `section` for a section title. */
+  size?: 'hero' | 'section';
+  class?: string;
+}
+const { text, highlight, tag: Tag = 'h2', size = 'section', class: className } = Astro.props;
+const SIZE = {
+  hero: 'text-[clamp(2.25rem,5vw,4rem)] leading-[1.1]',
+  section: 'text-3xl leading-tight sm:text-5xl',
+};
+---
+
+<Tag class:list={['font-display font-bold tracking-tight text-foreground', SIZE[size], className]}>
+  {text}
+  {
+    highlight && (
+      <span class="mt-1 inline-block rounded-xl bg-highlight px-2 pb-1 text-highlight-foreground">
+        {highlight}
+      </span>
+    )
+  }
+</Tag>

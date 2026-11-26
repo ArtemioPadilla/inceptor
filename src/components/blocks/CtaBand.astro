@@ -1,0 +1,31 @@
+---
+/**
+ * A call-to-action band on the highlight colour (marketing block, #338).
+ * Its text is always dark ink, in light and dark. Slot `actions` takes the
+ * button or link.
+ */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  tag?: 'h2' | 'h3';
+}
+const { eyebrow, title, body, tag: Tag = 'h2' } = Astro.props;
+---
+
+<div
+  class="grid items-center gap-6 rounded-3xl bg-highlight p-6 text-highlight-foreground sm:p-10 lg:grid-cols-2 lg:gap-12"
+>
+  <div>
+    {eyebrow && <p class="font-mono text-sm uppercase tracking-widest">{eyebrow}</p>}
+    <Tag class="mt-2 font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl"
+      >{title}</Tag
+    >
+  </div>
+  <div>
+    {body && <p class="max-w-prose text-base leading-relaxed">{body}</p>}
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <slot name="actions" />
+    </div>
+  </div>
+</div>

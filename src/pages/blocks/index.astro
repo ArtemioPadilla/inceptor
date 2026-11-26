@@ -4,6 +4,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const blocks = [
   {
+    href: '/blocks/marketing/',
+    name: 'Marketing blocks',
+    summary:
+      'Six landing blocks in plain Astro with zero JS: hero with a theme-aware graphic, highlight headline, paired cards, level ladder, principles panel and CTA band.',
+  },
+  {
     href: '/blocks/login/',
     name: 'Login block',
     summary:
@@ -30,14 +36,19 @@ const blocks = [
 >
   <main id="main-content" class="mx-auto max-w-6xl px-4 py-12">
     <header class="mb-10">
-      <h1 class="text-3xl font-bold tracking-tight text-foreground" style="view-transition-name: page-title">
+      <h1
+        class="text-3xl font-bold tracking-tight text-foreground"
+        style="view-transition-name: page-title"
+      >
         Blocks
       </h1>
       <p class="mt-2 text-muted-foreground">
         Complete, installable page compositions — built from the primitives already in
-        <a href={withBase('/gallery/')} class="text-primary underline underline-offset-2 hover:text-primary/80">/gallery</a>,
-        not new ones. Each block below ships with a Preview/Code toggle so you can copy
-        the exact source.
+        <a
+          href={withBase('/gallery/')}
+          class="text-primary underline underline-offset-2 hover:text-primary/80">/gallery</a
+        >, not new ones. Each block below ships with a Preview/Code toggle so you can copy the exact
+        source.
       </p>
     </header>
 

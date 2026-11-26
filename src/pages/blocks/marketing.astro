@@ -1,0 +1,201 @@
+---
+import { withBase } from '@/lib/href';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlockPreviewToggle from '../../components/gallery/BlockPreviewToggle.astro';
+import HeroGraphic from '../../components/blocks/HeroGraphic.astro';
+import HighlightHeadline from '../../components/blocks/HighlightHeadline.astro';
+import PairedCards from '../../components/blocks/PairedCards.astro';
+import LevelLadder from '../../components/blocks/LevelLadder.astro';
+import PrinciplesPanel from '../../components/blocks/PrinciplesPanel.astro';
+import CtaBand from '../../components/blocks/CtaBand.astro';
+import heroSource from '../../components/blocks/HeroGraphic.astro?raw';
+import headlineSource from '../../components/blocks/HighlightHeadline.astro?raw';
+import cardsSource from '../../components/blocks/PairedCards.astro?raw';
+import ladderSource from '../../components/blocks/LevelLadder.astro?raw';
+import principlesSource from '../../components/blocks/PrinciplesPanel.astro?raw';
+import ctaSource from '../../components/blocks/CtaBand.astro?raw';
+
+// The previews use Inceptor's own facts, so the page shows real copy.
+const cards: [
+  { eyebrow: string; title: string; body: string; points: string[] },
+  { eyebrow: string; title: string; body: string; points: string[] },
+] = [
+  {
+    eyebrow: 'Default',
+    title: 'Static, zero JS',
+    body: 'An Astro site that ships HTML. React hydrates only the islands that need it.',
+    points: [
+      'Any static host works: GitHub Pages is the default.',
+      'A service worker and an offline cache come with it.',
+    ],
+  },
+  {
+    eyebrow: 'Opt-in',
+    title: 'A backend when you need one',
+    body: 'Two interchangeable archetypes expose the same /api contract.',
+    points: [
+      'Hono, reusing the frontend’s Zod schemas, or Flask with Pydantic.',
+      'Unset PUBLIC_API_BASE and the site stays fully static.',
+    ],
+  },
+];
+const levels = [
+  { code: '1', name: 'Issue', detail: 'Every feature starts as a GitHub issue.' },
+  { code: '2', name: 'Plan', detail: 'prometeo orders the work; you approve it.' },
+  { code: '3', name: 'Build', detail: 'forja implements one issue, test first.' },
+  { code: '4', name: 'Verify', detail: 'centinela approves or rejects before the PR.' },
+];
+const principles = [
+  { title: 'Test first', text: 'A failing test is committed before the code that makes it pass.' },
+  {
+    title: 'Schemas are the spec',
+    text: 'Zod schemas are the source of truth, shared by frontend and backend.',
+  },
+  {
+    title: 'Ethical by default',
+    text: 'UI changes answer an eight-item ethics checklist before they merge.',
+  },
+];
+const BUTTON =
+  'inline-flex min-h-12 items-center rounded-xl px-6 py-3 text-base font-semibold transition-colors';
+---
+
+<BaseLayout
+  title="Marketing blocks — inceptor"
+  description="Six landing blocks in plain Astro with zero JS: a hero with a theme-aware graphic, a highlight headline, paired cards, a level ladder, a principles panel and a call-to-action band."
+>
+  <main id="main-content" class="mx-auto max-w-6xl space-y-14 px-4 py-12">
+    <header class="max-w-3xl">
+      <h1 class="text-3xl font-bold tracking-tight">Marketing blocks</h1>
+      <p class="mt-2 text-muted-foreground">
+        Six blocks to build a landing from, in plain Astro with zero JavaScript. They read the brand
+        tokens (<code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">--primary</code>,
+        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">--highlight</code>,
+        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">--brand-2</code>,
+        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">--brand-3</code>), so a
+        re-brand reaches all of them, and they use no inline style, so they work under a strict
+        Content Security Policy. Copy the files from
+        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">src/components/blocks/</code
+        >.
+      </p>
+    </header>
+
+    <section aria-labelledby="b-hero" class="space-y-4">
+      <h2 id="b-hero" class="text-xl font-semibold">Hero with a theme-aware graphic</h2>
+      <BlockPreviewToggle id="hero" code={heroSource} lang="astro">
+        <div class="overflow-hidden rounded-xl border border-border bg-background">
+          <HeroGraphic
+            eyebrow="Astro 5 · React 19 · zero JS by default"
+            title="Every feature ships"
+            highlight="through an issue."
+            lead="Issue, Claude Code, pull request, merge, deploy. A starter with a full UI kit where the workflow is part of the template."
+          >
+            <Fragment slot="actions">
+              <a
+                href={withBase('/docs/')}
+                class:list={[BUTTON, 'bg-primary text-primary-foreground hover:bg-primary/90']}
+              >
+                Read the docs
+              </a>
+              <a
+                href={withBase('/gallery/')}
+                class:list={[
+                  BUTTON,
+                  'border border-input bg-background text-foreground hover:bg-muted',
+                ]}
+              >
+                See the components
+              </a>
+            </Fragment>
+            <div
+              slot="aside"
+              class="rounded-2xl border border-border bg-card p-4 shadow-lg lg:max-w-sm"
+            >
+              <p class="text-base font-semibold leading-relaxed text-card-foreground">
+                Demo graphic
+              </p>
+              <p class="text-base leading-relaxed text-muted-foreground">
+                Two masked SVG layers. Replace them with yours through the graphic slot.
+              </p>
+            </div>
+          </HeroGraphic>
+        </div>
+      </BlockPreviewToggle>
+    </section>
+
+    <section aria-labelledby="b-headline" class="space-y-4">
+      <h2 id="b-headline" class="text-xl font-semibold">Headline with a highlight block</h2>
+      <BlockPreviewToggle id="headline" code={headlineSource} lang="astro">
+        <div class="rounded-xl border border-border bg-background p-6 sm:p-10">
+          <HighlightHeadline
+            tag="h3"
+            text="Batteries-included UI,"
+            highlight="zero JS by default."
+          />
+        </div>
+      </BlockPreviewToggle>
+    </section>
+
+    <section aria-labelledby="b-cards" class="space-y-4">
+      <h2 id="b-cards" class="text-xl font-semibold">Paired cards</h2>
+      <BlockPreviewToggle id="cards" code={cardsSource} lang="astro">
+        <PairedCards cards={cards} />
+      </BlockPreviewToggle>
+    </section>
+
+    <section aria-labelledby="b-ladder" class="space-y-4">
+      <h2 id="b-ladder" class="text-xl font-semibold">Level ladder</h2>
+      <BlockPreviewToggle id="ladder" code={ladderSource} lang="astro">
+        <LevelLadder levels={levels} />
+      </BlockPreviewToggle>
+    </section>
+
+    <section aria-labelledby="b-principles" class="space-y-4">
+      <h2 id="b-principles" class="text-xl font-semibold">Principles panel</h2>
+      <BlockPreviewToggle id="principles" code={principlesSource} lang="astro">
+        <PrinciplesPanel
+          tag="h3"
+          title="How the work gets done"
+          lead="The rules every pull request in this repository follows."
+          items={principles}
+        />
+      </BlockPreviewToggle>
+    </section>
+
+    <section aria-labelledby="b-cta" class="space-y-4">
+      <h2 id="b-cta" class="text-xl font-semibold">Call-to-action band</h2>
+      <BlockPreviewToggle id="cta" code={ctaSource} lang="astro">
+        <CtaBand
+          tag="h3"
+          eyebrow="MIT licensed"
+          title="Start from the template"
+          body="Clone it, run the generator and get a lean project with the UI kit, the sub-agents and the checks already in place."
+        >
+          <a
+            slot="actions"
+            href="https://github.com/ArtemioPadilla/inceptor"
+            class:list={[BUTTON, 'bg-highlight-foreground text-highlight hover:opacity-90']}
+          >
+            Open the repository
+          </a>
+        </CtaBand>
+      </BlockPreviewToggle>
+    </section>
+
+    <footer
+      class="flex flex-wrap gap-x-6 gap-y-2 border-t border-border pt-6 text-sm text-muted-foreground"
+    >
+      <a href={withBase('/blocks/')} class="underline underline-offset-4 hover:text-foreground">
+        ← Back to blocks
+      </a>
+      <a
+        href="https://github.com/ArtemioPadilla/inceptor/tree/main/src/components/blocks"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline underline-offset-4 hover:text-foreground"
+      >
+        View source on GitHub ↗
+      </a>
+    </footer>
+  </main>
+</BaseLayout>
