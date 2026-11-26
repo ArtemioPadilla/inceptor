@@ -21,7 +21,7 @@ npm run check         # astro diagnostics
 `/showcase` and `/dashboard` are snapshotted by Playwright in both light and dark.
 Baselines live under `tests/__screenshots__/{chromium-light,chromium-dark}/`.
 
-The CI workflow at `.github/workflows/visual.yml` re-runs Playwright on every PR.
+The workflow at `.github/workflows/visual.yml` re-runs Playwright on manual dispatch and weekly (not on every PR, to save CI minutes; see `docs/runbooks/ci-cost.md`). Dispatch it from the Actions tab before merging UI changes.
 
 > ⚠️ **Initial baselines were captured on macOS** and may produce false-positive
 > diffs against Ubuntu CI runners due to system font metric differences (~20–50px
