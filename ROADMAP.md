@@ -564,16 +564,18 @@ code, a highlight and supporting colours, landing blocks, and more than one
 starting point. The scaffold can raise the floor; it cannot make each
 product's design decision, so the first item makes the step mandatory instead.
 
-- [x] **Design round before planning** *(#336)* — `dedalo` sub-agent, `/design`,
+- [x] **Design round before planning** *(#336, PR #342)* — `dedalo` sub-agent, `/design`,
   `docs/design/TEMPLATE.md`, and a `centinela` gate (`DESIGN_SPEC_MISSING`).
-- [ ] **Highlight and supporting brand tokens** *(#337)* — derived from the
+- [x] **Highlight and supporting brand tokens** *(#337, PR #343)* — derived from the
   accent, covered by the contrast test.
-- [ ] **Marketing blocks** *(#338)* — hero with masked graphic, highlight
-  headline, paired cards, level ladder, principles, CTA band. Needs #337.
-- [ ] **`--look` starting landings** *(#339)* — three looks built from the
-  blocks. Needs #338.
-- [ ] **The site shows it** *(#340)* — looks gallery, blocks, the Buró del
-  Pueblo case, live accent picker, a new home. Needs #338 and #339.
+- [x] **Marketing blocks** *(#338, PR #344)* — hero with masked graphic, highlight
+  headline, paired cards, level ladder, principles, CTA band. Not in `registry.json` yet.
+- [x] **`--look` starting landings** *(#339, PR #345)* — three looks built from the
+  blocks. They still read as siblings: making them clearly distinct needs
+  look-specific blocks or tokens.
+- [~] **The site shows it** *(#340, PR #346)* — looks gallery, blocks, the Buró del
+  Pueblo case and the live accent picker shipped. Open: rebuild the home with a
+  look (needs its own design round) and screenshots for the case post.
 
 ## Epic 29c — iOS packaging via Tauri — not yet started
 
