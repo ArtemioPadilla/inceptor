@@ -62,7 +62,9 @@ describe('scripts/font-fallbacks.mjs', () => {
 
   it('the fallback faces in global.css are the script output for the shipped fonts', () => {
     const css = squash(read('src/styles/global.css'));
-    expect(css).toContain(squash(fallbackFaces(hanken, { family: 'Hanken Grotesk', kind: 'sans' })));
+    expect(css).toContain(
+      squash(fallbackFaces(hanken, { family: 'Hanken Grotesk', kind: 'sans' })),
+    );
     expect(css).toContain(squash(fallbackFaces(fraunces, { family: 'Fraunces', kind: 'serif' })));
   });
 
