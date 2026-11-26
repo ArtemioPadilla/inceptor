@@ -143,10 +143,73 @@
   --color-primary-700: #047857;
 
   /* Type system — editorial serif display + grotesque body + mono for code.
-     Loaded in BaseLayout via Google Fonts (preconnect + display=swap). */
-  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+     Self-hosted via @fontsource-variable in BaseLayout (font-display: swap).
+     Each webfont is followed by its metric-matched local fallbacks (below),
+     so the swap does not shift the layout. */
+  --font-sans:
+    'Hanken Grotesk Variable', 'Hanken Grotesk Fallback', 'Hanken Grotesk Fallback Roboto',
+    'Hanken Grotesk Fallback Liberation', ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    'Fraunces Variable', 'Fraunces Fallback', 'Fraunces Fallback Noto', 'Fraunces Fallback DejaVu',
+    Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+/* Metric-matched local fallbacks: text first paints in a local face resized
+   to the webfont's average width and line box. One @font-face per local
+   font, because the overrides apply per face: Arial/Georgia (macOS,
+   Windows), Roboto/Noto Serif (Android), Liberation Sans/DejaVu Serif
+   (Linux, CI). GENERATED: this block is the output of
+     node scripts/font-fallbacks.mjs <font> --family "<name>" --kind sans|serif
+   for the shipped fonts; src/tests/fonts-self-hosted.test.ts fails if they
+   differ. Re-run it when a face changes instead of editing the numbers. */
+@font-face {
+  font-family: 'Hanken Grotesk Fallback';
+  src: local('Arial');
+  size-adjust: 100.94%;
+  ascent-override: 99.07%;
+  descent-override: 30.02%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Hanken Grotesk Fallback Roboto';
+  src: local('Roboto');
+  size-adjust: 101.16%;
+  ascent-override: 98.85%;
+  descent-override: 29.95%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Hanken Grotesk Fallback Liberation';
+  src: local('Liberation Sans');
+  size-adjust: 100.94%;
+  ascent-override: 99.07%;
+  descent-override: 30.02%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Fraunces Fallback';
+  src: local('Georgia');
+  size-adjust: 115.75%;
+  ascent-override: 84.49%;
+  descent-override: 22.03%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Fraunces Fallback Noto';
+  src: local('Noto Serif');
+  size-adjust: 107.28%;
+  ascent-override: 91.17%;
+  descent-override: 23.77%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Fraunces Fallback DejaVu';
+  src: local('DejaVu Serif');
+  size-adjust: 99.88%;
+  ascent-override: 97.91%;
+  descent-override: 25.53%;
+  line-gap-override: 0%;
 }
 
 @layer base {

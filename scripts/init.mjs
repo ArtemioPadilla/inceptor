@@ -200,6 +200,8 @@ write('package.json', JSON.stringify({
   // with (drift once paired TS 5 with ignoreDeprecations: '6.0' → TS5103).
   dependencies: pick([
     '@astrojs/check', '@astrojs/react', '@astrojs/sitemap', '@base-ui-components/react',
+    '@fontsource-variable/fraunces', '@fontsource-variable/hanken-grotesk',
+    '@fontsource-variable/jetbrains-mono',
     '@hookform/resolvers', '@nanostores/react', '@tailwindcss/vite',
     '@tanstack/query-persist-client-core', '@tanstack/react-query',
     '@tanstack/react-table', '@tanstack/react-virtual', 'astro',
@@ -266,6 +268,12 @@ const nav: { href: string; label: string }[] = [];
 `);
 
 write('src/layouts/BaseLayout.astro', `---
+// Self-hosted fonts (#327): no request to a third party, so no visitor IP
+// leaves for Google Fonts and a strict CSP needs no extra host. Variable
+// files: one request per family, fetched per unicode-range.
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/hanken-grotesk';
+import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import SiteHeader from '../components/common/SiteHeader.astro';
@@ -288,9 +296,6 @@ const { title = '${name}', description = '', lang = '${lang}' } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <meta name="theme-color" content="${brandHex}" />

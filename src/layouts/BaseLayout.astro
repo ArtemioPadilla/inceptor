@@ -1,4 +1,10 @@
 ---
+// Self-hosted fonts (#327): no request to a third party, so no visitor IP
+// leaves for Google Fonts and a strict CSP needs no extra host. Variable
+// files: one request per family, fetched per unicode-range.
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/hanken-grotesk';
+import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import FeedbackFAB from '../components/common/FeedbackFAB.astro';
 import SiteHeader from '../components/common/SiteHeader.astro';
@@ -107,14 +113,6 @@ const canonicalUrl = Astro.site
     {alternates && alternates.map((alt) => (
       <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
     ))}
-    {/* Type system: Fraunces (display) + Hanken Grotesk (body) + JetBrains Mono.
-        preconnect + display=swap so text paints immediately in the fallback. */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-    />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <link rel="icon" type="image/png" sizes="32x32" href={withBase('/favicon.ico')} />
