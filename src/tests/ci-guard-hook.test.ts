@@ -15,6 +15,12 @@ describe('isCostly', () => {
     'git -C packages/app push origin HEAD',
     'gh api repos/o/r/pulls -f title=x',
     "gh api graphql -f query='mutation { enablePullRequestAutoMerge(input:{}) { clientMutationId } }'",
+    'cd x\ngit push origin HEAD',
+    'gh api -X PUT repos/o/r/pulls/5/merge',
+    'gh api --method POST repos/o/r/actions/workflows/ci.yml/dispatches -f ref=main',
+    'gh api -X POST repos/o/r/actions/runs/9/rerun',
+    'gh api -X POST repos/o/r/actions/runs/9/rerun-failed-jobs',
+    'gh api -X PUT repos/o/r/pulls/5/update-branch',
   ])('flags %s', (c) => expect(isCostly(c)).toBe(true));
 
   it.each([
@@ -23,6 +29,14 @@ describe('isCostly', () => {
     'gh pr view 3',
     'npm run check',
     'git pull',
+    'gh api repos/o/r/pulls/5',
+    'gh api repos/o/r/pulls/5/files',
+    'gh api repos/o/r/pulls/5/comments',
+    "gh api 'repos/o/r/pulls?state=open'",
+    'git push --dry-run',
+    'git push -n origin HEAD',
+    'gh api repos/o/r/actions/runs/9',
+    'gh api -X POST repos/o/r/issues/5/comments -f body=x',
   ])('ignores %s', (c) => expect(isCostly(c)).toBe(false));
 });
 

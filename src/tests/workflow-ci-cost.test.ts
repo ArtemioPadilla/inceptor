@@ -158,6 +158,17 @@ describe('docs and agent wiring', () => {
     }
   });
 
+  it('docs state drafts, re-runs and required checks accurately (review round 3)', () => {
+    const r = read('docs/runbooks/ci-cost.md');
+    expect(r).not.toMatch(/the four `ci\.yml` jobs/);
+    expect(r).toMatch(/Re-running the draft run will fail again/);
+    expect(r).toMatch(/close and reopen/);
+    expect(r).toMatch(/re-runs are not counted/i);
+    expect(r).toMatch(/no required job has a job-level skip condition/);
+    expect(read('AGENTS.md')).toMatch(/drafts run no checks/);
+    expect(read('AGENTS.md')).not.toMatch(/drafts run only the\s+cheap checks/);
+  });
+
   it('runbook documents budget, breaker, label and the hook', () => {
     const r = read('docs/runbooks/ci-cost.md');
     for (const needle of [
