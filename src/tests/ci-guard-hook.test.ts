@@ -21,6 +21,15 @@ describe('isCostly', () => {
     'gh api -X POST repos/o/r/actions/runs/9/rerun',
     'gh api -X POST repos/o/r/actions/runs/9/rerun-failed-jobs',
     'gh api -X PUT repos/o/r/pulls/5/update-branch',
+    'gh pr update-branch 5',
+    'gh pr reopen 5',
+    'git -c http.extraHeader=x push origin HEAD',
+    'git -c a=b -C sub push',
+    'GIT_SSH_COMMAND=ssh git push',
+    'FOO=1 BAR=2 git push origin HEAD',
+    'env git push',
+    'env FOO=1 git push origin HEAD',
+    'cd x && env A=b git -c k=v push',
   ])('flags %s', (c) => expect(isCostly(c)).toBe(true));
 
   it.each([
@@ -37,6 +46,12 @@ describe('isCostly', () => {
     'git push -n origin HEAD',
     'gh api repos/o/r/actions/runs/9',
     'gh api -X POST repos/o/r/issues/5/comments -f body=x',
+    'gh api -X GET repos/o/r/pulls -f state=open',
+    'gh api --method GET repos/o/r/pulls -F per_page=5',
+    'gh api -X get repos/o/r/pulls/5/merge -f x=y',
+    'FOO=1 git status',
+    'env git -c k=v log',
+    'git -c k=v push --dry-run',
   ])('ignores %s', (c) => expect(isCostly(c)).toBe(false));
 });
 
