@@ -50,7 +50,7 @@ describe('evaluateBudget', () => {
   it('asks only for runs created in the last 24h', async () => {
     const fetchImpl = api({ total: 1 });
     await evaluateBudget({ ...base, fetchImpl });
-    const url = decodeURIComponent(String(fetchImpl.mock.calls[0][0]));
+    const url = decodeURIComponent(String(fetchImpl.mock.calls[0]?.[0]));
     expect(url).toContain('/repos/o/r/actions/runs');
     expect(url).toContain('created=>=2026-11-25T12:00:00Z');
     expect(url).toContain('per_page=1');

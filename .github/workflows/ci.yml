@@ -62,10 +62,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         with:
           node-version: '22'
           cache: 'npm'
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
       - run: npm ci
         if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
       # `check` already ends with a full build (npm-run-all --serial build),
@@ -77,7 +77,6 @@ jobs:
       # to `tsc --noEmit` + `npm run build` instead. The step below picks this
       # up automatically.
       - name: Check (astro check + build, or tsc fallback)
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         run: |
           if [ "$CHECK_SKIP_ASTRO" = "1" ]; then
             echo "::warning::CHECK_SKIP_ASTRO=1 — running tsc --noEmit + build instead of astro check (OOM escape hatch)"
@@ -88,6 +87,7 @@ jobs:
           fi
         env:
           CHECK_SKIP_ASTRO: ${{ vars.CHECK_SKIP_ASTRO || '' }}
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
 
   # ---------------------------------------------------------------------------
   # actionlint — static analysis for all workflow files
@@ -196,17 +196,17 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: server-node/package-lock.json
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
       - run: npm ci
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         working-directory: server-node
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
       - run: npm test
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         working-directory: server-node
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
 
   server-flask:
     name: server-flask tests
@@ -224,14 +224,14 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           CI_DAILY_RUN_LIMIT: ${{ vars.CI_DAILY_RUN_LIMIT || '200' }}
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         with:
           python-version: '3.12'
           cache: pip
           cache-dependency-path: server-flask/requirements-dev.txt
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
       - run: pip install -r requirements-dev.txt
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         working-directory: server-flask
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
       - run: pytest
-        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}
         working-directory: server-flask
+        if: ${{ success() && needs.changes.outputs.heavy != 'false' }}

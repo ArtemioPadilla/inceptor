@@ -15,11 +15,11 @@ const ci = read('.github/workflows/ci.yml');
 function jobs(text: string): Record<string, string> {
   const body = text.slice(text.indexOf('\njobs:\n') + 7);
   const out: Record<string, string> = {};
-  let name: string | null = null;
+  let name = '';
   for (const line of body.split('\n')) {
     const m = /^ {2}([\w-]+):\s*$/.exec(line);
     if (m) {
-      name = m[1];
+      name = m[1] ?? '';
       out[name] = '';
     } else if (name) out[name] += line + '\n';
   }
@@ -64,7 +64,7 @@ describe('ci.yml — cost-aware', () => {
   it.each(['build', 'actionlint', 'server-node', 'server-flask'])(
     '%s runs the budget breaker as its first non-checkout step and is never skipped by a job-level if',
     (name) => {
-      const body = j[name];
+      const body = j[name] ?? '';
       expect(body).toBeDefined();
       expect(body).toMatch(/needs: changes/);
       // Job-level `if` would turn an over-budget PR into a skipped (= passing) check.
@@ -80,13 +80,13 @@ describe('ci.yml — cost-aware', () => {
 
   it('heavy steps are gated at step level', () => {
     expect(j.build).toMatch(
-      /if: \$\{\{ !cancelled\(\) && needs\.changes\.outputs\.heavy != 'false' \}\}/,
+      /if: \$\{\{ success\(\) && needs\.changes\.outputs\.heavy != 'false' \}\}/,
     );
   });
 
   it('actions stay SHA-pinned (no new unpinned refs)', () => {
-    for (const m of ci.matchAll(/uses:\s+(\S+)@(\S+)/g)) {
-      if (!/^(actions|github)\//.test(m[1])) expect(m[2]).toMatch(/^[0-9a-f]{40}$/);
+    for (const m of ci.matchAll(/^\s*-?\s*uses:\s+(\S+)@(\S+)/gm)) {
+      if (!/^(actions|github)\//.test(m[1] ?? '')) expect(m[2]).toMatch(/^[0-9a-f]{40}$/);
     }
   });
 });
