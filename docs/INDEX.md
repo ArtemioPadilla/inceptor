@@ -14,6 +14,7 @@ Core visual and interaction principles every Inceptor contributor must know.
 | Density modes (compact vs comfortable) | [`docs/foundation/density.md`](./foundation/density.md) |
 | Page regions, spacing rhythm, responsive breakpoints | [`docs/foundation/layout.md`](./foundation/layout.md) |
 | Light/dark theming, CSS variable layering | [`docs/foundation/theming.md`](./foundation/theming.md) |
+| Recording a project's brand: palette, colours to avoid, type, logo (template) | [`docs/foundation/brand.md`](./foundation/brand.md) |
 | Keyboard, focus, contrast, motion baseline | [`docs/foundation/accessibility.md`](./foundation/accessibility.md) |
 
 ## "Where do I find…?"
