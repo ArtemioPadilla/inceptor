@@ -33,7 +33,9 @@ describe('scripts/accent.mjs', () => {
     const out = rebrandCss(css, parseAccent(ROSA).h);
     expect(out).not.toMatch(EMERALD_HUE);
     // Lightness and chroma are the vetted ones: only the hue moves.
-    expect(out).toMatch(/--primary: light-dark\(oklch\(0\.50? 0\.123 [\d.]+\), oklch\(0\.78 0\.155 [\d.]+\)\)/);
+    expect(out).toMatch(
+      /--primary: light-dark\(oklch\(0\.50? 0\.123 [\d.]+\), oklch\(0\.78 0\.155 [\d.]+\)\)/,
+    );
     // Neutrals, the destructive red and the other chart hues are untouched.
     expect(out).toContain('--background: light-dark(oklch(1 0 0), oklch(0.145 0 0));');
     expect(out).toContain('oklch(0.577 0.245 27.325)');
