@@ -56,7 +56,9 @@ describe('ci.yml — cost-aware', () => {
   it('gates heavy work fail-safe: != false, never == true', () => {
     expect(ci).not.toMatch(/outputs\.heavy == 'true'/);
     expect(ci).toContain("needs.changes.outputs.heavy != 'false'");
-    expect(ci).toContain('!cancelled()');
+    // Step gates use success(), not !cancelled(): the latter would keep running
+    // the heavy steps after the budget step failed.
+    expect(ci).toContain("success() && needs.changes.outputs.heavy != 'false'");
   });
 
   it.each(['build', 'actionlint', 'server-node', 'server-flask'])(
@@ -66,7 +68,7 @@ describe('ci.yml — cost-aware', () => {
       expect(body).toBeDefined();
       expect(body).toMatch(/needs: changes/);
       // Job-level `if` would turn an over-budget PR into a skipped (= passing) check.
-      expect(body).not.toMatch(/^ {4}if:/m);
+      expect(body).not.toMatch(/^ {4}if: (?!\$\{\{ !cancelled\(\) \}\})/m);
       const steps = body
         .slice(body.indexOf('    steps:\n'))
         .split(/\n {6}- /)
