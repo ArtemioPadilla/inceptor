@@ -94,11 +94,43 @@ export function accentHex(hue) {
   return oklchToHex({ ...PRIMARY_LIGHT, h: hue });
 }
 
+/** Dark ink and paper: the two text colours a brand fill can carry. */
+const INK = 'oklch(0.165 0.004 286)';
+const PAPER = 'oklch(0.99 0 0)';
+const SUPPORTING = ['highlight', 'brand-2', 'brand-3'];
+const hueDistance = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+const oklch = (l, c, h) => `oklch(${l} ${c} ${Math.round((((h % 360) + 360) % 360) * 100) / 100})`;
+
+/**
+ * The highlight and the two supporting fills for an accent `hue`, each with
+ * the text colour it carries, as `{ light, dark }` pairs (#337). Same formula
+ * as define-theme.ts (parity test in src/tests/brand-tokens.test.ts).
+ *
+ * - highlight: a highlighter amber (hue 90), light enough for dark ink. If
+ *   the accent is itself near amber, the complement is used instead, so the
+ *   highlight never merges with the action colour.
+ * - brand-2: a mid-light fill 210° round the wheel, with dark ink.
+ * - brand-3: a deep fill 30° before the accent, with white text.
+ */
+export function supportingTokens(hue) {
+  const same = (value) => ({ light: value, dark: value });
+  const highlightHue = hueDistance(hue, 90) >= 40 ? 90 : hue + 180;
+  return {
+    highlight: same(oklch(0.86, 0.16, highlightHue)),
+    'highlight-foreground': same(INK),
+    'brand-2': same(oklch(0.72, 0.1, hue + 210)),
+    'brand-2-foreground': same(INK),
+    'brand-3': { light: oklch(0.38, 0.13, hue - 30), dark: oklch(0.43, 0.14, hue - 30) },
+    'brand-3-foreground': same(PAPER),
+  };
+}
+
 /**
  * Rotates every emerald brand token of the template's global.css to `hue`:
  * the `oklch()` values whose hue is the template's (chroma > 0, so neutrals
  * never match) and the `--color-primary-*` hex scale. Lightness and chroma
  * are kept. Other hues (destructive, the rest of the chart palette) stay.
+ * The highlight and the supporting fills are re-derived (supportingTokens).
  */
 export function rebrandCss(css, hue) {
   const h = Math.round(hue * 10) / 10;
@@ -110,6 +142,15 @@ export function rebrandCss(css, hue) {
   for (const hex of TEMPLATE_HEX_SCALE) {
     const { l, c } = srgbToOklch(hexToSrgb(hex));
     out = out.replace(new RegExp(hex, 'gi'), oklchToHex({ l, c, h: hue }));
+  }
+  // The highlight and supporting fills are derived, not rotated.
+  const derived = supportingTokens(hue);
+  for (const name of SUPPORTING.flatMap((n) => [n, `${n}-foreground`])) {
+    const { light, dark } = derived[name];
+    out = out.replace(
+      new RegExp(`(--${name}:\\s*)light-dark\\([^;]*\\);`),
+      `$1light-dark(${light}, ${dark});`,
+    );
   }
   return out;
 }

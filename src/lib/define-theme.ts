@@ -35,6 +35,15 @@ export interface PaletteTokens {
   accent: string;
   accentForeground: string;
   border: string;
+  /** Highlighter fill (the block behind a phrase, a pin) and the ink it carries. */
+  highlight: string;
+  highlightForeground: string;
+  /** Mid-light supporting fill, with dark ink. */
+  brand2: string;
+  brand2Foreground: string;
+  /** Deep supporting fill, with white text. */
+  brand3: string;
+  brand3Foreground: string;
 }
 
 /** A full generated theme: light + dark palettes sharing one accent hue. */
@@ -132,6 +141,40 @@ function neutral(l: number): OklchColor {
   return { l, c: 0, h: 0 };
 }
 
+/** Dark ink and paper: the two text colours a brand fill can carry. */
+const INK = 'oklch(0.165 0.004 286)';
+const PAPER = 'oklch(0.99 0 0)';
+
+function hueDistance(a: number, b: number): number {
+  return Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+}
+
+function wrapHue(h: number): number {
+  return ((h % 360) + 360) % 360;
+}
+
+/**
+ * Highlight and supporting fills (#337), the same formula as
+ * `supportingTokens()` in scripts/accent.mjs (parity test in
+ * src/tests/brand-tokens.test.ts). The highlight is a highlighter amber
+ * unless the accent is itself near amber, then its complement.
+ */
+function supporting(hue: number, mode: 'light' | 'dark') {
+  const highlightHue = hueDistance(hue, 90) >= 40 ? 90 : hue + 180;
+  return {
+    highlight: toOklchString({ l: 0.86, c: 0.16, h: wrapHue(highlightHue) }),
+    highlightForeground: INK,
+    brand2: toOklchString({ l: 0.72, c: 0.1, h: wrapHue(hue + 210) }),
+    brand2Foreground: INK,
+    brand3: toOklchString(
+      mode === 'light'
+        ? { l: 0.38, c: 0.13, h: wrapHue(hue - 30) }
+        : { l: 0.43, c: 0.14, h: wrapHue(hue - 30) },
+    ),
+    brand3Foreground: PAPER,
+  };
+}
+
 function buildPalette(hue: number): GeneratedTheme {
   const light: PaletteTokens = {
     background: toOklchString(neutral(1)),
@@ -141,6 +184,7 @@ function buildPalette(hue: number): GeneratedTheme {
     accent: toOklchString({ l: 0.96, c: 0.02, h: hue }),
     accentForeground: toOklchString({ l: 0.3, c: 0.06, h: hue }),
     border: toOklchString(neutral(0.922)),
+    ...supporting(hue, 'light'),
   };
 
   const dark: PaletteTokens = {
@@ -153,6 +197,7 @@ function buildPalette(hue: number): GeneratedTheme {
     // Dark borders use a translucent white overlay rather than a flat gray —
     // same convention as the shipped palette's `--border` in `.dark`.
     border: 'oklch(1 0 0 / 12%)',
+    ...supporting(hue, 'dark'),
   };
 
   return { light, dark };

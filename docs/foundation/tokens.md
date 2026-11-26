@@ -16,6 +16,8 @@ never hard-coded colour literals.
 | Brand / action | `--primary`, `--primary-foreground` | CTAs, active states, links |
 | Secondary | `--secondary`, `--secondary-foreground` | Lower-priority actions |
 | Accent | `--accent`, `--accent-foreground` | Hover / highlight washes |
+| Highlight | `--highlight`, `--highlight-foreground` | The block behind a phrase, a pin, a call-out; always dark ink on it |
+| Supporting brand | `--brand-2`, `--brand-3` (+ `-foreground`) | One-block fills for landing sections; never body text on the page background |
 | Destructive | `--destructive`, `--destructive-foreground` | Delete, revoke, danger |
 | Border / input | `--border`, `--input`, `--ring` | Lines, field outlines, focus rings |
 | Chart palette | `--chart-1` … `--chart-5` | Data-visualisation series |
