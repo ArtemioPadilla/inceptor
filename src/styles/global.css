@@ -85,6 +85,16 @@
     --chart-3: light-dark(oklch(0.55 0.16 255), oklch(0.7 0.16 255));
     --chart-4: light-dark(oklch(0.72 0.16 70), oklch(0.8 0.16 75));
     --chart-5: light-dark(oklch(0.58 0.2 300), oklch(0.72 0.19 300));
+    /* Highlight and supporting brand fills (#337), derived from the accent
+       hue by supportingTokens() in scripts/accent.mjs: `--accent` on init.mjs
+       re-derives them. Each fill ships with the text colour it carries. Fills
+       only: never body text on the page background. */
+    --highlight: light-dark(oklch(0.86 0.16 90), oklch(0.86 0.16 90));
+    --highlight-foreground: light-dark(oklch(0.165 0.004 286), oklch(0.165 0.004 286));
+    --brand-2: light-dark(oklch(0.72 0.1 13), oklch(0.72 0.1 13));
+    --brand-2-foreground: light-dark(oklch(0.165 0.004 286), oklch(0.165 0.004 286));
+    --brand-3: light-dark(oklch(0.38 0.13 133), oklch(0.43 0.14 133));
+    --brand-3-foreground: light-dark(oklch(0.99 0 0), oklch(0.99 0 0));
     --radius: 0.625rem;
     --sidebar: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
     --sidebar-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
@@ -122,6 +132,12 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-brand-2: var(--brand-2);
+  --color-brand-2-foreground: var(--brand-2-foreground);
+  --color-brand-3: var(--brand-3);
+  --color-brand-3-foreground: var(--brand-3-foreground);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

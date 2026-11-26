@@ -32,7 +32,11 @@ const contrast = (x: string, y: string) => {
   return (hi + 0.05) / (lo + 0.05);
 };
 const declared = (source: string, name: string) => {
-  const m = source.match(new RegExp(`--${name}:\\s*light-dark\\(\\s*(oklch\\([^)]*\\))\\s*,\\s*(oklch\\([^)]*\\))\\s*\\)`));
+  const m = source.match(
+    new RegExp(
+      `--${name}:\\s*light-dark\\(\\s*(oklch\\([^)]*\\))\\s*,\\s*(oklch\\([^)]*\\))\\s*\\)`,
+    ),
+  );
   expect(m, `--${name} is declared with light-dark()`).not.toBeNull();
   return { light: m![1]!, dark: m![2]! };
 };
@@ -67,8 +71,14 @@ describe('derivation from the accent', () => {
   it.each(HUES)('at hue %s every fill keeps AA text contrast in both themes', (hue) => {
     const t = supportingTokens(hue);
     for (const name of TOKENS) {
-      expect(contrast(t[`${name}-foreground`].light, t[name].light), `${name} light`).toBeGreaterThanOrEqual(4.5);
-      expect(contrast(t[`${name}-foreground`].dark, t[name].dark), `${name} dark`).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(t[`${name}-foreground`].light, t[name].light),
+        `${name} light`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(t[`${name}-foreground`].dark, t[name].dark),
+        `${name} dark`,
+      ).toBeGreaterThanOrEqual(4.5);
     }
   });
 

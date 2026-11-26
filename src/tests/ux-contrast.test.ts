@@ -102,6 +102,9 @@ const pairs: Array<[fg: string, bg: string, label: string]> = [
   ['--secondary-foreground', '--secondary', 'text on secondary'],
   ['--muted-foreground', '--muted', 'muted text on muted'],
   ['--accent-foreground', '--accent', 'text on accent'],
+  ['--highlight-foreground', '--highlight', 'ink on the highlight block'],
+  ['--brand-2-foreground', '--brand-2', 'ink on the mid-light brand fill'],
+  ['--brand-3-foreground', '--brand-3', 'white on the deep brand fill'],
 ];
 
 describe('WCAG AA contrast (Epic 12 criterion #5)', () => {
