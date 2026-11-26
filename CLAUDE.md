@@ -84,13 +84,17 @@ the full UI stack now in place.
 
 ## Workflow: Claude Code orchestration + Inceptor sub-agents
 
-This repo ships three project-specific sub-agents under `.claude/agents/`. There
+This repo ships four project-specific sub-agents under `.claude/agents/`. There
 is **no** native `/goal` loop — the main Claude Code session is the orchestrator.
 In a normal conversation, Claude triages an issue and dispatches the sub-agents
 (via the Task tool) to plan, implement, and validate the work, then opens a PR.
 
 ### Sub-agents (invoked via the Task tool)
 
+- **dedalo** — runs a design round before UI work is planned: sketches several
+  directions under `docs/design/sketches/`, helps you pick one, and records the
+  decision in a spec (`docs/design/`, from `TEMPLATE.md`). Does not write product
+  code. `/design` dispatches it.
 - **prometeo** — reads `INTEGRATION-PLAN.md` and decomposes a phase, milestone,
   or issue into an ordered, dependency-aware execution plan. Does not write code.
 - **forja** — implements a single issue: writes code, runs `npx` commands, makes
@@ -102,6 +106,9 @@ In a normal conversation, Claude triages an issue and dispatches the sub-agents
 
 The main session drives the loop, one issue at a time:
 
+0. For work that changes what a page looks like, **dedalo** runs the design
+   round first and you approve its spec. `centinela` rejects a page or layout PR
+   that cites no approved spec (`DESIGN_SPEC_MISSING`).
 1. **prometeo** decomposes the issue or phase into an ordered plan; you approve it.
 2. **forja** implements a single issue on a feature branch with atomic commits.
 3. **centinela** validates and returns APPROVED or REJECTED. On REJECTED it emits

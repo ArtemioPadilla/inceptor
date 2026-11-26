@@ -142,6 +142,28 @@ so the orchestrator routes the diagnosis back to `forja` with the right
 prompt — "you shipped a dark pattern" needs different remediation than "you
 broke the build".
 
+### 5.2 Design gate (pages and layouts)
+
+A page built with no design decision looks like the template. For PRs that
+add or restyle a page, a layout or the brand tokens (`src/pages/**`,
+`src/layouts/**`, the brand tokens or font stacks in `src/styles/global.css`):
+
+1. The PR body or a commit must cite a design spec under `docs/design/`.
+2. That spec must exist on the branch and carry `status: approved` in its
+   front matter. `status: proposed` is not enough: only a human approves.
+3. The diff should not contradict the spec's palette, type or "Requirements
+   found in tests". Flag what you see; you are not the design reviewer.
+
+Exempt: bug fixes, copy-only changes, changes inside a component that do not
+change what a page looks like, new gallery or demo entries for existing
+components, and tier-0 PRs. When in doubt whether a change is a restyle, say
+so in the verdict instead of guessing.
+
+If the spec is missing or not approved, REJECT with failure class
+`DESIGN_SPEC_MISSING` and `verdict_token: NEEDS_HUMAN`: `forja` cannot fix a
+decision nobody made. The remedy is a design round (`/design`, the `dedalo`
+sub-agent).
+
 ### 6. Bundle-size sanity check
 
 If forja added any new top-level dependency:

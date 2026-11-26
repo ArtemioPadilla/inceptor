@@ -1,13 +1,27 @@
 ---
-title: Sub-agents — prometeo, forja, centinela
-description: The three agents that execute the Inceptor loop.
+title: Sub-agents — dedalo, prometeo, forja, centinela
+description: The four agents that execute the Inceptor loop.
 ---
 
-Three Claude Code sub-agents under `.claude/agents/` execute the Inceptor
+Four Claude Code sub-agents under `.claude/agents/` execute the Inceptor
 development loop. The main Claude Code session is the orchestrator — it dispatches
 agents via the Task tool and reads their output to drive the next step.
 
-## The three agents
+## The four agents
+
+### dedalo — designer
+
+Runs a design round before UI work is planned, so a page is built from a
+decision and not from the template's defaults.
+
+- **Does:** read the product and its tests, sketch three to six directions as
+  self-contained HTML under `docs/design/sketches/`, lay out each one's strength
+  and cost, and write the chosen direction into a spec from
+  `docs/design/TEMPLATE.md`
+- **Does not:** write product code, or approve its own spec (a human sets
+  `status: approved`)
+- **Invoked when:** the work adds or restyles a page, a layout or the brand
+  (`/design`)
 
 ### prometeo — planner
 
@@ -43,6 +57,7 @@ Validates forja's work and returns APPROVED or REJECTED with a routing token.
 
 ```
 orchestrator
+  → dedalo (design)     → you pick a direction and approve the spec (UI work only)
   → prometeo (plan)     → you approve
   → forja (implement)   → commits on branch
   → centinela (verify)  → APPROVED / REJECTED
@@ -60,6 +75,7 @@ On REJECTED, the routing token drives what happens next:
 
 ## Agent spec files
 
+- [dedalo](https://github.com/ArtemioPadilla/inceptor/blob/main/.claude/agents/dedalo.md)
 - [prometeo](https://github.com/ArtemioPadilla/inceptor/blob/main/.claude/agents/prometeo.md)
 - [forja](https://github.com/ArtemioPadilla/inceptor/blob/main/.claude/agents/forja.md)
 - [centinela](https://github.com/ArtemioPadilla/inceptor/blob/main/.claude/agents/centinela.md)
