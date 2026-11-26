@@ -10,11 +10,13 @@ production. This scaffold uses Playwright for snapshot-based comparison.
 
 1. Playwright renders pages in a headless Chromium instance
 2. Snapshots are stored in `tests/__screenshots__/`
-3. The `visual.yml` CI workflow compares against stored snapshots on every PR
-4. Any pixel-level difference blocks merge
+3. The `visual.yml` workflow compares against stored snapshots when dispatched
+   manually (Actions tab) and on a weekly schedule, not on every PR (CI cost, #334)
+4. Any pixel-level difference fails that run; dispatch it before merging UI
+   changes and require it in review if you rely on it
 
 The `visual.yml` workflow is **separate from the main CI** — it uses the same
-Playwright runner but a different trigger (runs after `ci.yml` passes).
+Playwright runner but a different trigger (dispatch and weekly schedule).
 
 ## Running locally
 
@@ -54,8 +56,8 @@ expect(page).toHaveScreenshot({ threshold: 0.05 }); // 5% pixel diff tolerance
 
 ## Visual vs ux:check
 
-- **Visual regression** (`tests/__screenshots__/`) — catches *unintended* change
-- **`npm run ux:check`** — catches *intentional* harm (dark patterns, contrast failures, motion violations)
+- **Visual regression** (`tests/__screenshots__/`) — catches _unintended_ change
+- **`npm run ux:check`** — catches _intentional_ harm (dark patterns, contrast failures, motion violations)
 
 These are separate gates. Both must pass on a PR that touches UI.
 

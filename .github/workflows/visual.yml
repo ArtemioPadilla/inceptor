@@ -1,12 +1,16 @@
 name: Visual regression
 
+# Cost guardrail (#334): Playwright + browsers is the most expensive job, so it
+# no longer runs on every PR push. Run it from the Actions tab (or
+# `gh workflow run visual.yml --ref <branch>`) before merging UI changes, and
+# weekly on a schedule as the safety net. Scheduled runs are free on public
+# repos and cheap elsewhere; see docs/runbooks/ci-cost.md.
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * 1'
 
-# One run per branch (see ci.yml — audit Wave 1b).
+# One run per ref; a newer dispatch supersedes the in-flight one.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

@@ -53,6 +53,13 @@ Edit `.github/workflows/cd.yml` and replace the deploy step with your provider:
     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 ```
 
+## 3b. Set an Actions budget (private repos)
+
+Coding agents can burn CI minutes fast. In GitHub **Billing > Budgets and
+alerts**, add an Actions budget with **stop usage** and alerts. Guardrails
+shipped in the template and the rules for agents: `AGENTS.md` and
+`docs/runbooks/ci-cost.md`.
+
 ## 4. Update FeedbackFAB repo slug
 
 In `src/components/common/FeedbackFAB.astro`, confirm the `repoSlug` matches your repo:

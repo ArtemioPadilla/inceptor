@@ -556,6 +556,25 @@ not optional disclosure.
 
 **Design spec:** `docs/superpowers/specs/2026-08-20-tauri-mobile-android-design.md`
 
+## Epic 30 — Design quality for instanced projects (#341) — in progress
+
+Projects instanced from the scaffold come out looking like the scaffold.
+Re-branding Buró del Pueblo showed where the gain was: a design round before
+code, a highlight and supporting colours, landing blocks, and more than one
+starting point. The scaffold can raise the floor; it cannot make each
+product's design decision, so the first item makes the step mandatory instead.
+
+- [x] **Design round before planning** *(#336)* — `dedalo` sub-agent, `/design`,
+  `docs/design/TEMPLATE.md`, and a `centinela` gate (`DESIGN_SPEC_MISSING`).
+- [ ] **Highlight and supporting brand tokens** *(#337)* — derived from the
+  accent, covered by the contrast test.
+- [ ] **Marketing blocks** *(#338)* — hero with masked graphic, highlight
+  headline, paired cards, level ladder, principles, CTA band. Needs #337.
+- [ ] **`--look` starting landings** *(#339)* — three looks built from the
+  blocks. Needs #338.
+- [ ] **The site shows it** *(#340)* — looks gallery, blocks, the Buró del
+  Pueblo case, live accent picker, a new home. Needs #338 and #339.
+
 ## Epic 29c — iOS packaging via Tauri — not yet started
 
 Follow-up to Epic 29b. Needs a Mac CI runner, a $99/year Apple Developer
