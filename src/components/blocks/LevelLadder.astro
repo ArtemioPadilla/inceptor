@@ -1,0 +1,38 @@
+---
+/**
+ * An ordered ladder of levels or steps whose tiles get stronger towards the
+ * last one (marketing block, #338). The level is in the text (its code and
+ * name); the colour only accompanies it (WCAG 1.4.1).
+ */
+interface Level {
+  /** Short code or number: "E0", "1". */
+  code: string;
+  name: string;
+  detail?: string;
+}
+interface Props {
+  levels: Level[];
+}
+const { levels } = Astro.props;
+const SOFT = { box: 'bg-muted text-foreground', detail: 'text-muted-foreground' };
+const tone = (i: number) =>
+  i === levels.length - 1
+    ? { box: 'bg-primary text-primary-foreground', detail: '' }
+    : i === levels.length - 2
+      ? { box: 'bg-brand-2 text-brand-2-foreground', detail: '' }
+      : SOFT;
+---
+
+<ol role="list" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  {
+    levels.map((level, i) => (
+      <li class:list={['flex flex-col rounded-2xl p-5', tone(i).box]}>
+        <span class="font-display text-4xl font-bold tracking-tight">{level.code}</span>
+        <p class="mt-6 text-base font-semibold leading-relaxed">{level.name}</p>
+        {level.detail && (
+          <p class:list={['mt-1 text-base leading-relaxed', tone(i).detail]}>{level.detail}</p>
+        )}
+      </li>
+    ))
+  }
+</ol>

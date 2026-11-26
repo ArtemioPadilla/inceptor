@@ -25,7 +25,9 @@ describe('marketing blocks', () => {
     // Strict CSP (style-src 'self'): no style attribute, no define:vars.
     expect(src).not.toMatch(/\sstyle=|define:vars/);
     // Tokens, never literals: a re-brand must reach every block.
-    expect(src).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+    // (Comments are stripped first: an issue reference like #338 is not a colour.)
+    const code = src.replace(/\/\*[\s\S]*?\*\/|<!--[\s\S]*?-->/g, '');
+    expect(code).not.toMatch(/#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\b/i);
   });
 
   it('the fills come from the brand tokens, each with its own text colour', () => {

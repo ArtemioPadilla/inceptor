@@ -1,0 +1,65 @@
+---
+/**
+ * Two cards that read as a pair: the first outlined, the second filled with
+ * the deep brand colour (marketing block, #338). For two offers, two
+ * audiences or two questions that belong together.
+ */
+interface Card {
+  /** Small label above the title. */
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  points?: string[];
+}
+interface Props {
+  cards: [Card, Card];
+  /** Heading level of the card titles. */
+  tag?: 'h2' | 'h3';
+}
+const { cards, tag: Tag = 'h3' } = Astro.props;
+const TONE = [
+  {
+    box: 'border-foreground bg-card text-card-foreground',
+    soft: 'text-muted-foreground',
+    dot: 'bg-primary',
+  },
+  {
+    box: 'border-brand-3 bg-brand-3 text-brand-3-foreground',
+    soft: 'text-brand-3-foreground/85',
+    dot: 'bg-highlight',
+  },
+];
+---
+
+<div class="grid gap-4 md:grid-cols-2">
+  {
+    cards.map((card, i) => {
+      const tone = TONE[i]!;
+      return (
+        <article class:list={['flex flex-col rounded-3xl border-2 p-6 sm:p-10', tone.box]}>
+          {card.eyebrow && (
+            <p class:list={['font-mono text-sm uppercase tracking-widest', tone.soft]}>
+              {card.eyebrow}
+            </p>
+          )}
+          <Tag class="mt-3 font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+            {card.title}
+          </Tag>
+          {card.body && (
+            <p class:list={['mt-4 text-base leading-relaxed', tone.soft]}>{card.body}</p>
+          )}
+          {card.points && (
+            <ul role="list" class="mt-6 space-y-3 text-base leading-relaxed">
+              {card.points.map((point) => (
+                <li class="flex gap-3">
+                  <span aria-hidden="true" class:list={['mt-2.5 h-2 w-2 shrink-0', tone.dot]} />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      );
+    })
+  }
+</div>
