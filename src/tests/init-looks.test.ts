@@ -35,7 +35,9 @@ describe('create-inceptor-app --look', () => {
 
   it.each(LOOKS)('%s: the landing is built from the marketing blocks, which are copied', (look) => {
     const page = files[look]('src/pages/index.astro');
-    const used = [...page.matchAll(/from '\.\.\/components\/blocks\/(\w+)\.astro'/g)].map((m) => m[1]!);
+    const used = [...page.matchAll(/from '\.\.\/components\/blocks\/(\w+)\.astro'/g)].map(
+      (m) => m[1]!,
+    );
     expect(used.length).toBeGreaterThanOrEqual(3);
     for (const block of used) {
       expect(existsSync(join(out(look), `src/components/blocks/${block}.astro`)), block).toBe(true);
@@ -47,7 +49,11 @@ describe('create-inceptor-app --look', () => {
 
   it('the three landings are different compositions, not one page recoloured', () => {
     const blocksOf = (look: (typeof LOOKS)[number]) =>
-      [...files[look]('src/pages/index.astro').matchAll(/<(HeroGraphic|HighlightHeadline|PairedCards|LevelLadder|PrinciplesPanel|CtaBand)\b/g)]
+      [
+        ...files[look]('src/pages/index.astro').matchAll(
+          /<(HeroGraphic|HighlightHeadline|PairedCards|LevelLadder|PrinciplesPanel|CtaBand)\b/g,
+        ),
+      ]
         .map((m) => m[1])
         .join(' > ');
     const orders = LOOKS.map(blocksOf);
@@ -61,12 +67,18 @@ describe('create-inceptor-app --look', () => {
 
   it('each look has its own display face, imported by the layout and listed in package.json', () => {
     const expected = {
-      editorial: { pkg: '@fontsource-variable/fraunces', stack: /--font-display:\s*'Fraunces Variable'/ },
+      editorial: {
+        pkg: '@fontsource-variable/fraunces',
+        stack: /--font-display:\s*'Fraunces Variable'/,
+      },
       bold: {
         pkg: '@fontsource-variable/bricolage-grotesque',
         stack: /--font-display:\s*'Bricolage Grotesque Variable',\s*'Bricolage Grotesque Fallback'/,
       },
-      product: { pkg: '@fontsource-variable/hanken-grotesk', stack: /--font-display:\s*'Hanken Grotesk Variable'/ },
+      product: {
+        pkg: '@fontsource-variable/hanken-grotesk',
+        stack: /--font-display:\s*'Hanken Grotesk Variable'/,
+      },
     };
     for (const look of LOOKS) {
       const { pkg, stack } = expected[look];
@@ -77,7 +89,9 @@ describe('create-inceptor-app --look', () => {
     // A look that does not use Fraunces does not ship it.
     for (const look of ['bold', 'product'] as const) {
       expect(files[look]('src/layouts/BaseLayout.astro')).not.toContain('fraunces');
-      expect(JSON.parse(files[look]('package.json')).dependencies['@fontsource-variable/fraunces']).toBeUndefined();
+      expect(
+        JSON.parse(files[look]('package.json')).dependencies['@fontsource-variable/fraunces'],
+      ).toBeUndefined();
       expect(files[look]('src/styles/global.css')).not.toContain('Fraunces');
     }
   });
