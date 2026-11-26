@@ -159,6 +159,9 @@ const COPY = {
   },
 };
 
+/** The placeholder copy of the generated landings, by language (the site's /looks page reuses it). */
+export const LOOK_COPY = COPY;
+
 const BUTTON =
   'inline-flex min-h-12 items-center rounded-xl px-6 py-3 text-base font-semibold transition-colors';
 const PRIMARY = `${BUTTON} bg-primary text-primary-foreground hover:bg-primary/90`;

@@ -19,8 +19,10 @@ interface Props {
   /** Closing phrase of the title, on the highlight block. */
   highlight?: string;
   lead?: string;
+  /** Heading level of the title: `h1` on a landing, lower inside another page. */
+  tag?: 'h1' | 'h2' | 'h3';
 }
-const { eyebrow, title, highlight, lead } = Astro.props;
+const { eyebrow, title, highlight, lead, tag = 'h1' } = Astro.props;
 ---
 
 <section class="relative isolate overflow-hidden">
@@ -29,7 +31,7 @@ const { eyebrow, title, highlight, lead } = Astro.props;
   >
     <div class="pointer-events-auto max-w-xl">
       {eyebrow && <p class="font-mono text-sm uppercase tracking-widest text-primary">{eyebrow}</p>}
-      <HighlightHeadline tag="h1" size="hero" text={title} highlight={highlight} class="mt-4" />
+      <HighlightHeadline tag={tag} size="hero" text={title} highlight={highlight} class="mt-4" />
       {lead && <p class="mt-6 max-w-prose text-lg leading-relaxed text-muted-foreground">{lead}</p>}
       <div class="mt-8 flex flex-wrap items-center gap-3">
         <slot name="actions" />

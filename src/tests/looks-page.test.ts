@@ -20,9 +20,12 @@ const preview = (look: string) => {
 };
 
 describe('/looks', () => {
-  it.each(Object.keys(LOOKS))('%s: the preview composes the same blocks, in the same order, as init.mjs generates', (look) => {
-    expect(order(preview(look))).toBe(order(landing(look, { name: 'X', lang: 'en' })));
-  });
+  it.each(Object.keys(LOOKS))(
+    '%s: the preview composes the same blocks, in the same order, as init.mjs generates',
+    (look) => {
+      expect(order(preview(look))).toBe(order(landing(look, { name: 'X', lang: 'en' })));
+    },
+  );
 
   it.each(Object.keys(LOOKS))('%s: shows the command that generates it', (look) => {
     expect(page).toContain(`--look ${look}`);
@@ -39,7 +42,9 @@ describe('/looks', () => {
   });
 
   it('is reachable from the header and the blocks index', () => {
-    expect(readFileSync('src/components/common/SiteHeader.astro', 'utf8')).toMatch(/href: '\/looks\/'/);
+    expect(readFileSync('src/components/common/SiteHeader.astro', 'utf8')).toMatch(
+      /href: '\/looks\/'/,
+    );
     expect(readFileSync('src/pages/blocks/index.astro', 'utf8')).toMatch(/\/looks\//);
   });
 });

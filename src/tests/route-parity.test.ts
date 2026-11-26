@@ -62,6 +62,9 @@ const EN_ONLY_ALLOWLIST = new Set([
   '/blocks/login',
   '/blocks/settings',
   '/blocks/app-layout',
+  '/blocks/marketing',
+  // Starting looks (Epic 30) — English-only, like /blocks
+  '/looks',
   // Gallery — shared across locales; individual component pages are EN-only
   '/gallery',
   '/gallery/[component]',
