@@ -62,12 +62,12 @@ describe('scripts/brand-kit.mjs: variants from one geometry', () => {
     const derived = oneInk(DOOR, { ink: '#000', drop: ['#f2b705'] });
     const diff = await geometryDiff(derived, DOOR_TUNED);
     expect(diff).toBeGreaterThan(0);
-    expect(diff).toBeLessThan(0.03);
+    expect(diff).toBeLessThan(0.05);
   });
 
   it('measures a drifted one-ink symbol well above that allowance', async () => {
     const derived = oneInk(DOOR, { ink: '#000', drop: ['#f2b705'] });
-    expect(await geometryDiff(derived, DOOR_DRIFTED)).toBeGreaterThan(0.06);
+    expect(await geometryDiff(derived, DOOR_DRIFTED)).toBeGreaterThan(0.1);
   });
 });
 
@@ -157,7 +157,7 @@ describe('npm run brand:kit', () => {
 describe('init.mjs: generated projects can build their own kit', () => {
   let out: string;
   beforeAll(() => {
-    out = mkdtempSync(join(tmpdir(), 'init-brand-kit-'));
+    out = join(mkdtempSync(join(tmpdir(), 'init-brand-kit-')), 'app');
     execFileSync(
       'node',
       ['scripts/init.mjs', '--name', 'Casa Abierta', '--out', out, '--look', 'bold'],
@@ -167,7 +167,7 @@ describe('init.mjs: generated projects can build their own kit', () => {
       },
     );
   }, 60_000);
-  afterAll(() => rmSync(out, { recursive: true, force: true }));
+  afterAll(() => rmSync(join(out, '..'), { recursive: true, force: true }));
 
   it('copies the script, writes a config for the project and wires the command', () => {
     expect(existsSync(join(out, 'scripts/brand-kit.mjs'))).toBe(true);

@@ -19,10 +19,10 @@ is wrong: fix the page.
 One row per colour the brand owns. Neutrals (background, border, muted text)
 stay the scaffold's unless you change them on purpose.
 
-| Colour | Hex | Token (`global.css`) | Text on it | What it is for |
-| ------ | --- | -------------------- | ---------- | -------------- |
+| Colour | Hex | Token (`global.css`) | Text on it | What it is for                                       |
+| ------ | --- | -------------------- | ---------- | ---------------------------------------------------- |
 | …      | `…` | `--primary`          | …          | The action colour: buttons, active links, focus ring |
-| …      | `…` | `--…`                | …          | …              |
+| …      | `…` | `--…`                | …          | …                                                    |
 
 State how each colour changes in dark mode (the scaffold's convention: the
 primary gets lighter and carries dark text).
@@ -92,17 +92,29 @@ instantiation).
 
 ## Logo
 
-| File | Use |
-| ---- | --- |
-| `…`  | Mark alone |
-| `public/favicon.svg` | Icon |
-| `…`  | Maskable icon, touch icon, share image |
+| File                 | Use                                    |
+| -------------------- | -------------------------------------- |
+| `…`                  | Mark alone                             |
+| `public/favicon.svg` | Icon                                   |
+| `…`                  | Maskable icon, touch icon, share image |
 
 State the rules in one paragraph: what the mark stands for, the smallest size
 it must survive (check it at 16 px), which version goes on coloured
 backgrounds, and what may not be done to it. A mark that only works in colour
 fails in print, forced colours and for colour-blind users: check it in one
 ink.
+
+### Handing the logo to someone outside the repo
+
+`npm run brand:kit` builds `brand-kit/` (git-ignored) and a zip from
+`brand-kit.config.json`: horizontal, stacked, symbol and wordmark, each in
+colour, negative and one ink, as SVG, PNG and JPG, plus a brand sheet. The
+lettering is converted to outlines, so nobody needs the font. Every variant
+is derived from the one symbol file; a hand-tuned one-ink symbol is accepted
+only while it stays within `oneInk.allowance` of the colour geometry. Write
+the differences that are on purpose (a simplified favicon, for example) in
+`notes`: they are printed on the sheet. Recipe:
+[`docs/recipes/brand-kit.md`](../recipes/brand-kit.md).
 
 ## Open items
 

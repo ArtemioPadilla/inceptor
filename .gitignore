@@ -36,3 +36,6 @@ Thumbs.db
 # Stray local files that sneaked into the working tree during development
 image002.png
 names.md
+
+# Brand kit output (npm run brand:kit): generated, re-runnable
+brand-kit/
