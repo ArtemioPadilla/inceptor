@@ -206,6 +206,31 @@ for (const f of [
   '.claude/hooks/ci-push-guard.mjs',
   '.claude/settings.example.json',
 ]) copy(f);
+// Brand kit (#349): the logo as files that can leave the repo. The config
+// starts from what init knows (name, display font, favicon, accent) and is
+// meant to be edited once the project has a real mark.
+copy('scripts/brand-kit.mjs');
+{
+  const displayPkg = LOOKS[look ?? 'editorial'].display.pkg;
+  const file = `${displayPkg.split('/').pop()}-latin-wght-normal.woff2`;
+  write('brand-kit.config.json', JSON.stringify({
+    name,
+    lang: 'en',
+    wordmark: { text: name, font: `node_modules/${displayPkg}/files/${file}`, weight: 700, tracking: -0.01 },
+    symbol: 'public/favicon.svg',
+    ink: '#0a0a0a',
+    paper: '#ffffff',
+    negative: {},
+    oneInk: { drop: [], allowance: 0.05 },
+    palette: [
+      { name: 'Brand', hex: brandHex, use: 'The mark, actions' },
+      { name: 'Ink', hex: '#0a0a0a', use: 'Text, one-ink versions' },
+      { name: 'Paper', hex: '#ffffff', use: 'Backgrounds, reversed versions' },
+    ],
+    type: [{ use: 'Logo and display', family: displayPkg.split('/').pop(), licence: 'TODO(agent): check the licence in node_modules/' + displayPkg }],
+    notes: [],
+  }, null, 2) + '\n');
+}
 // The copied runbook is the template's: drop the table rows for workflows a
 // generated project does not have, so it only claims what exists.
 {
@@ -244,6 +269,7 @@ write('package.json', JSON.stringify({
     'type-check': 'tsc --noEmit',
     test: 'vitest run',
     format: 'prettier --write .',
+    'brand:kit': 'node scripts/brand-kit.mjs',
   },
   // Versions come from the template's own package.json so the generated
   // project can never drift from what this repo actually builds and tests
@@ -261,8 +287,8 @@ write('package.json', JSON.stringify({
   devDependencies: pick([
     '@testing-library/jest-dom', '@testing-library/react',
     '@testing-library/user-event', '@types/node', '@types/react',
-    '@types/react-dom', 'jsdom', 'npm-run-all', 'prettier',
-    'prettier-plugin-astro', 'typescript', 'vitest',
+    '@types/react-dom', 'fontkit', 'jsdom', 'npm-run-all', 'prettier',
+    'prettier-plugin-astro', 'sharp', 'typescript', 'vitest',
   ]),
 }, null, 2) + '\n');
 
@@ -379,7 +405,7 @@ write('.nvmrc', '22\n');
 write('public/robots.txt', site
   ? `User-agent: *\nAllow: /\n\n# Deploy base /${slug}/ (ASTRO_BASE in .github/workflows/deploy.yml)\nSitemap: ${site}/${slug}/sitemap-index.xml\n`
   : `User-agent: *\nAllow: /\n\n# TODO(agent): point at the production sitemap (deploy base included), e.g.\n# Sitemap: https://example.com/${slug}/sitemap-index.xml\n`);
-write('.gitignore', '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n.astro/\n*.log\n');
+write('.gitignore', '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n.astro/\n*.log\nbrand-kit/\n');
 write('.env.example', `PUBLIC_REPO_SLUG=${repoSlug}\n${backend ? 'PUBLIC_API_BASE=\n' : ''}PUBLIC_BUILD_SHA=dev\nPUBLIC_VERSION=dev\n`);
 // public/ con un favicon mínimo
 write('public/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="${brandHex}"/></svg>\n`);

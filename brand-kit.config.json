@@ -1,0 +1,31 @@
+{
+  "name": "Inceptor",
+  "lang": "en",
+  "wordmark": {
+    "text": "Inceptor",
+    "font": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2",
+    "weight": 600,
+    "tracking": -0.01
+  },
+  "symbol": "public/favicon.svg",
+  "ink": "#0a0a0a",
+  "paper": "#ffffff",
+  "negative": {},
+  "oneInk": { "drop": ["white"], "allowance": 0.05 },
+  "palette": [
+    { "name": "Emerald", "hex": "#10b981", "use": "Brand colour: the mark, actions" },
+    { "name": "Ink", "hex": "#0a0a0a", "use": "Text, one-ink versions" },
+    { "name": "Paper", "hex": "#ffffff", "use": "Backgrounds, reversed versions" }
+  ],
+  "type": [
+    {
+      "use": "Logo and display",
+      "family": "Fraunces, weight 600",
+      "licence": "SIL Open Font License 1.1"
+    },
+    { "use": "Text", "family": "Hanken Grotesk", "licence": "SIL Open Font License 1.1" }
+  ],
+  "notes": [
+    "The PWA and share images use a larger, detailed mark (public/icons/logo-source.svg); the kit uses the flat symbol, which survives 16 px and one ink."
+  ]
+}
